@@ -50,17 +50,26 @@ export interface Season {
 export interface TVSeries extends BaseMedia {
     id: number;
     title: string;
-    poster: string;
-    backdrop: string;
     year: number;
+    duration: number;
     imdb_rating: number;
-    numberOfSeasons: number;
+    status: string;
     category: Category;
-    overview: string;
+    poster: string;
     description: string;
-    genres: string[];
+    backdrop: string;
+    total_seasons: number;
     persons: Person[];
     trailers: Trailer[];
+    seasons: {
+        season_number: number;
+        year: string;
+        episodes: {
+            episode_number: number;
+            title: string;
+            description: string;
+        }[];
+    }[];
 }
 
 export interface Episode {

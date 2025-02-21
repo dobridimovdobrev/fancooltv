@@ -46,15 +46,19 @@ export class MovieDetailsManager extends MediaDetailsManager {
         // Set cast
         if (this.elements.cast && movie.persons) {
             const castHtml = movie.persons.map(person => `
-                <div class="cast-member">
-                    <img src="${this.apiService.getImageUrl(person.profile_image)}" alt="${person.name}" class="cast-photo">
+                <div class="cast-item">
+                    <div class="cast-image">
+                        <img src="${this.apiService.getImageUrl(person.profile_image)}" alt="${person.name}" class="cast-photo">
+                    </div>
                     <div class="cast-name">${person.name}</div>
                 </div>
             `).join('');
             this.elements.cast.innerHTML = `
                 <h3>Cast</h3>
-                <div class="cast-grid">
-                    ${castHtml}
+                <div class="cast-section">
+                    <div class="cast-list">
+                        ${castHtml}
+                    </div>
                 </div>
             `;
         }

@@ -44,7 +44,7 @@ export class TVSeriesManager extends MediaManager {
         if (ratingValue)
             ratingValue.textContent = series.imdb_rating.toString();
         if (seasonsValue)
-            seasonsValue.textContent = `${series.numberOfSeasons} seasons`;
+            seasonsValue.textContent = `${series.total_seasons} seasons`;
         if (categoryValue)
             categoryValue.textContent = series.category.name;
         if (detailsLink) {

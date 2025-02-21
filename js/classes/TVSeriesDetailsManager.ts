@@ -44,7 +44,7 @@ export class TVSeriesDetailsManager extends MediaDetailsManager<TVSeries> {
             this.elements.metadata.innerHTML = `
                 <div class="meta-item"><i class="fas fa-calendar"></i> ${series.year}</div>
                 <div class="meta-item"><i class="fas fa-star"></i> ${series.imdb_rating}</div>
-                <div class="meta-item"><i class="fas fa-tv"></i> ${series.numberOfSeasons} Seasons</div>
+                <div class="meta-item"><i class="fas fa-tv"></i> ${series.total_seasons} Seasons</div>
                 <div class="meta-item"><i class="fas fa-film"></i> ${series.category.name}</div>
             `;
         }

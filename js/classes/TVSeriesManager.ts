@@ -52,7 +52,7 @@ export class TVSeriesManager extends MediaManager<TVSeries> {
         if (title) title.textContent = series.title;
         if (yearValue) yearValue.textContent = series.year.toString();
         if (ratingValue) ratingValue.textContent = series.imdb_rating.toString();
-        if (seasonsValue) seasonsValue.textContent = `${series.numberOfSeasons} seasons`;
+        if (seasonsValue) seasonsValue.textContent = `${series.total_seasons} seasons`;
         if (categoryValue) categoryValue.textContent = series.category.name;
         
         if (detailsLink) {
