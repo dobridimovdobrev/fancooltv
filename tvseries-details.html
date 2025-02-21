@@ -116,7 +116,7 @@
                             <!-- Template per una stagione -->
                             <template id="season-template">
                                 <div class="season-section mb-4">
-                                    <div class="season-header d-flex justify-content-between align-items-center p-3 bg-secondary bg-opacity-25 rounded" role="button" data-bs-toggle="collapse">
+                                    <div class="season-header d-flex justify-content-between align-items-center p-3 bg-secondary bg-opacity-25 rounded" role="button" data-bs-toggle="collapse" data-bs-target="">
                                         <div class="d-flex align-items-center gap-2">
                                             <i class="fas fa-chevron-down toggle-icon"></i>
                                             <span class="season-name"></span>
@@ -134,9 +134,9 @@
 
                             <!-- Template per un episodio -->
                             <template id="episode-template">
-                                <div class="episode-item p-3 mb-2 bg-secondary bg-opacity-10 rounded">
+                                <div class="episode-item p-2 mt-2 bg-secondary bg-opacity-10 rounded">
                                     <div class="d-flex align-items-center gap-3">
-                                        <span class="episode-number badge bg-primary fs-5" style="min-width: 35px"></span>
+                                        <span class="episode-number text-white fs-5" style="min-width: 35px"></span>
                                         <div class="episode-still rounded" style="width: 160px; height: 90px; background-size: cover; background-position: center; background-color: #2a2a2a;"></div>
                                         <div class="flex-grow-1">
                                             <h5 class="episode-title mb-2"></h5>
@@ -149,6 +149,9 @@
                                 </div>
                             </template>
                         </div>
+                        <button class="btn btn-primary load-more-button mt-3" style="display: none;">
+                            Load More (5 Seasons)
+                        </button>
                     </div>
                 </div>
             </div>
@@ -165,7 +168,9 @@
                 </div>
                 <div class="modal-body">
                     <div class="ratio ratio-16x9">
-                        <iframe src="" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" sandbox="allow-same-origin allow-scripts allow-popups allow-forms"></iframe>
+                        <iframe src="" title="YouTube video player" frameborder="0" 
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                            allowfullscreen></iframe>
                     </div>
                 </div>
             </div>

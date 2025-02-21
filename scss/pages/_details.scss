@@ -271,74 +271,9 @@
     }
     
     .cast-section {
-      margin-top: 2rem;
-
       h3 {
-        color: $white;
         margin-bottom: 1.5rem;
-        font-weight: 600;
         font-size: 1.5rem;
-      }
-
-      .cast-grid {
-        display: grid;
-        grid-template-columns: repeat(5, 1fr);
-        gap: 1.5rem;
-        
-        @include media-down($breakpoint-md) {
-          grid-template-columns: repeat(4, 1fr);
-          gap: 1rem;
-        }
-
-        .cast-card {
-          background: rgba($third, 0.3);
-          border-radius: 8px;
-          overflow: hidden;
-          cursor: pointer;
-          transition: all 0.2s ease;
-          
-          &:hover {
-            .cast-image {
-              transform: scale(1.05);
-              border: 2px solid $primary;
-            }
-          }
-
-          .cast-image {
-            width: 100%;
-            aspect-ratio: 1;
-            background-size: cover;
-            background-position: center;
-            background-color: #2a2a2a;
-            border: 1px solid rgba($white, 0.1);
-            transition: all 0.2s ease;
-          }
-
-          .cast-info {
-            padding: 0.75rem;
-            text-align: center;
-
-            .actor-name {
-              color: $white;
-              font-weight: 500;
-              font-size: 0.9rem;
-              margin-bottom: 0.25rem;
-              white-space: nowrap;
-              overflow: hidden;
-              text-overflow: ellipsis;
-              padding: 0 0.5rem;
-            }
-
-            .character-name {
-              color: rgba($white, 0.6);
-              font-size: 0.85rem;
-              white-space: nowrap;
-              overflow: hidden;
-              text-overflow: ellipsis;
-              padding: 0 0.5rem;
-            }
-          }
-        }
       }
     }
     

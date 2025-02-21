@@ -40,7 +40,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         seasonTemplate: document.getElementById('season-template') as HTMLTemplateElement,
         episodeTemplate: document.getElementById('episode-template') as HTMLTemplateElement,
         trailerModal: new bootstrap.Modal(document.getElementById('trailerModal')),
-        trailerIframe: document.querySelector('#trailerModal iframe') as HTMLIFrameElement
+        trailerIframe: document.querySelector('#trailerModal iframe') as HTMLIFrameElement,
+        seasonsContainer: document.querySelector('.seasons-container') as HTMLElement,
+        loadMoreButton: document.querySelector('.load-more-button') as HTMLButtonElement
     };
 
     // Validate required elements

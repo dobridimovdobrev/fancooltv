@@ -28,15 +28,8 @@ export interface ExtendedMediaDetailsElements extends MediaDetailsElements {
     trailerModal: any;
     trailerIframe: HTMLIFrameElement;
     seasons: HTMLElement;
-}
-
-export interface ExtendedMediaDetailsElements extends MediaDetailsElements {
-    backdrop: HTMLElement;
-    seasonTemplate: HTMLTemplateElement;
-    episodeTemplate: HTMLTemplateElement;
-    trailerModal: any;
-    trailerIframe: HTMLIFrameElement;
-    seasons: HTMLElement;
+    seasonsContainer: HTMLElement;
+    loadMoreButton: HTMLButtonElement;
 }
 
 export interface CardElements {

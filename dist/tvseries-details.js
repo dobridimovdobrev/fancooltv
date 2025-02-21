@@ -33,7 +33,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         seasonTemplate: document.getElementById('season-template'),
         episodeTemplate: document.getElementById('episode-template'),
         trailerModal: new bootstrap.Modal(document.getElementById('trailerModal')),
-        trailerIframe: document.querySelector('#trailerModal iframe')
+        trailerIframe: document.querySelector('#trailerModal iframe'),
+        seasonsContainer: document.querySelector('.seasons-container'),
+        loadMoreButton: document.querySelector('.load-more-button')
     };
     // Validate required elements
     const missingElements = Object.entries(elements)

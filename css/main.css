@@ -14031,114 +14031,55 @@ ul {
   }
 }
 
-.cast-section {
-  margin-top: 3rem;
-}
 .cast-section .cast-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  grid-template-columns: repeat(5, 1fr);
   gap: 1.5rem;
+  justify-items: start;
 }
-@media (max-width: 450px) {
-  .cast-section .cast-grid {
-    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-    gap: 1rem;
-  }
-}
-.cast-section .cast-grid .cast-member {
-  text-align: center;
-  transition: all 0.3s ease;
-}
-.cast-section .cast-grid .cast-member:hover {
-  transform: translateY(-5px);
-}
-.cast-section .cast-grid .cast-member img {
-  width: 100px;
-  height: 100px;
-  object-fit: cover;
-  border-radius: 50%;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  padding: 2px;
-  background: rgba(0, 0, 0, 0.2);
-}
-.cast-section .cast-grid .cast-member .cast-name {
-  color: #ffffff;
-  margin-top: 0.5rem;
-  font-size: 0.9rem;
-  text-align: center;
-  max-width: 100px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.cast-section .cast-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1rem;
-}
-@media (max-width: 768px) {
-  .cast-section .cast-list {
-    justify-content: center;
-  }
-}
-
-.cast-card {
-  background: rgba(0, 0, 0, 0.3);
-  border: 1px solid rgba(248, 249, 250, 0.1);
-  border-radius: 6px;
-  overflow: hidden;
-  transition: all 0.3s ease;
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  background: rgba(0, 0, 0, 0.5);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
-.cast-card:hover {
-  transform: translateY(-5px);
-  border-color: rgba(248, 181, 71, 0.3);
-}
-.cast-card:hover .cast-image img {
-  transform: scale(1.05);
-}
-.cast-card .cast-image {
-  position: relative;
-  padding-top: 150%;
-  overflow: hidden;
-}
-.cast-card .cast-image img {
-  position: absolute;
-  top: 0;
-  left: 0;
+.cast-section .cast-grid .cast-card {
   width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: transform 0.3s ease;
-}
-.cast-card .cast-content {
-  padding: 1rem;
   text-align: center;
+  transition: all 0.2s ease;
 }
-.cast-card .cast-content .cast-name {
+.cast-section .cast-grid .cast-card:hover {
+  transform: translateY(-5px);
+}
+.cast-section .cast-grid .cast-card:hover .cast-image {
+  border-color: #f8b547;
+  box-shadow: 0 0 15px rgba(248, 181, 71, 0.3);
+}
+.cast-section .cast-grid .cast-card .cast-image {
+  width: 100%;
+  padding-bottom: 100%;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background-color: rgba(0, 0, 0, 0.2);
+  transition: all 0.2s ease;
+}
+.cast-section .cast-grid .cast-card .cast-info {
+  text-align: center;
+  padding: 0 0.5rem;
+}
+.cast-section .cast-grid .cast-card .cast-info .actor-name {
+  color: white;
   font-size: 1rem;
-  font-weight: 600;
-  margin-bottom: 0.25rem;
-  white-space: nowrap;
+  margin: 0;
   overflow: hidden;
   text-overflow: ellipsis;
-}
-.cast-card .cast-content .cast-name a {
-  color: #ffffff;
-  text-decoration: none;
-}
-.cast-card .cast-content .cast-name a:hover {
-  color: #f8b547;
-}
-.cast-card .cast-content .cast-character {
-  font-size: 0.875rem;
-  color: #adb5bd;
   white-space: nowrap;
+  width: 100%;
+}
+.cast-section .cast-grid .cast-card .cast-info .character-name {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.9rem;
   overflow: hidden;
   text-overflow: ellipsis;
+  white-space: nowrap;
+  width: 100%;
 }
 
 .cast-modal .modal-content {
@@ -14238,6 +14179,106 @@ ul {
 .details-info .cast-info .info-content {
   color: #adb5bd;
   line-height: 1.6;
+}
+
+.seasons-container .season-section {
+  margin-bottom: 1rem;
+}
+.seasons-container .season-section:last-child {
+  margin-bottom: 0;
+}
+.seasons-container .season-section .season-header {
+  background-color: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.seasons-container .season-section .season-header:hover {
+  background-color: rgba(248, 181, 71, 0.1);
+  border-color: rgba(248, 181, 71, 0.2);
+}
+.seasons-container .season-section .season-header .season-info {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.seasons-container .season-section .season-header .season-info .season-title {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+.seasons-container .season-section .season-header .season-info .season-title .season-name {
+  font-weight: 600;
+  margin: 0;
+}
+.seasons-container .season-section .season-header .season-info .season-title .episodes-count {
+  color: #f8b547;
+  font-size: 0.9rem;
+}
+.seasons-container .season-section .season-header .season-info .season-title .season-year {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.9rem;
+}
+.seasons-container .season-section .episodes-list {
+  padding: 1rem;
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+}
+.seasons-container .season-section .episodes-list .episode-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 1rem;
+  border-radius: 8px;
+  background-color: rgba(255, 255, 255, 0.05);
+  margin-bottom: 1rem;
+  position: relative;
+}
+.seasons-container .season-section .episodes-list .episode-item:last-child {
+  margin-bottom: 0;
+}
+.seasons-container .season-section .episodes-list .episode-item .episode-still {
+  flex: 0 0 120px;
+  height: 68px;
+  background-size: cover;
+  background-position: center;
+  border-radius: 4px;
+  background-color: rgba(0, 0, 0, 0.2);
+}
+.seasons-container .season-section .episodes-list .episode-item .episode-info {
+  flex: 1;
+  min-width: 0;
+}
+.seasons-container .season-section .episodes-list .episode-item .episode-info .episode-title {
+  font-weight: 600;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.seasons-container .season-section .episodes-list .episode-item .episode-info .episode-number {
+  color: #f8b547;
+  font-size: 0.9rem;
+  margin-bottom: 0.25rem;
+}
+.seasons-container .season-section .episodes-list .episode-item .episode-info .episode-description {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.9rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  line-height: 1.4;
+  padding-right: 100px;
+}
+.seasons-container .season-section .episodes-list .episode-item .watch-button {
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  padding: 0.5rem 1rem;
 }
 
 .grid {
@@ -15150,67 +15191,9 @@ ul {
   width: 20px;
   text-align: center;
 }
-.series-details .cast-section {
-  margin-top: 2rem;
-}
 .series-details .cast-section h3, .series-details .cast-section .h3 {
-  color: #ffffff;
   margin-bottom: 1.5rem;
-  font-weight: 600;
   font-size: 1.5rem;
-}
-.series-details .cast-section .cast-grid {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 1.5rem;
-}
-@media (max-width: 768px) {
-  .series-details .cast-section .cast-grid {
-    grid-template-columns: repeat(4, 1fr);
-    gap: 1rem;
-  }
-}
-.series-details .cast-section .cast-grid .cast-card {
-  background: rgba(0, 5, 13, 0.3);
-  border-radius: 8px;
-  overflow: hidden;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-.series-details .cast-section .cast-grid .cast-card:hover .cast-image {
-  transform: scale(1.05);
-  border: 2px solid #f8b547;
-}
-.series-details .cast-section .cast-grid .cast-card .cast-image {
-  width: 100%;
-  aspect-ratio: 1;
-  background-size: cover;
-  background-position: center;
-  background-color: #2a2a2a;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  transition: all 0.2s ease;
-}
-.series-details .cast-section .cast-grid .cast-card .cast-info {
-  padding: 0.75rem;
-  text-align: center;
-}
-.series-details .cast-section .cast-grid .cast-card .cast-info .actor-name {
-  color: #ffffff;
-  font-weight: 500;
-  font-size: 0.9rem;
-  margin-bottom: 0.25rem;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  padding: 0 0.5rem;
-}
-.series-details .cast-section .cast-grid .cast-card .cast-info .character-name {
-  color: rgba(255, 255, 255, 0.6);
-  font-size: 0.85rem;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  padding: 0 0.5rem;
 }
 .series-details .details-section {
   margin-top: 3rem;
@@ -15258,5 +15241,3 @@ ul {
     font-size: 1.5rem;
   }
 }
-
-/*# sourceMappingURL=main.css.map */
