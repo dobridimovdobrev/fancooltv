@@ -33,7 +33,7 @@ export class TVSeriesManager extends MediaManager<TVSeries> {
         const ratingValue = article.querySelector('.rating-value');
         const seasonsValue = article.querySelector('.duration-value');
         const categoryValue = article.querySelector('.category-value');
-        const detailsLink = article.querySelector('.btn-details');
+        const detailsLink = article.querySelector('.btn-details') as HTMLAnchorElement;
 
         if (img) {
             img.src = this.apiService.getImageUrl(series.poster);
@@ -56,9 +56,14 @@ export class TVSeriesManager extends MediaManager<TVSeries> {
         if (categoryValue) categoryValue.textContent = series.category.name;
         
         if (detailsLink) {
-            detailsLink.setAttribute('href', `tvseries-details.html?id=${series.id}`);
-            detailsLink.setAttribute('aria-label', `View details for ${series.title}`);
-            detailsLink.setAttribute('title', `View details for ${series.title}`);
+            if (series.tv_series_id) {
+                detailsLink.setAttribute('href', `tvseries-details.html?id=${series.tv_series_id}`);
+                detailsLink.setAttribute('aria-label', `View details for ${series.title}`);
+                detailsLink.setAttribute('title', `View details for ${series.title}`);
+            } else {
+                console.error('Series ID is undefined:', series);
+                detailsLink.style.display = 'none';
+            }
         }
 
         // Avvolgere l'article in un div.col per la griglia

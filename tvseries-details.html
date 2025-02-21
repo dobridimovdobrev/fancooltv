@@ -111,19 +111,17 @@
                             <!-- Template per una stagione -->
                             <template id="season-template">
                                 <div class="season-section mb-4">
-                                    <div class="season-header" data-bs-toggle="collapse" data-bs-target="">
-                                        <h3 class="season-title">
-                                            <span class="d-flex align-items-center gap-2">
-                                                <i class="fas fa-chevron-down toggle-icon"></i>
-                                                <span class="season-name"></span>
-                                            </span>
-                                            <div class="d-flex align-items-center gap-2">
-                                                <span class="badge episodes-count"></span>
-                                                <span class="badge season-year"></span>
-                                            </div>
-                                        </h3>
+                                    <div class="season-header d-flex justify-content-between align-items-center p-3 bg-secondary bg-opacity-25 rounded" role="button" data-bs-toggle="collapse">
+                                        <div class="d-flex align-items-center gap-2">
+                                            <i class="fas fa-chevron-down toggle-icon"></i>
+                                            <span class="season-name"></span>
+                                        </div>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <span class="badge episodes-count"></span>
+                                            <span class="badge season-year"></span>
+                                        </div>
                                     </div>
-                                    <div class="collapse episodes-container" data-bs-parent="#seasons">
+                                    <div class="episodes-list collapse">
                                         <!-- Gli episodi verranno inseriti qui -->
                                     </div>
                                 </div>
@@ -131,15 +129,18 @@
 
                             <!-- Template per un episodio -->
                             <template id="episode-template">
-                                <div class="episode-row p-3" role="button">
-                                    <div class="episode-number d-flex align-items-center"></div>
-                                    <img class="episode-still d-none d-md-block" alt="Episode Still">
-                                    <div class="title-container">
-                                        <div class="episode-title"></div>
+                                <div class="episode-item p-3 mb-2 bg-secondary bg-opacity-10 rounded">
+                                    <div class="d-flex align-items-center gap-3">
+                                        <span class="episode-number badge bg-primary fs-5" style="min-width: 35px"></span>
+                                        <div class="episode-still rounded" style="width: 160px; height: 90px; background-size: cover; background-position: center; background-color: #2a2a2a;"></div>
+                                        <div class="flex-grow-1">
+                                            <h5 class="episode-title mb-2"></h5>
+                                            <p class="episode-description mb-0 text-muted"></p>
+                                        </div>
+                                        <button class="btn btn-primary watch-button">
+                                            <i class="fas fa-play me-2"></i>Watch
+                                        </button>
                                     </div>
-                                    <button class="btn btn-primary btn-sm watch-episode">
-                                        <i class="fas fa-play me-2"></i>Watch
-                                    </button>
                                 </div>
                             </template>
                         </div>
@@ -159,7 +160,7 @@
                 </div>
                 <div class="modal-body">
                     <div class="ratio ratio-16x9">
-                        <iframe src="" allowfullscreen></iframe>
+                        <iframe src="" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" sandbox="allow-same-origin allow-scripts allow-popups allow-forms"></iframe>
                     </div>
                 </div>
             </div>
@@ -196,6 +197,6 @@
       <!-- Bootstrap JS -->
 
     <script src="js/bootstrap.bundle.min.js"></script>
-    <script src="dist/tvseries-details.js" type="module"></script>
+    <script type="module" src="dist/tvseries-details.js"></script>
   </body>
 </html>

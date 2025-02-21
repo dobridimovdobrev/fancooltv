@@ -48,7 +48,7 @@ export interface Season {
 }
 
 export interface TVSeries extends BaseMedia {
-    id: number;
+    tv_series_id: number;
     title: string;
     year: number;
     duration: number;
