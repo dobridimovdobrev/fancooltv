@@ -1,0 +1,232 @@
+// Cast section styles
+.cast-section {
+    margin-top: 3rem;
+    
+    .cast-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 1.5rem;
+        
+        @include media-down($breakpoint-sm) {
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 1rem;
+        }
+        
+        .cast-member {
+            text-align: center;
+            transition: $transition-base;
+            
+            &:hover {
+                transform: translateY(-5px);
+            }
+            
+            img {
+                width: 100px;
+                height: 100px;
+                object-fit: cover;
+                border-radius: 50%;
+                border: 1px solid rgba($white, 0.1);
+                padding: 2px;
+                background: rgba($dark, 0.2);
+            }
+            
+            .cast-name {
+                color: $white;
+                margin-top: 0.5rem;
+                font-size: 0.9rem;
+                text-align: center;
+                max-width: 100px;
+                @include text-truncate;
+            }
+        }
+    }
+    
+    .cast-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        
+        @include media-down($breakpoint-md) {
+            justify-content: center;
+        }
+    }
+}
+
+// Cast member card
+.cast-card {
+    background: rgba($dark, 0.3);
+    border: 1px solid rgba($light, 0.1);
+    border-radius: $border-radius;
+    overflow: hidden;
+    transition: $transition-base;
+    @include glass-effect;
+    
+    &:hover {
+        transform: translateY(-5px);
+        border-color: rgba($primary, 0.3);
+        
+        .cast-image img {
+            transform: scale(1.05);
+        }
+    }
+    
+    .cast-image {
+        position: relative;
+        padding-top: 150%;
+        overflow: hidden;
+        
+        img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+    }
+    
+    .cast-content {
+        padding: 1rem;
+        text-align: center;
+        
+        .cast-name {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+            @include text-truncate;
+            
+            a {
+                color: $white;
+                text-decoration: none;
+                
+                &:hover {
+                    color: $primary;
+                }
+            }
+        }
+        
+        .cast-character {
+            font-size: 0.875rem;
+            color: $gray-500;
+            @include text-truncate;
+        }
+    }
+}
+
+// Cast member modal
+.cast-modal {
+    .modal-content {
+        background: rgba($dark, 0.95);
+        @include glass-effect;
+        border: 1px solid rgba($light, 0.1);
+        
+        .modal-header {
+            border-bottom-color: rgba($light, 0.1);
+        }
+        
+        .modal-body {
+            .cast-details {
+                display: flex;
+                gap: 1.5rem;
+                
+                @include media-down($breakpoint-sm) {
+                    flex-direction: column;
+                }
+                
+                .cast-photo {
+                    flex: 0 0 200px;
+                    
+                    img {
+                        width: 100%;
+                        border-radius: $border-radius;
+                    }
+                }
+                
+                .cast-info {
+                    flex: 1;
+                    
+                    .cast-name {
+                        font-size: 1.5rem;
+                        font-weight: 700;
+                        margin-bottom: 0.5rem;
+                    }
+                    
+                    .cast-meta {
+                        margin-bottom: 1rem;
+                        font-size: 0.875rem;
+                        color: $gray-500;
+                        
+                        span {
+                            display: inline-block;
+                            margin-right: 1rem;
+                            
+                            i {
+                                margin-right: 0.25rem;
+                            }
+                        }
+                    }
+                    
+                    .cast-bio {
+                        font-size: 0.875rem;
+                        line-height: 1.6;
+                        color: $gray-300;
+                    }
+                    
+                    .cast-filmography {
+                        margin-top: 1.5rem;
+                        
+                        h4 {
+                            font-size: 1rem;
+                            margin-bottom: 0.5rem;
+                        }
+                        
+                        ul {
+                            list-style: none;
+                            padding: 0;
+                            margin: 0;
+                            
+                            li {
+                                padding: 0.5rem 0;
+                                border-bottom: 1px solid rgba($light, 0.1);
+                                font-size: 0.875rem;
+                                
+                                &:last-child {
+                                    border-bottom: none;
+                                }
+                                
+                                .year {
+                                    color: $primary;
+                                    margin-right: 0.5rem;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+// Cast info in details
+.details-info {
+    @include glass-effect;
+    border-radius: $border-radius-lg;
+    padding: 2rem;
+    
+    .cast-info {
+        margin-top: 1rem;
+        
+        .info-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: $primary;
+        }
+        
+        .info-content {
+            color: $gray-500;
+            line-height: 1.6;
+        }
+    }
+}

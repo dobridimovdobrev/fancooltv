@@ -1,0 +1,105 @@
+// Form controls
+.form-control,
+.form-select {
+  background-color: rgba($dark, 0.4) !important;
+  border: 1px solid rgba($white, 0.1);
+  color: $white;
+  transition: $transition-base;
+  
+  &::placeholder {
+    color: rgba($white, 0.5);
+  }
+  
+  &:focus {
+    background-color: rgba($dark, 0.6) !important;
+    border-color: $primary;
+    box-shadow: 0 0 0 0.25rem rgba($primary, 0.25);
+    color: $white;
+  }
+}
+
+// Form groups
+.form-group {
+  margin-bottom: 1rem;
+  
+  label {
+    color: $white;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+  }
+}
+
+// Custom select
+.custom-select {
+  @extend .form-select;
+  cursor: pointer;
+  
+  option {
+    background-color: $dark;
+    color: $white;
+  }
+}
+
+// Input groups
+.input-group {
+  .input-group-text {
+    background-color: rgba($dark, 0.6);
+    border: 1px solid rgba($white, 0.1);
+    color: $gray-500;
+  }
+}
+
+// Form validation
+.was-validated {
+  .form-control:valid,
+  .form-select:valid {
+    border-color: rgba($primary, 0.5);
+    background-color: rgba($dark, 0.4) !important;
+    
+    &:focus {
+      border-color: $primary;
+      box-shadow: 0 0 0 0.25rem rgba($primary, 0.25);
+    }
+  }
+  
+  .form-control:invalid,
+  .form-select:invalid {
+    border-color: rgba(red, 0.5);
+    background-color: rgba($dark, 0.4) !important;
+    
+    &:focus {
+      border-color: red;
+      box-shadow: 0 0 0 0.25rem rgba(red, 0.25);
+    }
+  }
+}
+
+// Custom checkbox
+.custom-checkbox {
+  position: relative;
+  padding-left: 1.5rem;
+  
+  .custom-control-input {
+    position: absolute;
+    opacity: 0;
+    
+    &:checked ~ .custom-control-label::before {
+      background-color: $primary;
+      border-color: $primary;
+    }
+  }
+  
+  .custom-control-label {
+    cursor: pointer;
+    
+    &::before {
+      position: absolute;
+      left: 0;
+      width: 1rem;
+      height: 1rem;
+      border: 1px solid rgba($white, 0.2);
+      background-color: rgba($dark, 0.4);
+      transition: $transition-base;
+    }
+  }
+}

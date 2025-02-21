@@ -625,7 +625,7 @@ body {
     }
   }
 }
-
+/* Episodes styles */
 .episodes-container {
   .episode-row {
     display: flex;
@@ -647,7 +647,7 @@ body {
 
     .episode-number {
       font-size: 1.1rem;
-      font-weight: 600;
+      font-weight: 500;
       color: $white;
       min-width: 30px;
     }
@@ -733,6 +733,143 @@ body {
         margin: 0.75rem auto 0;
         display: block;
       }
+    }
+  }
+}
+
+.episodes-container {
+  .episode-row {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+
+    &:hover {
+      background-color: rgba($white, 0.05);
+    }
+
+    .episode-image {
+      width: 180px;
+      height: 100px;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .episode-number {
+      font-size: 1.1rem;
+      font-weight: 500;
+      color: $white;
+      min-width: 30px;
+    }
+  }
+}
+
+.episode-item {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  margin-bottom: 0.5rem;
+  padding: 1rem;
+  border-radius: 0.5rem;
+
+  .d-flex {
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .episode-still {
+    width: 160px;
+    height: 90px;
+    background-size: cover;
+    background-position: center;
+    background-color: #2a2a2a;
+    border-radius: 0.25rem;
+    flex-shrink: 0;
+  }
+
+  .episode-number {
+    min-width: 35px;
+    font-weight: normal;
+  }
+
+  .episode-title {
+    font-weight: normal;
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+  }
+
+  .watch-button {
+    white-space: nowrap;
+    padding: 0.5rem 1rem;
+    flex-shrink: 0;
+  }
+
+  @media (max-width: 1400px) {
+    .d-flex {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      grid-template-areas: 
+        "number image button"
+        "title title title";
+      gap: 0.75rem;
+      align-items: center;
+    }
+
+    .episode-still {
+      grid-area: image;
+      justify-self: center;
+      width: 140px;
+      height: 80px;
+    }
+
+    .episode-number {
+      grid-area: number;
+    }
+
+    .title-container {
+      grid-area: title;
+      width: 100%;
+      margin: 0;
+      text-align: center;
+    }
+
+    .episode-title {
+      white-space: normal;
+    }
+
+    .watch-button {
+      grid-area: button;
+    }
+  }
+}
+
+@media (max-width: 1400px) {
+  .episode-item {
+    .episode-still {
+      width: 140px;
+      height: 80px;
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .episode-item {
+    .d-flex {
+      flex-wrap: wrap;
+    }
+
+    .episode-still {
+      width: 120px;
+      height: 70px;
+    }
+
+    .watch-button {
+      margin-top: 1rem;
+      width: 100%;
     }
   }
 }

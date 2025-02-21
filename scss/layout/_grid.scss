@@ -1,0 +1,188 @@
+// Grid system
+.grid {
+  display: grid;
+  gap: 1rem;
+}
+
+// Grid columns
+@for $i from 1 through 12 {
+  .grid-cols-#{$i} {
+    grid-template-columns: repeat($i, 1fr);
+  }
+}
+
+// Responsive grid
+@include media-up($breakpoint-sm) {
+  @for $i from 1 through 6 {
+    .grid-cols-sm-#{$i} {
+      grid-template-columns: repeat($i, 1fr);
+    }
+  }
+}
+
+@include media-up($breakpoint-md) {
+  @for $i from 1 through 8 {
+    .grid-cols-md-#{$i} {
+      grid-template-columns: repeat($i, 1fr);
+    }
+  }
+}
+
+@include media-up($breakpoint-lg) {
+  @for $i from 1 through 12 {
+    .grid-cols-lg-#{$i} {
+      grid-template-columns: repeat($i, 1fr);
+    }
+  }
+}
+
+// Custom breakpoints for exact control
+@media (min-width: 450px) {
+    .col-custom-2 {
+        flex: 0 0 50%;
+        max-width: 50%;
+    }
+}
+
+@media (min-width: 768px) {
+    .col-custom-3 {
+        flex: 0 0 33.333333%;
+        max-width: 33.333333%;
+    }
+}
+
+@media (min-width: 990px) {
+    .col-custom-4 {
+        flex: 0 0 25%;
+        max-width: 25%;
+    }
+}
+
+@media (min-width: 1199px) {
+    .col-custom-5 {
+        flex: 0 0 20%;
+        max-width: 20%;
+    }
+}
+
+// Grid customization
+.row {
+  --bs-gutter-x: 1.25rem;  
+  --bs-gutter-y: 1.25rem;  
+}
+
+// Grid gaps
+.gap-0 { gap: 0; }
+.gap-1 { gap: 0.25rem; }
+.gap-2 { gap: 0.5rem; }
+.gap-3 { gap: 1rem; }
+.gap-4 { gap: 1.5rem; }
+.gap-5 { gap: 2rem; }
+
+// Grid alignment
+.grid-center {
+  place-items: center;
+}
+
+.grid-start {
+  place-items: start;
+}
+
+.grid-end {
+  place-items: end;
+}
+
+// Auto columns
+.auto-cols-fr {
+  grid-auto-columns: minmax(0, 1fr);
+}
+
+.auto-cols-auto {
+  grid-auto-columns: auto;
+}
+
+// Auto rows
+.auto-rows-fr {
+  grid-auto-rows: minmax(0, 1fr);
+}
+
+.auto-rows-auto {
+  grid-auto-rows: auto;
+}
+
+// Grid flow
+.grid-flow-row {
+  grid-auto-flow: row;
+}
+
+.grid-flow-col {
+  grid-auto-flow: column;
+}
+
+.grid-flow-dense {
+  grid-auto-flow: dense;
+}
+
+// Custom grid styles
+.grid {
+    &-custom {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 1rem;
+        padding: 1rem;
+
+        &-item {
+            background: #fff;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+
+            &:hover {
+                transform: translateY(-5px);
+            }
+        }
+    }
+}
+
+.card-img-top {
+    border-radius: 0.5rem;
+    object-fit: cover;
+    height: 300px;
+    width: 100%;
+}
+
+// Responsive containers
+.container {
+  width: 100%;
+  margin-right: auto;
+  margin-left: auto;
+  padding-right: 1rem;
+  padding-left: 1rem;
+  
+  @include media-up($breakpoint-sm) {
+    max-width: 540px;
+  }
+  
+  @include media-up($breakpoint-md) {
+    max-width: 720px;
+  }
+  
+  @include media-up($breakpoint-lg) {
+    max-width: 960px;
+  }
+  
+  @include media-up($breakpoint-xl) {
+    max-width: 1140px;
+  }
+  
+  @include media-up($breakpoint-xxl) {
+    max-width: 1320px;
+  }
+}
+
+// Container styles
+.container {
+  position: relative;
+  z-index: 1;
+}

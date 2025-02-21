@@ -1,0 +1,46 @@
+// Colors
+$body-bg: #00050d;
+$third: #00050d;
+$primary: #f8b547;
+$secondary: #6C757D;
+$success: #28A745;
+$info: #17A2B8;
+$warning: #FFC107;
+$danger: #DC3545;
+$white: #ffffff;
+$dark: #000000;
+$gray-500: #adb5bd;
+$light: #f8f9fa;
+$black: #000000;
+
+// Grays
+$gray-100: #F8F9FA;
+$gray-200: #E9ECEF;
+$gray-300: #DEE2E6;
+$gray-400: #CED4DA;
+$gray-600: #6C757D;
+$gray-700: #495057;
+$gray-800: #343A40;
+$gray-900: #212529;
+
+// Breakpoints
+$breakpoint-sm: 450px;
+$breakpoint-md: 768px;
+$breakpoint-lg: 991px;
+$breakpoint-xl: 1199px;
+$breakpoint-xxl: 1400px;
+
+// Border radius
+$border-radius-sm: 4px;
+$border-radius: 6px;
+$border-radius-lg: 8px;
+$border-radius-xl: 12px;
+
+// Transitions
+$transition-base: all 0.3s ease;
+$transition-transform: transform 0.3s ease;
+
+// Z-index
+$z-index-header: 1000;
+$z-index-modal: 1050;
+$z-index-overlay: 2;

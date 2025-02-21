@@ -57,23 +57,20 @@ export class MovieDetailsManager extends MediaDetailsManager<Movie> {
 
         // Set cast
         if (this.elements.cast && movie.persons) {
-            const castHtml = movie.persons.map(person => `
-                <div class="cast-item">
-                    <div class="cast-image">
-                        <img src="${this.apiService.getImageUrl(person.profile_image)}" alt="${person.name}" class="cast-photo">
+            const castGrid = this.elements.cast.querySelector('.cast-grid');
+            if (castGrid) {
+                const castHtml = movie.persons.slice(0, 5).map(person => `
+                    <div class="cast-card">
+                        <div class="cast-image" style="background-image: url('${this.apiService.getImageUrl(person.profile_image)}')"></div>
+                        <div class="cast-info">
+                            <div class="actor-name">${person.name}</div>
+                            ${person.character ? `<div class="character-name">${person.character}</div>` : ''}
+                        </div>
                     </div>
-                    <div class="cast-name">${person.name}</div>
-                </div>
-            `).join('');
+                `).join('');
 
-            this.elements.cast.innerHTML = `
-                <h3>Cast</h3>
-                <div class="cast-section">
-                    <div class="cast-list">
-                        ${castHtml}
-                    </div>
-                </div>
-            `;
+                castGrid.innerHTML = castHtml;
+            }
         }
 
         // Set trailer

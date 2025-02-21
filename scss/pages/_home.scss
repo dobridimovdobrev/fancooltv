@@ -1,0 +1,152 @@
+// Home page styles
+.home {
+  padding-top: 2rem;
+  
+  // Hero section
+  .hero {
+    position: relative;
+    min-height: 60vh;
+    display: flex;
+    align-items: center;
+    background: linear-gradient(to bottom right, rgba($dark, 0.8), rgba($dark, 0.8)),
+      url("../images/hero-bg.jpg") center/cover no-repeat;
+    padding: 4rem 0;
+    margin-bottom: 4rem;
+    
+    .hero-content {
+      max-width: 600px;
+      
+      h1 {
+        font-size: 3rem;
+        font-weight: 700;
+        margin-bottom: 1.5rem;
+        
+        @include media-down($breakpoint-md) {
+          font-size: 2rem;
+        }
+      }
+      
+      p {
+        font-size: 1.2rem;
+        margin-bottom: 2rem;
+        opacity: 0.9;
+        
+        @include media-down($breakpoint-md) {
+          font-size: 1rem;
+        }
+      }
+
+      // Hero buttons
+      .btn {
+        padding: 0.75rem 1.5rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+
+        &:hover {
+          transform: translateY(-3px);
+          box-shadow: 0 4px 15px rgba($primary, 0.3);
+        }
+
+        &.btn-primary {
+          background: $primary;
+          border-color: $primary;
+          
+          &:hover {
+            background: darken($primary, 5%);
+            border-color: darken($primary, 5%);
+          }
+        }
+
+        &.btn-outline-light {
+          &:hover {
+            background: rgba($white, 0.1);
+            border-color: $white;
+            color: $white;
+          }
+        }
+      }
+    }
+  }
+  
+  // Search and filters
+  .search-section {
+    margin-bottom: 3rem;
+    
+    .search-wrapper {
+      position: relative;
+      max-width: 500px;
+      margin: 0 auto;
+      
+      .search-icon {
+        position: absolute;
+        left: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: $gray-500;
+      }
+      
+      .search-input {
+        padding-left: 2.8rem;
+        background: rgba($dark, 0.6);
+        border: 1px solid rgba($light, 0.1);
+        color: $white;
+        @include glass-effect;
+        
+        &:focus {
+          background: rgba($dark, 0.8);
+          border-color: $primary;
+          box-shadow: 0 0 0 0.25rem rgba($primary, 0.25);
+        }
+        
+        &::placeholder {
+          color: rgba($white, 0.5);
+        }
+      }
+    }
+    
+    .filter-select {
+      background: rgba($dark, 0.6);
+      border: 1px solid rgba($light, 0.1);
+      color: $white;
+      @include glass-effect;
+      
+      &:focus {
+        background: rgba($dark, 0.8);
+        border-color: $primary;
+        box-shadow: 0 0 0 0.25rem rgba($primary, 0.25);
+      }
+      
+      option {
+        background-color: $dark;
+      }
+    }
+  }
+  
+  // Movies grid
+  .movies-grid {
+    margin-bottom: 4rem;
+    
+    .section-title {
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 2rem;
+      text-align: center;
+      
+      @include media-down($breakpoint-md) {
+        font-size: 1.5rem;
+      }
+    }
+  }
+  
+  // Load more
+  .load-more {
+    text-align: center;
+    margin-top: 2rem;
+    
+    .spinner-border {
+      width: 3rem;
+      height: 3rem;
+      color: $primary;
+    }
+  }
+}

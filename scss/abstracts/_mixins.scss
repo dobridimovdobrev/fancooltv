@@ -1,0 +1,53 @@
+// Glass effect mixin
+@mixin glass-effect($opacity: 0.5, $blur: 10px) {
+  backdrop-filter: blur($blur);
+  -webkit-backdrop-filter: blur($blur);
+  background: rgba($dark, $opacity);
+  border: 1px solid rgba($white, 0.1);
+}
+
+// Hover transform mixin
+@mixin hover-transform($y: -2px) {
+  transition: $transition-transform;
+  &:hover {
+    transform: translateY($y);
+  }
+}
+
+// Text truncate mixin
+@mixin text-truncate {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+// Flex center mixin
+@mixin flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+// Media queries mixins
+@mixin media-up($breakpoint) {
+  @media (min-width: $breakpoint) {
+    @content;
+  }
+}
+
+@mixin media-down($breakpoint) {
+  @media (max-width: $breakpoint) {
+    @content;
+  }
+}
+
+// Button styles mixin
+@mixin button-variant($bg-color, $text-color: $white) {
+  background-color: rgba($bg-color, 0.2);
+  color: $text-color;
+  
+  &:hover {
+    background-color: rgba($bg-color, 0.6);
+    box-shadow: 0 5px 15px rgba($bg-color, 0.3);
+  }
+}

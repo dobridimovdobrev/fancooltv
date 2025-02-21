@@ -90,21 +90,20 @@ export class TVSeriesDetailsManager {
     public updateCast(persons: Person[] | undefined): void {
         if (!persons || persons.length === 0) return;
 
-        this.elements.cast.innerHTML = `
-            <h3 class="mb-3">Cast</h3>
-            <div class="cast-section">
-                <div class="cast-list">
-                    ${persons.map(person => `
-                        <div class="cast-item">
-                            <div class="cast-image">
-                                <img src="${this.getImageUrl(person.profile_image)}" alt="${person.name} Profile" title="${person.name} - Cast Member" onerror="this.src='images/no-profile.png'">
-                            </div>
-                            <p class="cast-name">${person.name}</p>
-                        </div>
-                    `).join('')}
+        const castGrid = this.elements.cast.querySelector('.cast-grid');
+        if (castGrid) {
+            const castHtml = persons.slice(0, 5).map(person => `
+                <div class="cast-card">
+                    <div class="cast-image" style="background-image: url('${this.getImageUrl(person.profile_image)}')"></div>
+                    <div class="cast-info">
+                        <div class="actor-name">${person.name}</div>
+                        ${person.character ? `<div class="character-name">${person.character}</div>` : ''}
+                    </div>
                 </div>
-            </div>
-        `;
+            `).join('');
+
+            castGrid.innerHTML = castHtml;
+        }
     }
 
     public updateSeasons(series: TVSeries, seasons: any[], trailerUrl: string | undefined): void {

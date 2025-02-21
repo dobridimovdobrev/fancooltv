@@ -1,0 +1,74 @@
+// Search component styles
+.search-wrapper {
+  position: relative;
+  
+  .search-icon {
+    position: absolute;
+    top: 50%;
+    left: 1rem;
+    transform: translateY(-50%);
+    color: $gray-500;
+    pointer-events: none;
+  }
+  
+  .search-input {
+    width: 100%;
+    padding: 0.75rem 1rem 0.75rem 2.5rem;
+    background: rgba($dark, 0.3);
+    border: 1px solid rgba($light, 0.1);
+    border-radius: $border-radius;
+    color: $white;
+    @include glass-effect(0.3, 5px);
+    
+    &::placeholder {
+      color: $gray-500;
+    }
+    
+    &:focus {
+      outline: none;
+      border-color: rgba($primary, 0.5);
+      box-shadow: 0 0 0 2px rgba($primary, 0.25);
+    }
+  }
+  
+  .search-results {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    margin-top: 0.5rem;
+    background: rgba($dark, 0.95);
+    border: 1px solid rgba($light, 0.1);
+    border-radius: $border-radius;
+    max-height: 300px;
+    overflow-y: auto;
+    z-index: 1000;
+    @include glass-effect;
+    
+    .result-item {
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid rgba($light, 0.1);
+      cursor: pointer;
+      transition: $transition-base;
+      
+      &:last-child {
+        border-bottom: none;
+      }
+      
+      &:hover {
+        background: rgba($primary, 0.1);
+      }
+      
+      .result-title {
+        color: $white;
+        margin-bottom: 0.25rem;
+        @include text-truncate;
+      }
+      
+      .result-info {
+        font-size: 0.875rem;
+        color: $gray-500;
+      }
+    }
+  }
+}

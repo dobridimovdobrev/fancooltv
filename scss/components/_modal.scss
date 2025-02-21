@@ -1,0 +1,109 @@
+// Modal base
+.modal {
+  .modal-content {
+    background: rgba($dark, 0.95);
+    @include glass-effect;
+    border: 1px solid rgba($white, 0.1);
+    border-radius: $border-radius-lg;
+    color: $white;
+  }
+  
+  .modal-header {
+    border-bottom: 1px solid rgba($white, 0.1);
+    padding: 1.5rem;
+    
+    .modal-title {
+      font-weight: 600;
+      color: $white;
+    }
+    
+    .btn-close {
+      filter: invert(1) grayscale(100%) brightness(200%);
+      opacity: 0.8;
+      
+      &:hover {
+        opacity: 1;
+      }
+    }
+  }
+  
+  .modal-body {
+    padding: 1.5rem;
+  }
+  
+  .modal-footer {
+    border-top: 1px solid rgba($white, 0.1);
+    padding: 1.5rem;
+  }
+}
+
+// Video modal
+.video-modal {
+  .modal-dialog {
+    max-width: 800px;
+    margin: 1.75rem auto;
+  }
+  
+  .modal-content {
+    background: transparent;
+    border: none;
+  }
+  
+  .modal-body {
+    padding: 0;
+    position: relative;
+    padding-bottom: 56.25%; // 16:9 aspect ratio
+    
+    iframe {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border: none;
+      border-radius: $border-radius;
+    }
+  }
+}
+
+// Offcanvas menu
+.offcanvas {
+  background-color: $third;
+  
+  .offcanvas-header,
+  .offcanvas-body {
+    background-color: $third;
+  }
+  
+  .btn-close {
+    filter: invert(1) grayscale(100%) brightness(200%);
+    opacity: 0.8;
+    
+    &:hover {
+      opacity: 1;
+    }
+  }
+  
+  .nav-link {
+    color: $white;
+    transition: $transition-base;
+    padding: 0.75rem 1.5rem;
+    border-radius: $border-radius;
+    margin: 0.5rem 0;
+    
+    &:hover {
+      color: $primary;
+      background: rgba($primary, 0.1);
+      transform: translateX(10px);
+    }
+    
+    &.active {
+      color: $primary;
+      background: rgba($primary, 0.1);
+    }
+    
+    i {
+      margin-right: 10px;
+    }
+  }
+}
