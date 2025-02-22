@@ -14745,12 +14745,30 @@ ul {
   border-radius: 6px;
   transition: all 0.3s ease;
 }
+.custom-navbar.navbar .navbar-nav .nav-item .nav-link i.fa-home::before,
+.custom-navbar.navbar .navbar-nav .nav-item .nav-link i.fa-film::before,
+.custom-navbar.navbar .navbar-nav .nav-item .nav-link i.fa-tv::before,
+.custom-navbar.navbar .navbar-nav .nav-item .nav-link i.fa-sign-in-alt::before {
+  color: #ffffff;
+}
 .custom-navbar.navbar .navbar-nav .nav-item .nav-link:hover {
+  color: #f8b547;
+}
+.custom-navbar.navbar .navbar-nav .nav-item .nav-link:hover i.fa-home::before,
+.custom-navbar.navbar .navbar-nav .nav-item .nav-link:hover i.fa-film::before,
+.custom-navbar.navbar .navbar-nav .nav-item .nav-link:hover i.fa-tv::before,
+.custom-navbar.navbar .navbar-nav .nav-item .nav-link:hover i.fa-sign-in-alt::before {
   color: #f8b547;
 }
 .custom-navbar.navbar .navbar-nav .nav-item .nav-link.active {
   color: #f8b547;
   background: rgba(248, 181, 71, 0.1);
+}
+.custom-navbar.navbar .navbar-nav .nav-item .nav-link.active i.fa-home::before,
+.custom-navbar.navbar .navbar-nav .nav-item .nav-link.active i.fa-film::before,
+.custom-navbar.navbar .navbar-nav .nav-item .nav-link.active i.fa-tv::before,
+.custom-navbar.navbar .navbar-nav .nav-item .nav-link.active i.fa-sign-in-alt::before {
+  color: #f8b547;
 }
 .custom-navbar.navbar .navbar-nav .nav-item .nav-link i {
   margin-right: 6px;
@@ -14758,7 +14776,7 @@ ul {
 }
 .custom-navbar.navbar .navbar-toggler {
   color: #ffffff !important;
-  border: 2px solid #ffffff !important;
+  border: none;
   padding: 0.5rem 0.8rem;
   border-radius: 6px;
   background: transparent !important;

@@ -27,13 +27,32 @@
                 border-radius: 6px;
                 transition: all 0.3s ease;
 
+                i.fa-home::before,
+                i.fa-film::before,
+                i.fa-tv::before,
+                i.fa-sign-in-alt::before {
+                    color: $white;
+                }
+
                 &:hover {
                     color: $primary;
+                    i.fa-home::before,
+                    i.fa-film::before,
+                    i.fa-tv::before,
+                    i.fa-sign-in-alt::before {
+                        color: $primary;
+                    }
                 }
 
                 &.active {
                     color: $primary;
                     background: rgba($primary, 0.1);
+                    i.fa-home::before,
+                    i.fa-film::before,
+                    i.fa-tv::before,
+                    i.fa-sign-in-alt::before {
+                        color: $primary;
+                    }
                 }
 
                 i {
@@ -46,7 +65,7 @@
 
     .navbar-toggler {
         color: $white !important;
-        border: 2px solid $white !important;
+        border: none;
         padding: 0.5rem 0.8rem;
         border-radius: 6px;
         background: transparent !important;

@@ -6,8 +6,8 @@
   "scripts": {
     "start": "tsc --watch",
     "build": "tsc",
-    "sass": "sass --no-source-map --watch scss:css",
-    "sass:build": "sass --no-source-map scss:css"
+    "sass": "sass --no-source-map --style=compressed --watch scss:css",
+    "sass:build": "sass --no-source-map --style=compressed scss:css"
   },
   "author": "Dobri Dobrev",
   "license": "MIT",
