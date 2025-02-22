@@ -93,19 +93,22 @@ export class TVSeriesDetailsManager {
         if (!persons || persons.length === 0) return;
 
         const castGrid = this.elements.cast.querySelector('.cast-grid');
-        if (castGrid) {
-            const castHtml = persons.slice(0, 5).map(person => `
+        if (!castGrid) return;
+
+        // Crea le card del cast
+        castGrid.innerHTML = persons.slice(0, 5).map(person => {
+            const imageUrl = this.apiService.getImageUrl(person.profile_image || '', 'cast');
+            
+            return `
                 <div class="cast-card">
-                    <div class="cast-image" style="background-image: url('${this.getImageUrl(person.profile_image)}')"></div>
+                    <div class="cast-image" style="background-image: url('${imageUrl}')"></div>
                     <div class="cast-info">
                         <div class="actor-name">${person.name}</div>
                         ${person.character ? `<div class="character-name">${person.character}</div>` : ''}
                     </div>
                 </div>
-            `).join('');
-
-            castGrid.innerHTML = castHtml;
-        }
+            `;
+        }).join('');
     }
 
     public updateSeasons(series: TVSeries, seasons: any[], trailerUrl: string | undefined): void {

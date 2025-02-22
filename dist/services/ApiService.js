@@ -47,11 +47,15 @@ export class ApiService {
         this.token = null;
         localStorage.removeItem('auth_token');
     }
-    getImageUrl(path) {
+    getImageUrl(path, type = 'poster') {
         if (!path)
             return '';
         // Se il percorso è già un URL completo, restituiscilo
         if (path.startsWith('http://') || path.startsWith('https://')) {
+            // Aggiungi comunque i parametri di dimensione per le immagini del cast
+            if (type === 'cast' && !path.includes('w=') && !path.includes('h=')) {
+                return `${path}${path.includes('?') ? '&' : '?'}w=300&h=300&fit=crop`;
+            }
             return path;
         }
         // Rimuovi eventuali slash iniziali
@@ -64,8 +68,11 @@ export class ApiService {
                 cleanPath = pathParts.join('/');
             }
         }
+        // Aggiungi dimensioni specifiche per tipo di immagine
         const fullUrl = `${this.baseImageUrl}/${cleanPath}`;
-        console.log('Image URL:', { path, cleanPath, fullUrl });
+        if (type === 'cast') {
+            return `${fullUrl}?w=300&h=300&fit=crop`;
+        }
         return fullUrl;
     }
     async get(endpoint, params) {

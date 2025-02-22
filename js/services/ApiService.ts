@@ -67,11 +67,15 @@ export class ApiService {
         localStorage.removeItem('auth_token');
     }
 
-    public getImageUrl(path: string): string {
+    public getImageUrl(path: string, type: 'cast' | 'poster' | 'backdrop' | 'still' = 'poster'): string {
         if (!path) return '';
         
         // Se il percorso è già un URL completo, restituiscilo
         if (path.startsWith('http://') || path.startsWith('https://')) {
+            // Aggiungi comunque i parametri di dimensione per le immagini del cast
+            if (type === 'cast' && !path.includes('w=') && !path.includes('h=')) {
+                return `${path}${path.includes('?') ? '&' : '?'}w=300&h=300&fit=crop`;
+            }
             return path;
         }
 
@@ -87,8 +91,12 @@ export class ApiService {
             }
         }
 
+        // Aggiungi dimensioni specifiche per tipo di immagine
         const fullUrl = `${this.baseImageUrl}/${cleanPath}`;
-        console.log('Image URL:', { path, cleanPath, fullUrl });
+        if (type === 'cast') {
+            return `${fullUrl}?w=300&h=300&fit=crop`;
+        }
+
         return fullUrl;
     }
 
