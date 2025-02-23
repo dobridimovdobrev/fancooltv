@@ -36,10 +36,9 @@ export interface ApiError {
 
 export interface PaginationParams {
     page: number;
-    perPage?: number;
-    search?: string;
-    genre?: string;
-    year?: string;
+    q?: string;           // per la ricerca
+    category?: string;    // per il filtro categoria
+    year?: string;        // per il filtro anno
 }
 
 export interface LoginCredentials {

@@ -72,8 +72,8 @@ export class ApiService {
     async getTVSeriesDetails(id) {
         return this.get(`/api/v1/tvseries/${id}`);
     }
-    async getCategories() {
-        return this.get('/categories');
+    async getCategories(params) {
+        return this.get('/api/v1/categories', params);
     }
     logout() {
         this.token = null;
@@ -111,11 +111,21 @@ export class ApiService {
         const url = new URL(this.baseUrl + endpoint);
         if (params) {
             Object.entries(params).forEach(([key, value]) => {
-                if (value !== undefined) {
-                    url.searchParams.append(key, value.toString());
+                if (value !== undefined && value !== '') {
+                    // Converti i parametri nel formato corretto
+                    if (key === 'q') {
+                        url.searchParams.append('title', value.toString());
+                    }
+                    else if (key === 'category') {
+                        url.searchParams.append('category_id', value.toString());
+                    }
+                    else {
+                        url.searchParams.append(key, value.toString());
+                    }
                 }
             });
         }
+        console.log('Requesting URL:', url.toString()); // Per debug
         const response = await fetch(url.toString(), {
             method: 'GET',
             headers: this.getHeaders()
@@ -123,7 +133,9 @@ export class ApiService {
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
-        return response.json();
+        const data = await response.json();
+        console.log('API Response:', data); // Per debug
+        return data;
     }
     async post(endpoint, data) {
         const response = await fetch(this.baseUrl + endpoint, {

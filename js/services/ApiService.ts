@@ -95,8 +95,8 @@ export class ApiService {
         return this.get<TVSeries>(`/api/v1/tvseries/${id}`);
     }
 
-    public async getCategories(): Promise<ApiResponse<Category[]>> {
-        return this.get('/categories');
+    public async getCategories(params?: Record<string, any>): Promise<ApiResponse<Category[]>> {
+        return this.get<Category[]>('/api/v1/categories', params);
     }
 
     public logout(): void {
@@ -141,11 +141,20 @@ export class ApiService {
         const url = new URL(this.baseUrl + endpoint);
         if (params) {
             Object.entries(params).forEach(([key, value]) => {
-                if (value !== undefined) {
-                    url.searchParams.append(key, value.toString());
+                if (value !== undefined && value !== '') {
+                    // Converti i parametri nel formato corretto
+                    if (key === 'q') {
+                        url.searchParams.append('title', value.toString());
+                    } else if (key === 'category') {
+                        url.searchParams.append('category_id', value.toString());
+                    } else {
+                        url.searchParams.append(key, value.toString());
+                    }
                 }
             });
         }
+
+        console.log('Requesting URL:', url.toString()); // Per debug
 
         const response = await fetch(url.toString(), {
             method: 'GET',
@@ -156,7 +165,9 @@ export class ApiService {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
 
-        return response.json();
+        const data = await response.json();
+        console.log('API Response:', data); // Per debug
+        return data;
     }
 
     private async post<T>(endpoint: string, data: Record<string, any>): Promise<AuthApiResponse<T>> {

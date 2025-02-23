@@ -7,6 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const grid = document.getElementById('moviesGrid');
     const template = document.getElementById('movie-card-template');
     const searchInput = document.getElementById('searchInput');
+    const searchButton = document.getElementById('searchButton');
     const genreFilter = document.getElementById('genreFilter');
     const yearFilter = document.getElementById('yearFilter');
     const loadMoreBtn = document.getElementById('loadMoreBtn');
@@ -18,11 +19,20 @@ document.addEventListener('DOMContentLoaded', () => {
         grid,
         template,
         searchInput,
+        searchButton,
         genreFilter,
         yearFilter,
         loadMoreBtn
     };
     const apiService = new ApiService();
     const movieManager = new MovieManager(elements, apiService);
+    // Aggiungi l'event listener per il pulsante di ricerca
+    if (searchButton) {
+        searchButton.addEventListener('click', () => {
+            if (searchInput) {
+                movieManager.search(searchInput.value);
+            }
+        });
+    }
     movieManager.initialize();
 });

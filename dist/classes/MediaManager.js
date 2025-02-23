@@ -2,6 +2,9 @@ export class MediaManager {
     constructor(elements, apiService) {
         this.currentPage = 1;
         this.isLoading = false;
+        this.currentSearch = '';
+        this.currentGenre = '';
+        this.currentYear = '';
         this.elements = elements;
         this.apiService = apiService;
         this.initialize();
@@ -13,6 +16,9 @@ export class MediaManager {
             return;
         }
         this.setupLoadMoreButton();
+        this.setupFilters();
+        this.loadCategories();
+        this.loadYears();
         this.loadItems();
     }
     setupLoadMoreButton() {
@@ -22,6 +28,76 @@ export class MediaManager {
                 this.loadItems();
             });
         }
+    }
+    setupFilters() {
+        // Setup search input
+        if (this.elements.searchInput) {
+            let searchTimeout;
+            this.elements.searchInput.addEventListener('input', (e) => {
+                const target = e.target;
+                clearTimeout(searchTimeout);
+                searchTimeout = window.setTimeout(() => {
+                    this.currentSearch = target.value;
+                    this.currentPage = 1;
+                    this.loadItems();
+                }, 500);
+            });
+            // Aggiungi anche l'evento per il tasto Enter
+            this.elements.searchInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    this.currentSearch = e.target.value;
+                    this.currentPage = 1;
+                    this.loadItems();
+                }
+            });
+        }
+        // Setup genre filter
+        if (this.elements.genreFilter) {
+            this.elements.genreFilter.addEventListener('change', (e) => {
+                const select = e.target;
+                this.currentGenre = select.value || '';
+                console.log('Selected category:', this.currentGenre); // Debug
+                this.currentPage = 1;
+                this.loadItems();
+            });
+        }
+        // Setup year filter
+        if (this.elements.yearFilter) {
+            this.elements.yearFilter.addEventListener('change', (e) => {
+                const select = e.target;
+                this.currentYear = select.value || '';
+                console.log('Selected year:', this.currentYear); // Debug
+                this.currentPage = 1;
+                this.loadItems();
+            });
+        }
+    }
+    async loadCategories() {
+        if (!this.elements.genreFilter)
+            return;
+        try {
+            const response = await this.apiService.getCategories();
+            if (response.data) {
+                const categories = response.data;
+                console.log('Categories loaded:', categories); // Per debug
+                const options = categories.map(category => `<option value="${category.id}">${category.name}</option>`).join('');
+                this.elements.genreFilter.innerHTML = '<option value="">All Genres</option>' + options;
+            }
+        }
+        catch (error) {
+            console.error('Error loading categories:', error);
+        }
+    }
+    loadYears() {
+        if (!this.elements.yearFilter)
+            return;
+        const currentYear = new Date().getFullYear();
+        const startYear = 1900;
+        let options = '<option value="">All Years</option>';
+        for (let year = currentYear; year >= startYear; year--) {
+            options += `<option value="${year}">${year}</option>`;
+        }
+        this.elements.yearFilter.innerHTML = options;
     }
     async loadItems() {
         if (this.isLoading)
@@ -33,10 +109,34 @@ export class MediaManager {
             const params = {
                 page: this.currentPage
             };
+            // Aggiungi i parametri di filtro solo se sono stati impostati
+            if (this.currentSearch && this.currentSearch.trim() !== '') {
+                params.q = this.currentSearch.trim();
+            }
+            // Aggiungi categoria solo se è stata selezionata
+            if (this.currentGenre && this.currentGenre !== '' && this.currentGenre !== 'undefined') {
+                params.category = this.currentGenre;
+            }
+            // Aggiungi anno solo se è stato selezionato
+            if (this.currentYear && this.currentYear !== '' && this.currentYear !== 'undefined') {
+                params.year = this.currentYear;
+            }
+            console.log('Loading items with params:', params); // Per debug
             const response = await this.fetchItems(params);
             if (response.data && Array.isArray(response.data)) {
+                // Clear grid if it's a new search or filter
+                if (this.currentPage === 1) {
+                    this.elements.grid.innerHTML = '';
+                }
                 this.displayItems(response.data);
                 this.updatePagination(response.meta);
+                // Show "no results" message if needed
+                if (response.data.length === 0 && this.currentPage === 1) {
+                    this.showNoResults();
+                }
+                else {
+                    this.hideNoResults();
+                }
             }
             else {
                 throw new Error('Invalid response format');
@@ -55,10 +155,6 @@ export class MediaManager {
         if (!this.elements.grid) {
             console.error('Grid element not found');
             return;
-        }
-        // Remove existing content only if it's the first page
-        if (this.currentPage === 1) {
-            this.elements.grid.innerHTML = '';
         }
         items.forEach(item => {
             try {
@@ -112,6 +208,28 @@ export class MediaManager {
             else {
                 this.elements.loadMoreBtn.classList.add('d-none');
             }
+        }
+    }
+    showNoResults() {
+        var _a;
+        const noResultsDiv = document.createElement('div');
+        noResultsDiv.id = 'noResults';
+        noResultsDiv.className = 'text-center mt-4';
+        noResultsDiv.innerHTML = `
+            <p class="text-muted">No results found</p>
+            ${this.currentSearch || this.currentGenre || this.currentYear ?
+            '<p class="text-muted">Try adjusting your filters or search terms</p>' : ''}
+        `;
+        const existingNoResults = document.getElementById('noResults');
+        if (existingNoResults) {
+            existingNoResults.remove();
+        }
+        (_a = this.elements.grid) === null || _a === void 0 ? void 0 : _a.appendChild(noResultsDiv);
+    }
+    hideNoResults() {
+        const noResultsDiv = document.getElementById('noResults');
+        if (noResultsDiv) {
+            noResultsDiv.remove();
         }
     }
 }

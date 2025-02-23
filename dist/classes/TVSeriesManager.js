@@ -3,26 +3,26 @@ export class TVSeriesManager extends MediaManager {
     constructor(elements, apiService) {
         super(elements, apiService);
     }
+    search(query) {
+        this.currentSearch = query;
+        this.currentPage = 1;
+        this.loadItems();
+    }
     async fetchItems(params) {
-        const response = await this.apiService.getTVSeries(params);
-        console.log('TV Series response:', response);
-        if (response.data && Array.isArray(response.data)) {
-            console.log('First TV series data:', response.data[0]);
-        }
-        return response;
+        return this.apiService.getTVSeries(params);
     }
     createItemElement(series) {
         const template = this.elements.template.content.cloneNode(true);
         const article = template.querySelector('.movie-card');
         if (!article) {
-            console.error('TV Series card element not found in template');
+            console.error('TV series card element not found in template');
             return document.createElement('div');
         }
         const img = article.querySelector('img');
         const title = article.querySelector('.card-title');
         const yearValue = article.querySelector('.year-value');
         const ratingValue = article.querySelector('.rating-value');
-        const seasonsValue = article.querySelector('.duration-value');
+        const durationValue = article.querySelector('.duration-value');
         const categoryValue = article.querySelector('.category-value');
         const detailsLink = article.querySelector('.btn-details');
         if (img) {
@@ -43,20 +43,14 @@ export class TVSeriesManager extends MediaManager {
             yearValue.textContent = series.year.toString();
         if (ratingValue)
             ratingValue.textContent = series.imdb_rating.toString();
-        if (seasonsValue)
-            seasonsValue.textContent = `${series.total_seasons} seasons`;
-        if (categoryValue)
+        if (durationValue)
+            durationValue.textContent = `${series.total_seasons} Seasons`;
+        if (categoryValue && series.category)
             categoryValue.textContent = series.category.name;
         if (detailsLink) {
-            if (series.tv_series_id) {
-                detailsLink.setAttribute('href', `tvseries-details.html?id=${series.tv_series_id}`);
-                detailsLink.setAttribute('aria-label', `View details for ${series.title}`);
-                detailsLink.setAttribute('title', `View details for ${series.title}`);
-            }
-            else {
-                console.error('Series ID is undefined:', series);
-                detailsLink.style.display = 'none';
-            }
+            detailsLink.setAttribute('href', `tvseries-details.html?id=${series.tv_series_id}`);
+            detailsLink.setAttribute('aria-label', `View details for ${series.title}`);
+            detailsLink.setAttribute('title', `View details for ${series.title}`);
         }
         // Wrap article in div.col for grid
         const col = document.createElement('div');

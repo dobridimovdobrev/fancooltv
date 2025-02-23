@@ -9,6 +9,12 @@ export class MovieManager extends MediaManager<Movie> {
         super(elements, apiService);
     }
 
+    public search(query: string): void {
+        this.currentSearch = query;
+        this.currentPage = 1;
+        this.loadItems();
+    }
+
     protected async fetchItems(params: PaginationParams): Promise<ApiResponse<Movie[]>> {
         const response = await this.apiService.getMovies(params);
         console.log('Movie response:', response);

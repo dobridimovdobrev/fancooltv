@@ -3,6 +3,11 @@ export class MovieManager extends MediaManager {
     constructor(elements, apiService) {
         super(elements, apiService);
     }
+    search(query) {
+        this.currentSearch = query;
+        this.currentPage = 1;
+        this.loadItems();
+    }
     async fetchItems(params) {
         const response = await this.apiService.getMovies(params);
         console.log('Movie response:', response);

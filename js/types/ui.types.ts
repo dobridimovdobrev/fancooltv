@@ -2,6 +2,7 @@ export interface UIElements {
     grid: HTMLElement;
     template: HTMLTemplateElement;
     searchInput?: HTMLInputElement;
+    searchButton?: HTMLButtonElement;
     genreFilter?: HTMLSelectElement;
     yearFilter?: HTMLSelectElement;
     loadMoreBtn?: HTMLButtonElement;
