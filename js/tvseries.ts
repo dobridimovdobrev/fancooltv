@@ -1,8 +1,12 @@
 import { TVSeriesManager } from './classes/TVSeriesManager.js';
 import { ApiService } from './services/ApiService.js';
 import { UIElements } from './types/ui.types.js';
+import { requireAuth } from './utils/auth.js';
 
 document.addEventListener('DOMContentLoaded', () => {
+    // Verifica autenticazione prima di tutto
+    requireAuth();
+    
     const grid = document.getElementById('tvSeriesGrid');
     const template = document.getElementById('tvseries-card-template') as HTMLTemplateElement;
     const searchInput = document.getElementById('searchInput') as HTMLInputElement;

@@ -1,8 +1,12 @@
 import { MovieDetailsManager } from './classes/MovieDetailsManager.js';
 import { ApiService } from './services/ApiService.js';
 import { MediaDetailsElements } from './types/ui.types.js';
+import { requireAuth } from './utils/auth.js';
 
 document.addEventListener('DOMContentLoaded', () => {
+    // Verifica autenticazione prima di tutto
+    requireAuth();
+    
     const elements: MediaDetailsElements = {
         poster: document.getElementById('poster') as HTMLElement,
         title: document.getElementById('title') as HTMLElement,

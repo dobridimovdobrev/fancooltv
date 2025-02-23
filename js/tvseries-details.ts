@@ -1,17 +1,15 @@
 import { TVSeriesDetailsManager } from './classes/TVSeriesDetailsManager.js';
 import { ApiService } from './services/ApiService.js';
 import { ExtendedMediaDetailsElements } from './types/ui.types.js';
+import { requireAuth } from './utils/auth.js';
 
 // Declare Bootstrap globally since it's loaded from CDN
 declare const bootstrap: any;
 
 document.addEventListener('DOMContentLoaded', async () => {
-    const token = localStorage.getItem('auth_token');
-    if (!token) {
-        window.location.href = 'login.html';
-        return;
-    }
-
+    // Verifica autenticazione prima di tutto
+    requireAuth();
+    
     // Get series ID from URL
     const urlParams = new URLSearchParams(window.location.search);
     const seriesId = urlParams.get('id');

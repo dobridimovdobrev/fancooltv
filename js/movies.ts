@@ -1,8 +1,12 @@
 import { MovieManager } from './classes/MovieManager.js';
 import { ApiService } from './services/ApiService.js';
 import { UIElements } from './types/ui.types.js';
+import { requireAuth } from './utils/auth.js';
 
 document.addEventListener('DOMContentLoaded', () => {
+    // Verifica autenticazione prima di tutto
+    requireAuth();
+    
     const grid = document.getElementById('moviesGrid');
     const template = document.getElementById('movie-card-template') as HTMLTemplateElement;
     const searchInput = document.getElementById('searchInput') as HTMLInputElement;

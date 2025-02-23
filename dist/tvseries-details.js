@@ -1,12 +1,10 @@
 import { TVSeriesDetailsManager } from './classes/TVSeriesDetailsManager.js';
 import { ApiService } from './services/ApiService.js';
+import { requireAuth } from './utils/auth.js';
 document.addEventListener('DOMContentLoaded', async () => {
     var _a, _b;
-    const token = localStorage.getItem('auth_token');
-    if (!token) {
-        window.location.href = 'login.html';
-        return;
-    }
+    // Verifica autenticazione prima di tutto
+    requireAuth();
     // Get series ID from URL
     const urlParams = new URLSearchParams(window.location.search);
     const seriesId = urlParams.get('id');
