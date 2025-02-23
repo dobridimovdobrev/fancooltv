@@ -32,7 +32,7 @@ export interface Person {
     person_id: number;
     name: string;
     profile_image: string;
-    character?: string;  // Aggiunto per il nome del personaggio
+    character?: string;  // Added for character name
 }
 
 export interface Trailer {

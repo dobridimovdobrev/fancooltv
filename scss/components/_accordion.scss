@@ -1,0 +1,50 @@
+// Accordion styles
+.accordion {
+  .accordion-item {
+    background: transparent;
+    border: 1px solid rgba($white, 0.1);
+    margin-bottom: 0.5rem;
+    
+    &.glass-effect {
+      @include glass-effect(0.3, 10px);
+    }
+  }
+
+  .accordion-header {
+    .accordion-button {
+      color: $white;
+      background: transparent;
+      border: none;
+      padding: 1rem;
+      
+      &:not(.collapsed) {
+        color: $primary;
+        background: transparent;
+        box-shadow: none;
+      }
+      
+      &::after {
+        filter: invert(1); // Make arrow white
+      }
+      
+      &:focus {
+        box-shadow: none;
+        border-color: rgba($primary, 0.5);
+      }
+    }
+  }
+
+  .accordion-body {
+    color: rgba($white, 0.8);
+    background: transparent;
+    padding: 1rem;
+    
+    ul {
+      padding-left: 1.5rem;
+      
+      li {
+        margin-bottom: 0.5rem;
+      }
+    }
+  }
+}

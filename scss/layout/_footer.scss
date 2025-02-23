@@ -5,9 +5,9 @@
   background: $third;
   border-top: 1px solid rgba($white, 0.1);
 
-  // Aumentiamo la specificità per sovrascrivere Bootstrap
+  // Increase specificity to override Bootstrap
   .nav .nav-link {
-    color: rgba($white, 0.6) !important; // Forziamo il colore
+    color: rgba($white, 0.6) !important; // Force color
     font-size: 0.9rem;
     padding: 0.5rem 1rem;
     border-radius: 4px;
@@ -17,7 +17,7 @@
     border: 0;
 
     &:hover {
-      color: $white !important; // Forziamo il colore hover
+      color: $white !important; // Force hover color
       background: rgba($white, 0.05);
     }
   }

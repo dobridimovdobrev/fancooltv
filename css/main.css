@@ -13785,6 +13785,7 @@ ul {
   border: 1px solid rgba(255, 255, 255, 0.1);
   color: #ffffff;
   transition: all 0.3s ease;
+  cursor: pointer;
 }
 .form-control::placeholder,
 .form-select::placeholder,
@@ -13797,6 +13798,14 @@ ul {
   background-color: rgba(0, 0, 0, 0.6) !important;
   border-color: #f8b547;
   box-shadow: 0 0 0 0.25rem rgba(248, 181, 71, 0.25);
+  color: #ffffff;
+}
+
+.form-select, .custom-select {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23ffffff' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+}
+.form-select option, .custom-select option {
+  background-color: rgba(0, 0, 0, 0.9);
   color: #ffffff;
 }
 
@@ -13813,7 +13822,7 @@ ul {
   cursor: pointer;
 }
 .custom-select option {
-  background-color: #000000;
+  background-color: rgba(0, 0, 0, 0.9);
   color: #ffffff;
 }
 
@@ -13846,6 +13855,12 @@ ul {
 .was-validated .custom-select:invalid:focus {
   border-color: red;
   box-shadow: 0 0 0 0.25rem rgba(255, 0, 0, 0.25);
+}
+
+input[type=date]::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+  opacity: 0.8;
+  cursor: pointer;
 }
 
 .custom-checkbox {
@@ -14308,6 +14323,47 @@ ul {
   border-color: #f8b547;
   box-shadow: 0 0 10px rgba(248, 181, 71, 0.5), 0 0 20px rgba(248, 181, 71, 0.3), 0 0 30px rgba(248, 181, 71, 0.1);
   text-shadow: 0 0 5px rgba(248, 181, 71, 0.5);
+}
+
+.accordion .accordion-item {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  margin-bottom: 0.5rem;
+}
+.accordion .accordion-item.glass-effect {
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+.accordion .accordion-header .accordion-button {
+  color: #ffffff;
+  background: transparent;
+  border: none;
+  padding: 1rem;
+}
+.accordion .accordion-header .accordion-button:not(.collapsed) {
+  color: #f8b547;
+  background: transparent;
+  box-shadow: none;
+}
+.accordion .accordion-header .accordion-button::after {
+  filter: invert(1);
+}
+.accordion .accordion-header .accordion-button:focus {
+  box-shadow: none;
+  border-color: rgba(248, 181, 71, 0.5);
+}
+.accordion .accordion-body {
+  color: rgba(255, 255, 255, 0.8);
+  background: transparent;
+  padding: 1rem;
+}
+.accordion .accordion-body ul {
+  padding-left: 1.5rem;
+}
+.accordion .accordion-body ul li {
+  margin-bottom: 0.5rem;
 }
 
 .grid {

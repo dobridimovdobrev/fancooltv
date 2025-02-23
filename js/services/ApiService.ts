@@ -84,19 +84,19 @@ export class ApiService {
     public getImageUrl(path: string, type: 'cast' | 'poster' | 'backdrop' | 'still' = 'poster'): string {
         if (!path) return '';
         
-        // Se il percorso è già un URL completo, restituiscilo
+        // If path is already a complete URL, return it
         if (path.startsWith('http://') || path.startsWith('https://')) {
-            // Aggiungi comunque i parametri di dimensione per le immagini del cast
+            // Still add size parameters for cast images
             if (type === 'cast' && !path.includes('w=') && !path.includes('h=')) {
                 return `${path}${path.includes('?') ? '&' : '?'}w=300&h=300&fit=crop`;
             }
             return path;
         }
 
-        // Rimuovi eventuali slash iniziali
+        // Remove any leading slashes
         let cleanPath = path.replace(/^\/+/, '');
 
-        // Aggiungi storage/ prima del percorso delle immagini
+        // Add storage/ before image paths
         if (!cleanPath.startsWith('storage/')) {
             const pathParts = cleanPath.split('/');
             if (pathParts[0] === 'images') {
@@ -105,7 +105,7 @@ export class ApiService {
             }
         }
 
-        // Aggiungi dimensioni specifiche per tipo di immagine
+        // Add specific dimensions based on image type
         const fullUrl = `${this.baseImageUrl}/${cleanPath}`;
         if (type === 'cast') {
             return `${fullUrl}?w=300&h=300&fit=crop`;

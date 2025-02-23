@@ -2,7 +2,7 @@ import { ApiService } from './services/ApiService.js';
 import { LoginCredentials } from './types/api.types.js';
 
 document.addEventListener('DOMContentLoaded', () => {
-    // Pulisci il localStorage all'inizio
+    // Clear localStorage at start
     localStorage.removeItem('auth_token');
     
     const apiService = new ApiService();
@@ -22,7 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
 
-    // Rimuovi la classe is-invalid quando l'utente inizia a digitare
+    // Remove is-invalid class when user starts typing
     [usernameInput, passwordInput].forEach(input => {
         input.addEventListener('input', () => {
             input.classList.remove('is-invalid');
@@ -65,15 +65,15 @@ document.addEventListener('DOMContentLoaded', () => {
             window.location.href = 'index.html';
         } catch (error) {
             console.error('Login error:', error);
-            // Messaggio generico per sicurezza
+            // Generic message for security
             errorMessage.textContent = 'Invalid username or password';
             errorMessage.classList.remove('d-none');
             
-            // Evidenzia entrambi i campi per non rivelare quale è sbagliato
+            // Highlight both fields to not reveal which one is wrong
             usernameInput.classList.add('is-invalid');
             passwordInput.classList.add('is-invalid');
             
-            // Pulisci la password per sicurezza
+            // Clear password for security
             passwordInput.value = '';
         }
     });

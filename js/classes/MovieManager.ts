@@ -39,7 +39,7 @@ export class MovieManager extends MediaManager<Movie> {
             img.src = this.apiService.getImageUrl(movie.poster);
             img.alt = `${movie.title} Poster`;
             
-            // Gestire il caso in cui l'immagine non si carica
+            // Handle case when image fails to load
             img.onerror = () => {
                 const noImagePlaceholder = article.querySelector('.no-image-placeholder');
                 if (noImagePlaceholder) {
@@ -61,7 +61,7 @@ export class MovieManager extends MediaManager<Movie> {
             detailsLink.setAttribute('title', `View details for ${movie.title}`);
         }
 
-        // Avvolgere l'article in un div.col per la griglia
+        // Wrap article in div.col for grid
         const col = document.createElement('div');
         col.className = 'col-12 col-custom-2 col-custom-3 col-custom-4 col-custom-5';
         col.appendChild(article);
