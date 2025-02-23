@@ -49,8 +49,11 @@ export interface LoginCredentials {
 
 export interface RegistrationData {
     username: string;
+    email: string;
     password: string;
-    firstName: string;
-    lastName: string;
+    password_confirmation: string;
+    first_name: string;
+    last_name: string;
     gender: 'male' | 'female';
+    birthday: string;
 }

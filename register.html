@@ -89,6 +89,7 @@
             <div class="bg-custom border border-light border-opacity-10 p-4 fade-in">
               <div class="card-body">
                 <h2 class="text-center mb-4">Create Account</h2>
+                <div id="errorContainer" class="mb-3"></div>
                 <form id="registerForm" class="needs-validation" novalidate>
                   <!-- Personal Information -->
                   <div class="mb-4">
@@ -102,15 +103,15 @@
                     </div>
                     <div class="row">
                       <div class="col-md-6 mb-3">
-                        <label for="firstName" class="form-label">First Name</label>
-                        <input type="text" class="form-control bg-dark text-light" id="firstName" required>
+                        <label for="first_name" class="form-label">First Name</label>
+                        <input type="text" class="form-control bg-dark text-light" id="first_name" required>
                         <div class="invalid-feedback">
                           First name is required.
                         </div>
                       </div>
                       <div class="col-md-6 mb-3">
-                        <label for="lastName" class="form-label">Last Name</label>
-                        <input type="text" class="form-control bg-dark text-light" id="lastName" required>
+                        <label for="last_name" class="form-label">Last Name</label>
+                        <input type="text" class="form-control bg-dark text-light" id="last_name" required>
                         <div class="invalid-feedback">
                           Last name is required.
                         </div>

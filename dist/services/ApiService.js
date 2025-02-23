@@ -32,13 +32,32 @@ export class ApiService {
         }
     }
     async register(data) {
-        const response = await this.post('/auth/register', data);
-        if (response.data.token) {
-            this.token = response.data.token;
-            localStorage.setItem('auth_token', this.token);
+        console.log('Sending registration data:', data);
+        const response = await fetch(this.baseUrl + '/api/register', {
+            method: 'POST',
+            headers: this.getHeaders(),
+            body: JSON.stringify(data)
+        });
+        const responseData = await response.json();
+        console.log('Server response:', responseData);
+        if (!response.ok) {
+            if (response.status === 422) {
+                // Validation errors
+                throw {
+                    status: 422,
+                    errors: responseData.errors || { general: [responseData.message || 'Validation failed'] },
+                    message: 'Validation failed'
+                };
+            }
+            throw new Error(responseData.message || 'Registration failed');
+        }
+        // La registrazione è andata a buon fine, non ci aspettiamo più un token
+        if (responseData.status === 'success') {
+            return; // L'utente dovrà fare login separatamente
         }
         else {
-            throw new Error('Registration failed');
+            console.error('Unexpected response format:', responseData);
+            throw new Error('Registration failed: Invalid response format');
         }
     }
     async getMovies(params = { page: 1 }) {
@@ -63,17 +82,17 @@ export class ApiService {
     getImageUrl(path, type = 'poster') {
         if (!path)
             return '';
-        // Se il percorso è già un URL completo, restituiscilo
+        // If path is already a complete URL, return it
         if (path.startsWith('http://') || path.startsWith('https://')) {
-            // Aggiungi comunque i parametri di dimensione per le immagini del cast
+            // Still add size parameters for cast images
             if (type === 'cast' && !path.includes('w=') && !path.includes('h=')) {
                 return `${path}${path.includes('?') ? '&' : '?'}w=300&h=300&fit=crop`;
             }
             return path;
         }
-        // Rimuovi eventuali slash iniziali
+        // Remove any leading slashes
         let cleanPath = path.replace(/^\/+/, '');
-        // Aggiungi storage/ prima del percorso delle immagini
+        // Add storage/ before image paths
         if (!cleanPath.startsWith('storage/')) {
             const pathParts = cleanPath.split('/');
             if (pathParts[0] === 'images') {
@@ -81,7 +100,7 @@ export class ApiService {
                 cleanPath = pathParts.join('/');
             }
         }
-        // Aggiungi dimensioni specifiche per tipo di immagine
+        // Add specific dimensions based on image type
         const fullUrl = `${this.baseImageUrl}/${cleanPath}`;
         if (type === 'cast') {
             return `${fullUrl}?w=300&h=300&fit=crop`;

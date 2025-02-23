@@ -28,7 +28,7 @@ export class TVSeriesManager extends MediaManager {
         if (img) {
             img.src = this.apiService.getImageUrl(series.poster);
             img.alt = `${series.title} Poster`;
-            // Gestire il caso in cui l'immagine non si carica
+            // Handle case when image fails to load
             img.onerror = () => {
                 const noImagePlaceholder = article.querySelector('.no-image-placeholder');
                 if (noImagePlaceholder) {
@@ -58,7 +58,7 @@ export class TVSeriesManager extends MediaManager {
                 detailsLink.style.display = 'none';
             }
         }
-        // Avvolgere l'article in un div.col per la griglia
+        // Wrap article in div.col for grid
         const col = document.createElement('div');
         col.className = 'col-12 col-custom-2 col-custom-3 col-custom-4 col-custom-5';
         col.appendChild(article);

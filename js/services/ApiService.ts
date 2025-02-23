@@ -47,12 +47,35 @@ export class ApiService {
     }
 
     public async register(data: RegistrationData): Promise<void> {
-        const response = await this.post<AuthResponse>('/auth/register', data);
-        if (response.data.token) {
-            this.token = response.data.token;
-            localStorage.setItem('auth_token', this.token);
+        console.log('Sending registration data:', data);
+
+        const response = await fetch(this.baseUrl + '/api/register', {
+            method: 'POST',
+            headers: this.getHeaders(),
+            body: JSON.stringify(data)
+        });
+
+        const responseData = await response.json();
+        console.log('Server response:', responseData);
+
+        if (!response.ok) {
+            if (response.status === 422) {
+                // Validation errors
+                throw {
+                    status: 422,
+                    errors: responseData.errors || { general: [responseData.message || 'Validation failed'] },
+                    message: 'Validation failed'
+                };
+            }
+            throw new Error(responseData.message || 'Registration failed');
+        }
+
+        // La registrazione è andata a buon fine, non ci aspettiamo più un token
+        if (responseData.status === 'success') {
+            return; // L'utente dovrà fare login separatamente
         } else {
-            throw new Error('Registration failed');
+            console.error('Unexpected response format:', responseData);
+            throw new Error('Registration failed: Invalid response format');
         }
     }
 

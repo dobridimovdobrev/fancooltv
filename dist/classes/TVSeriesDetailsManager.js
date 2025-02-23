@@ -76,7 +76,7 @@ export class TVSeriesDetailsManager {
         const castGrid = this.elements.cast.querySelector('.cast-grid');
         if (!castGrid)
             return;
-        // Crea le card del cast
+        // Create cast cards
         castGrid.innerHTML = persons.slice(0, 5).map(person => {
             const imageUrl = this.apiService.getImageUrl(person.profile_image || '', 'cast');
             return `
@@ -93,30 +93,30 @@ export class TVSeriesDetailsManager {
     updateSeasons(series, seasons, trailerUrl) {
         if (!seasons || seasons.length === 0)
             return;
-        // Filtra le stagioni valide (season_number > 0)
+        // Filter valid seasons (season_number > 0)
         const validSeasons = seasons
             .filter(season => season.season_number > 0)
             .sort((a, b) => a.season_number - b.season_number);
         if (validSeasons.length === 0)
             return;
         this.elements.seasons.innerHTML = `<h3 class="mb-4">Seasons</h3>`;
-        // Mostra solo le prime 5 stagioni inizialmente
+        // Show only first 5 seasons initially
         const initialSeasons = validSeasons.slice(0, 5);
         this.renderSeasons(initialSeasons, trailerUrl);
-        // Se ci sono più di 5 stagioni, aggiungi il pulsante "Load More"
+        // If more than 5 seasons, add Load More button
         if (validSeasons.length > 5) {
             const loadMoreBtn = document.createElement('button');
             loadMoreBtn.className = 'btn btn-outline-primary mt-3 w-100';
             loadMoreBtn.innerHTML = '<i class="fas fa-plus me-2"></i>Load More Seasons';
             let currentIndex = 5;
             loadMoreBtn.addEventListener('click', () => {
-                // Rimuovi il pulsante temporaneamente
+                // Remove button temporarily
                 loadMoreBtn.remove();
-                // Prendi le prossime 5 stagioni
+                // Get next 5 seasons
                 const nextSeasons = validSeasons.slice(currentIndex, currentIndex + 5);
                 this.renderSeasons(nextSeasons, trailerUrl);
                 currentIndex += 5;
-                // Aggiungi il pulsante dopo l'ultima stagione mostrata
+                // Add button after last shown season
                 if (currentIndex < validSeasons.length) {
                     loadMoreBtn.innerHTML = '<i class="fas fa-plus me-2"></i>Load More Seasons';
                     this.elements.seasons.appendChild(loadMoreBtn);
@@ -126,7 +126,7 @@ export class TVSeriesDetailsManager {
         }
     }
     renderSeasons(seasons, trailerUrl) {
-        // Prima rimuovi tutti gli event listener esistenti
+        // First remove all existing event listeners
         const existingAccordions = this.elements.seasons.querySelectorAll('.season-header');
         existingAccordions.forEach(accordion => {
             accordion.replaceWith(accordion.cloneNode(true));
@@ -150,7 +150,7 @@ export class TVSeriesDetailsManager {
             seasonYear.textContent = season.year || '';
             // Create episodes list
             if (season.episodes && season.episodes.length > 0) {
-                // Ordina gli episodi per numero
+                // Sort episodes by number
                 const sortedEpisodes = [...season.episodes].sort((a, b) => a.episode_number - b.episode_number);
                 sortedEpisodes.forEach((episode) => {
                     const episodeElement = this.elements.episodeTemplate.content.cloneNode(true);
@@ -192,13 +192,13 @@ export class TVSeriesDetailsManager {
                 const target = document.querySelector(targetId);
                 if (!target)
                     return;
-                // Chiudi tutti gli altri accordion
+                // Close all other accordions
                 const allCollapses = document.querySelectorAll('.episodes-list.show');
                 allCollapses.forEach(collapse => {
                     if (collapse.id !== targetId.substring(1)) {
                         const bsCollapse = bootstrap.Collapse.getOrCreateInstance(collapse);
                         bsCollapse.hide();
-                        // Trova e aggiorna l'icona del collapse chiuso
+                        // Find and update closed collapse icon
                         const collapseHeader = document.querySelector(`[data-bs-target="#${collapse.id}"]`);
                         const icon = collapseHeader === null || collapseHeader === void 0 ? void 0 : collapseHeader.querySelector('.toggle-icon');
                         if (icon) {
@@ -207,7 +207,7 @@ export class TVSeriesDetailsManager {
                         }
                     }
                 });
-                // Gestione del collapse corrente
+                // Handle current collapse
                 const bsCollapse = bootstrap.Collapse.getOrCreateInstance(target, {
                     toggle: false
                 });
@@ -234,14 +234,14 @@ export class TVSeriesDetailsManager {
         const seasonsContainer = this.elements.seasonsContainer;
         if (!seasonsContainer)
             return;
-        // Nascondi tutte le stagioni inizialmente
+        // Hide all seasons initially
         const allSeasons = Array.from(seasonsContainer.querySelectorAll('.season-item'));
         allSeasons.forEach((season, index) => {
             if (index >= this.SEASONS_PER_LOAD) {
                 season.style.display = 'none';
             }
         });
-        // Mostra/nascondi il pulsante "Load More" in base al numero di stagioni
+        // Show/hide Load More button based on number of seasons
         this.updateLoadMoreButton(allSeasons.length);
     }
     updateLoadMoreButton(totalSeasons) {
@@ -250,7 +250,7 @@ export class TVSeriesDetailsManager {
             return;
         if (this.currentVisibleSeasons < totalSeasons) {
             loadMoreButton.style.display = 'block';
-            // Aggiorna il testo del pulsante per mostrare quante stagioni rimangono
+            // Update button text to show remaining seasons count
             const remainingSeasons = totalSeasons - this.currentVisibleSeasons;
             const seasonsToLoad = Math.min(this.SEASONS_PER_LOAD, remainingSeasons);
             loadMoreButton.textContent = `Load More (${seasonsToLoad} Seasons)`;
@@ -265,16 +265,16 @@ export class TVSeriesDetailsManager {
             return;
         const allSeasons = Array.from(seasonsContainer.querySelectorAll('.season-item'));
         const totalSeasons = allSeasons.length;
-        // Calcola quante nuove stagioni mostrare
+        // Calculate next seasons to show
         const startIndex = this.currentVisibleSeasons;
         const endIndex = Math.min(startIndex + this.SEASONS_PER_LOAD, totalSeasons);
-        // Mostra le prossime stagioni
+        // Show next seasons
         for (let i = startIndex; i < endIndex; i++) {
             allSeasons[i].style.display = 'block';
         }
-        // Aggiorna il contatore delle stagioni visibili
+        // Update visible seasons counter
         this.currentVisibleSeasons = endIndex;
-        // Aggiorna il pulsante "Load More"
+        // Update Load More button
         this.updateLoadMoreButton(totalSeasons);
     }
     playEpisode(trailerUrl, episodeTitle) {
@@ -287,13 +287,13 @@ export class TVSeriesDetailsManager {
     }
     getYouTubeEmbedUrl(url) {
         var _a;
-        // Gestisce sia i link normali che quelli abbreviati
+        // Handle both normal and shortened links
         const videoId = url.includes('youtu.be/')
             ? url.split('youtu.be/')[1]
             : (_a = url.split('v=')[1]) === null || _a === void 0 ? void 0 : _a.split('&')[0];
         if (!videoId)
             return '';
-        // Aggiungi parametri necessari per l'embed
+        // Add parameters needed for embed
         return `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0&modestbranding=1&enablejsapi=1`;
     }
     getImageUrl(imageUrl) {
@@ -302,9 +302,9 @@ export class TVSeriesDetailsManager {
         return imageUrl.startsWith('http') ? imageUrl : `https://api.dobridobrev.com/storage/${imageUrl}`;
     }
     initialize() {
-        // Inizializza le stagioni
+        // Initialize seasons
         this.initializeSeasons();
-        // Event listener per il pulsante "Load More"
+        // Event listener for Load More button
         const loadMoreButton = this.elements.loadMoreButton;
         if (loadMoreButton) {
             loadMoreButton.addEventListener('click', () => this.handleLoadMore());

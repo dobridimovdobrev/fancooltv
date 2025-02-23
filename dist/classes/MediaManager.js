@@ -56,7 +56,7 @@ export class MediaManager {
             console.error('Grid element not found');
             return;
         }
-        // Rimuovi il contenuto esistente solo se è la prima pagina
+        // Remove existing content only if it's the first page
         if (this.currentPage === 1) {
             this.elements.grid.innerHTML = '';
         }
