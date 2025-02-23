@@ -4,6 +4,7 @@ export interface UIElements {
     searchInput?: HTMLInputElement;
     genreFilter?: HTMLSelectElement;
     yearFilter?: HTMLSelectElement;
+    loadMoreBtn?: HTMLButtonElement;
 }
 
 export interface MediaDetailsElements {

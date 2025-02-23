@@ -8,6 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const searchInput = document.getElementById('searchInput') as HTMLInputElement;
     const genreFilter = document.getElementById('genreFilter') as HTMLSelectElement;
     const yearFilter = document.getElementById('yearFilter') as HTMLSelectElement;
+    const loadMoreBtn = document.getElementById('loadMoreBtn') as HTMLButtonElement;
 
     if (!grid || !template) {
         console.error('Required elements not found');
@@ -19,9 +20,11 @@ document.addEventListener('DOMContentLoaded', () => {
         template,
         searchInput,
         genreFilter,
-        yearFilter
+        yearFilter,
+        loadMoreBtn
     };
 
     const apiService = new ApiService();
     const tvSeriesManager = new TVSeriesManager(elements, apiService);
+    tvSeriesManager.initialize();
 });

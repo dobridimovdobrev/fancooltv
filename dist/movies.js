@@ -6,6 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const searchInput = document.getElementById('searchInput');
     const genreFilter = document.getElementById('genreFilter');
     const yearFilter = document.getElementById('yearFilter');
+    const loadMoreBtn = document.getElementById('loadMoreBtn');
     if (!grid || !template) {
         console.error('Required elements not found');
         return;
@@ -15,7 +16,8 @@ document.addEventListener('DOMContentLoaded', () => {
         template,
         searchInput,
         genreFilter,
-        yearFilter
+        yearFilter,
+        loadMoreBtn
     };
     const apiService = new ApiService();
     const movieManager = new MovieManager(elements, apiService);

@@ -10,7 +10,7 @@ interface AuthResponse {
 }
 
 export class ApiService {
-    private readonly baseUrl = 'https://api.dobridobrev.com/api/v1';
+    private readonly baseUrl = 'https://api.dobridobrev.com';
     private readonly baseImageUrl = 'https://api.dobridobrev.com';
     private token: string | null = null;
 
@@ -23,12 +23,26 @@ export class ApiService {
     }
 
     public async login(credentials: LoginCredentials): Promise<void> {
-        const response = await this.post<AuthResponse>('/auth/login', credentials);
-        if (response.data.token) {
-            this.token = response.data.token;
-            localStorage.setItem('auth_token', this.token);
+        const response = await fetch(this.baseUrl + '/api/login', {
+            method: 'POST',
+            headers: this.getHeaders(),
+            body: JSON.stringify({
+                username: credentials.username,
+                password: credentials.password
+            })
+        });
+
+        if (!response.ok) {
+            throw new Error(`Login failed: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        if (data.status === 'success' && data.message?.token) {
+            const token = data.message.token;
+            this.token = token;
+            localStorage.setItem('auth_token', token);
         } else {
-            throw new Error('Login failed');
+            throw new Error('Login failed: Invalid response format');
         }
     }
 
@@ -43,19 +57,19 @@ export class ApiService {
     }
 
     public async getMovies(params: Partial<PaginationParams> = { page: 1 }): Promise<ApiResponse<Movie[]>> {
-        return this.get('/movies', params);
+        return this.get<Movie[]>('/api/v1/movies', params);
     }
 
     public async getMovieDetails(id: number): Promise<ApiResponse<Movie>> {
-        return this.get(`/movies/${id}`);
+        return this.get<Movie>(`/api/v1/movies/${id}`);
     }
 
     public async getTVSeries(params: Partial<PaginationParams> = { page: 1 }): Promise<ApiResponse<TVSeries[]>> {
-        return this.get('/tvseries', params);
+        return this.get<TVSeries[]>('/api/v1/tvseries', params);
     }
 
     public async getTVSeriesDetails(id: number): Promise<ApiResponse<TVSeries>> {
-        return this.get(`/tvseries/${id}`);
+        return this.get<TVSeries>(`/api/v1/tvseries/${id}`);
     }
 
     public async getCategories(): Promise<ApiResponse<Category[]>> {

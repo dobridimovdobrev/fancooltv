@@ -22,7 +22,17 @@ export abstract class MediaManager<T> {
             return;
         }
 
+        this.setupLoadMoreButton();
         this.loadItems();
+    }
+
+    private setupLoadMoreButton(): void {
+        if (this.elements.loadMoreBtn) {
+            this.elements.loadMoreBtn.addEventListener('click', () => {
+                this.currentPage++;
+                this.loadItems();
+            });
+        }
     }
 
     protected async loadItems(): Promise<void> {
@@ -30,6 +40,7 @@ export abstract class MediaManager<T> {
         
         try {
             this.isLoading = true;
+            this.showLoading();
             this.hideError();
             
             const params: PaginationParams = {
@@ -49,6 +60,7 @@ export abstract class MediaManager<T> {
             this.showError('An error occurred while loading the content');
         } finally {
             this.isLoading = false;
+            this.hideLoading();
         }
     }
 
@@ -90,9 +102,36 @@ export abstract class MediaManager<T> {
         }
     }
 
+    private showLoading(): void {
+        const spinner = document.getElementById('loadingSpinner');
+        if (spinner) {
+            spinner.classList.remove('d-none');
+        }
+        if (this.elements.loadMoreBtn) {
+            this.elements.loadMoreBtn.disabled = true;
+        }
+    }
+
+    private hideLoading(): void {
+        const spinner = document.getElementById('loadingSpinner');
+        if (spinner) {
+            spinner.classList.add('d-none');
+        }
+        if (this.elements.loadMoreBtn) {
+            this.elements.loadMoreBtn.disabled = false;
+        }
+    }
+
     protected updatePagination(meta: ApiResponse<any>['meta']): void {
-        // TODO: Implementare la paginazione usando meta.links
         this.currentPage = meta.current_page;
+        
+        if (this.elements.loadMoreBtn) {
+            if (meta.current_page < meta.last_page) {
+                this.elements.loadMoreBtn.classList.remove('d-none');
+            } else {
+                this.elements.loadMoreBtn.classList.add('d-none');
+            }
+        }
     }
 
     protected abstract fetchItems(params: PaginationParams): Promise<ApiResponse<T[]>>;

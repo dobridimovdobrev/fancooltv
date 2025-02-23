@@ -12,13 +12,23 @@ export class MediaManager {
             this.showError('An error occurred while initializing the page');
             return;
         }
+        this.setupLoadMoreButton();
         this.loadItems();
+    }
+    setupLoadMoreButton() {
+        if (this.elements.loadMoreBtn) {
+            this.elements.loadMoreBtn.addEventListener('click', () => {
+                this.currentPage++;
+                this.loadItems();
+            });
+        }
     }
     async loadItems() {
         if (this.isLoading)
             return;
         try {
             this.isLoading = true;
+            this.showLoading();
             this.hideError();
             const params = {
                 page: this.currentPage
@@ -38,6 +48,7 @@ export class MediaManager {
         }
         finally {
             this.isLoading = false;
+            this.hideLoading();
         }
     }
     displayItems(items) {
@@ -74,8 +85,33 @@ export class MediaManager {
             errorContainer.classList.add('d-none');
         }
     }
+    showLoading() {
+        const spinner = document.getElementById('loadingSpinner');
+        if (spinner) {
+            spinner.classList.remove('d-none');
+        }
+        if (this.elements.loadMoreBtn) {
+            this.elements.loadMoreBtn.disabled = true;
+        }
+    }
+    hideLoading() {
+        const spinner = document.getElementById('loadingSpinner');
+        if (spinner) {
+            spinner.classList.add('d-none');
+        }
+        if (this.elements.loadMoreBtn) {
+            this.elements.loadMoreBtn.disabled = false;
+        }
+    }
     updatePagination(meta) {
-        // TODO: Implementare la paginazione usando meta.links
         this.currentPage = meta.current_page;
+        if (this.elements.loadMoreBtn) {
+            if (meta.current_page < meta.last_page) {
+                this.elements.loadMoreBtn.classList.remove('d-none');
+            }
+            else {
+                this.elements.loadMoreBtn.classList.add('d-none');
+            }
+        }
     }
 }

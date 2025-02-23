@@ -1,6 +1,6 @@
 export class ApiService {
     constructor() {
-        this.baseUrl = 'https://api.dobridobrev.com/api/v1';
+        this.baseUrl = 'https://api.dobridobrev.com';
         this.baseImageUrl = 'https://api.dobridobrev.com';
         this.token = null;
         this.token = localStorage.getItem('auth_token');
@@ -9,13 +9,26 @@ export class ApiService {
         return this.token !== null;
     }
     async login(credentials) {
-        const response = await this.post('/auth/login', credentials);
-        if (response.data.token) {
-            this.token = response.data.token;
-            localStorage.setItem('auth_token', this.token);
+        var _a;
+        const response = await fetch(this.baseUrl + '/api/login', {
+            method: 'POST',
+            headers: this.getHeaders(),
+            body: JSON.stringify({
+                username: credentials.username,
+                password: credentials.password
+            })
+        });
+        if (!response.ok) {
+            throw new Error(`Login failed: ${response.statusText}`);
+        }
+        const data = await response.json();
+        if (data.status === 'success' && ((_a = data.message) === null || _a === void 0 ? void 0 : _a.token)) {
+            const token = data.message.token;
+            this.token = token;
+            localStorage.setItem('auth_token', token);
         }
         else {
-            throw new Error('Login failed');
+            throw new Error('Login failed: Invalid response format');
         }
     }
     async register(data) {
@@ -29,16 +42,16 @@ export class ApiService {
         }
     }
     async getMovies(params = { page: 1 }) {
-        return this.get('/movies', params);
+        return this.get('/api/v1/movies', params);
     }
     async getMovieDetails(id) {
-        return this.get(`/movies/${id}`);
+        return this.get(`/api/v1/movies/${id}`);
     }
     async getTVSeries(params = { page: 1 }) {
-        return this.get('/tvseries', params);
+        return this.get('/api/v1/tvseries', params);
     }
     async getTVSeriesDetails(id) {
-        return this.get(`/tvseries/${id}`);
+        return this.get(`/api/v1/tvseries/${id}`);
     }
     async getCategories() {
         return this.get('/categories');
