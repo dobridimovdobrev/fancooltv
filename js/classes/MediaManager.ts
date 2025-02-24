@@ -97,7 +97,7 @@ export abstract class MediaManager<T> {
                 const categories = response.data;
                 console.log('Categories loaded:', categories); // Per debug
                 const options = categories.map(category => 
-                    `<option value="${category.id}">${category.name}</option>`
+                    `<option value="${category.category_id}">${category.name}</option>`
                 ).join('');
                 this.elements.genreFilter.innerHTML = '<option value="">All Genres</option>' + options;
             }

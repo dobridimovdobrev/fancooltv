@@ -4,7 +4,7 @@ import { UIElements } from './types/ui.types.js';
 import { requireAuth } from './utils/auth.js';
 
 document.addEventListener('DOMContentLoaded', () => {
-    // Verifica autenticazione prima di tutto
+    // Verify authentication before anything else
     requireAuth();
     
     const grid = document.getElementById('tvSeriesGrid');
@@ -33,7 +33,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const apiService = new ApiService();
     const tvSeriesManager = new TVSeriesManager(elements, apiService);
 
-    // Aggiungi l'event listener per il pulsante di ricerca
+    // Add event listener to search button
     if (searchButton) {
         searchButton.addEventListener('click', () => {
             if (searchInput) {

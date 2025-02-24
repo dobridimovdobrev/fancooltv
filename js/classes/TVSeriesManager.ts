@@ -3,22 +3,25 @@ import { MediaManager } from './MediaManager.js';
 import { ApiService } from '../services/ApiService.js';
 import { UIElements } from '../types/ui.types.js';
 import { ApiResponse, PaginationParams } from '../types/api.types.js';
-
+// TVSeriesManager class
 export class TVSeriesManager extends MediaManager<TVSeries> {
     constructor(elements: UIElements, apiService: ApiService) {
         super(elements, apiService);
     }
-
+    
+    //search method
     public search(query: string): void {
         this.currentSearch = query;
         this.currentPage = 1;
         this.loadItems();
     }
 
+    //fetch items method
     protected async fetchItems(params: PaginationParams): Promise<ApiResponse<TVSeries[]>> {
         return this.apiService.getTVSeries(params);
     }
 
+    //create item element method
     protected createItemElement(series: TVSeries): HTMLElement {
         const template = this.elements.template.content.cloneNode(true) as DocumentFragment;
         const article = template.querySelector('.movie-card') as HTMLElement;

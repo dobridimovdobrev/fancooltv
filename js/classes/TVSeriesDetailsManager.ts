@@ -2,7 +2,7 @@ import { TVSeries, Person } from '../types/media.types.js';
 import { ApiService } from '../services/ApiService.js';
 import { ExtendedMediaDetailsElements } from '../types/ui.types.js';
 declare var bootstrap: any;
-
+    //TVSeriesDetailsManager class
 export class TVSeriesDetailsManager {
     private elements: ExtendedMediaDetailsElements;
     private apiService: ApiService;
@@ -20,6 +20,7 @@ export class TVSeriesDetailsManager {
         });
     }
 
+    //fetch series details method
     public async fetchSeriesDetails(seriesId: string): Promise<TVSeries> {
         const token = localStorage.getItem('auth_token');
         if (!token) throw new Error('Authentication required');
@@ -41,6 +42,7 @@ export class TVSeriesDetailsManager {
         return data.data;
     }
 
+    //update series details method
     public updateSeriesDetails(series: TVSeries): void {
         // Set backdrop
         if (series.backdrop) {
@@ -89,6 +91,7 @@ export class TVSeriesDetailsManager {
         }
     }
 
+    //update cast method
     public updateCast(persons: Person[] | undefined): void {
         if (!persons || persons.length === 0) return;
 
@@ -111,6 +114,7 @@ export class TVSeriesDetailsManager {
         }).join('');
     }
 
+    //update seasons method
     public updateSeasons(series: TVSeries, seasons: any[], trailerUrl: string | undefined): void {
         if (!seasons || seasons.length === 0) return;
 
@@ -155,6 +159,7 @@ export class TVSeriesDetailsManager {
         }
     }
 
+    //render seasons method
     private renderSeasons(seasons: any[], trailerUrl: string | undefined): void {
         // First remove all existing event listeners
         const existingAccordions = this.elements.seasons.querySelectorAll('.season-header');
@@ -271,7 +276,7 @@ export class TVSeriesDetailsManager {
             });
         });
     }
-
+    //initialize seasons method
     private initializeSeasons(): void {
         const seasonsContainer = this.elements.seasonsContainer;
         if (!seasonsContainer) return;
@@ -288,6 +293,7 @@ export class TVSeriesDetailsManager {
         this.updateLoadMoreButton(allSeasons.length);
     }
 
+    //update load more button method
     private updateLoadMoreButton(totalSeasons: number): void {
         const loadMoreButton = this.elements.loadMoreButton;
         if (!loadMoreButton) return;
@@ -303,6 +309,7 @@ export class TVSeriesDetailsManager {
         }
     }
 
+    //handle load more method
     private handleLoadMore(): void {
         const seasonsContainer = this.elements.seasonsContainer;
         if (!seasonsContainer) return;
@@ -326,6 +333,7 @@ export class TVSeriesDetailsManager {
         this.updateLoadMoreButton(totalSeasons);
     }
 
+    //play episode method
     public playEpisode(trailerUrl: string, episodeTitle: string): void {
         if (!trailerUrl) return;
 
@@ -335,6 +343,7 @@ export class TVSeriesDetailsManager {
         this.elements.trailerModal._element.querySelector('.modal-title').textContent = episodeTitle;
     }
 
+    //get you tube embed url method
     private getYouTubeEmbedUrl(url: string): string {
         // Handle both normal and shortened links
         const videoId = url.includes('youtu.be/') 

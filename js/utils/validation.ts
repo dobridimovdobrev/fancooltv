@@ -1,5 +1,6 @@
 import { ValidationResult } from '../types';
 
+// Form validator
 export class FormValidator {
     static validateEmail(email: string): ValidationResult {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -9,6 +10,7 @@ export class FormValidator {
         };
     }
 
+    // Password validation
     static validatePassword(password: string): ValidationResult {
         return {
             isValid: password.length >= 6,
@@ -16,6 +18,7 @@ export class FormValidator {
         };
     }
 
+    // Required field validation
     static validateRequired(value: string, fieldName: string): ValidationResult {
         return {
             isValid: value.trim().length > 0,
@@ -23,6 +26,7 @@ export class FormValidator {
         };
     }
 
+    // Name validation
     static validateName(name: string): ValidationResult {
         return {
             isValid: name.trim().length > 0,
@@ -30,6 +34,7 @@ export class FormValidator {
         };
     }
 
+    // Password match validation
     static validatePasswordMatch(password: string, confirmPassword: string): ValidationResult {
         return {
             isValid: password === confirmPassword,
@@ -37,6 +42,7 @@ export class FormValidator {
         };
     }
 
+    // Phone validation
     static validatePhone(phone: string): ValidationResult {
         const phoneRegex = /^\+?[\d\s-]{10,}$/;
         return {
@@ -44,7 +50,7 @@ export class FormValidator {
             message: 'Please enter a valid phone number'
         };
     }
-
+    //validates zip code
     static validateZipCode(zipCode: string): ValidationResult {
         const zipRegex = /^\d{5}(-\d{4})?$/;
         return {
@@ -52,20 +58,21 @@ export class FormValidator {
             message: 'Please enter a valid ZIP code'
         };
     }
-
+    //validates email
     validateEmail(email: string): boolean {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         return emailRegex.test(email);
     }
-
+    //validates password
     validatePassword(password: string): boolean {
         return password.length >= 6;
     }
-
-    validateName(name: string): boolean {
-        return name.length >= 2;
+    //validates required field
+    validateRequired(value: string, fieldName: string): boolean {
+        return value.trim().length > 0;
     }
 
+    // Password match validation
     validatePasswordMatch(password: string, confirmPassword: string): boolean {
         return password === confirmPassword;
     }

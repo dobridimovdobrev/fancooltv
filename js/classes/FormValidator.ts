@@ -1,13 +1,13 @@
 import { ValidationError } from '../types/auth.types';
-
+// Field validator interface
 type ValidatorFn = (value: string) => boolean | Promise<boolean>;
 type ErrorMessageFn = (value: string) => string;
-
+    // Field validator interface
 interface FieldValidator {
     validate: ValidatorFn;
     errorMessage: ErrorMessageFn;
 }
-
+    // Form validator class
 export class FormValidator {
     private validators: Map<string, FieldValidator[]>;
 
@@ -15,6 +15,7 @@ export class FormValidator {
         this.validators = new Map();
     }
 
+    // Add a validator
     addValidator(
         fieldName: string, 
         validator: ValidatorFn, 
@@ -30,6 +31,7 @@ export class FormValidator {
         this.validators.set(fieldName, validators);
     }
 
+    // Validate a field
     async validateField(fieldName: string, value: string): Promise<ValidationError | null> {
         const fieldValidators = this.validators.get(fieldName);
         if (!fieldValidators) return null;
@@ -47,6 +49,7 @@ export class FormValidator {
         return null;
     }
 
+    // Validate all fields
     async validateAll(formData: Record<string, string>): Promise<ValidationError[]> {
         const errors: ValidationError[] = [];
 

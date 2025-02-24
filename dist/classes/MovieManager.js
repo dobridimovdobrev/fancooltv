@@ -1,13 +1,16 @@
 import { MediaManager } from './MediaManager.js';
+// MovieManager class
 export class MovieManager extends MediaManager {
     constructor(elements, apiService) {
         super(elements, apiService);
     }
+    // search method
     search(query) {
         this.currentSearch = query;
         this.currentPage = 1;
         this.loadItems();
     }
+    // fetch items method
     async fetchItems(params) {
         const response = await this.apiService.getMovies(params);
         console.log('Movie response:', response);
@@ -16,6 +19,7 @@ export class MovieManager extends MediaManager {
         }
         return response;
     }
+    // create item element method
     createItemElement(movie) {
         const template = this.elements.template.content.cloneNode(true);
         const article = template.querySelector('.movie-card');

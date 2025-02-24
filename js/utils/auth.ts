@@ -1,5 +1,7 @@
+// Utils/auth.ts
 import { ApiService } from '../services/ApiService.js';
 
+// Require authentication
 export function requireAuth(): void {
     const apiService = new ApiService();
     

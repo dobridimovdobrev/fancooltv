@@ -1,7 +1,9 @@
+// Form validator class
 export class FormValidator {
     constructor() {
         this.validators = new Map();
     }
+    // Add a validator
     addValidator(fieldName, validator, errorMessage) {
         const validators = this.validators.get(fieldName) || [];
         validators.push({
@@ -12,6 +14,7 @@ export class FormValidator {
         });
         this.validators.set(fieldName, validators);
     }
+    // Validate a field
     async validateField(fieldName, value) {
         const fieldValidators = this.validators.get(fieldName);
         if (!fieldValidators)
@@ -27,6 +30,7 @@ export class FormValidator {
         }
         return null;
     }
+    // Validate all fields
     async validateAll(formData) {
         const errors = [];
         for (const [fieldName, value] of Object.entries(formData)) {

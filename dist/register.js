@@ -21,7 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
         console.error('Required form elements not found');
         return;
     }
-    // Funzione per mostrare gli errori di validazione
+    // Function to show validation errors
     const showValidationErrors = (errors) => {
         var _a, _b;
         errorContainer.innerHTML = '';
@@ -29,7 +29,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const input = document.getElementById(field);
             if (input) {
                 input.classList.add('is-invalid');
-                // Rimuovi eventuali feedback esistenti
+                // Remove any existing feedback
                 const existingFeedback = (_a = input.parentElement) === null || _a === void 0 ? void 0 : _a.querySelector('.invalid-feedback');
                 if (existingFeedback) {
                     existingFeedback.remove();
@@ -41,7 +41,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
     };
-    // Funzione per pulire gli errori di validazione
+    // Function to clear validation errors
     const clearValidationErrors = () => {
         errorContainer.innerHTML = '';
         const invalidInputs = registerForm.querySelectorAll('.is-invalid');
@@ -54,7 +54,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     };
-    // Validazione del form
+    // Validation function
     const validateForm = () => {
         const errors = {};
         if (!termsCheck.checked) {

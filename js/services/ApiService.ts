@@ -1,6 +1,6 @@
 import { ApiResponse, AuthApiResponse, LoginCredentials, PaginationParams, RegistrationData } from '../types/api.types.js';
 import { Movie, TVSeries, Category } from '../types/media.types.js';
-
+// Response interface
 interface AuthResponse {
     token: string;
     user: {
@@ -8,7 +8,7 @@ interface AuthResponse {
         username: string;
     };
 }
-
+// API service class
 export class ApiService {
     private readonly baseUrl = 'https://api.dobridobrev.com';
     private readonly baseImageUrl = 'https://api.dobridobrev.com';
@@ -21,7 +21,8 @@ export class ApiService {
     public isAuthenticated(): boolean {
         return this.token !== null;
     }
-
+    
+    // Login method
     public async login(credentials: LoginCredentials): Promise<void> {
         const response = await fetch(this.baseUrl + '/api/login', {
             method: 'POST',
@@ -45,7 +46,7 @@ export class ApiService {
             throw new Error('Login failed: Invalid response format');
         }
     }
-
+    //register method
     public async register(data: RegistrationData): Promise<void> {
         console.log('Sending registration data:', data);
 
@@ -70,40 +71,44 @@ export class ApiService {
             throw new Error(responseData.message || 'Registration failed');
         }
 
-        // La registrazione è andata a buon fine, non ci aspettiamo più un token
+        // The registration was successful, no need for a token
         if (responseData.status === 'success') {
-            return; // L'utente dovrà fare login separatamente
+            return; // The user should log in separately
         } else {
             console.error('Unexpected response format:', responseData);
             throw new Error('Registration failed: Invalid response format');
         }
     }
 
+    //get movies method
     public async getMovies(params: Partial<PaginationParams> = { page: 1 }): Promise<ApiResponse<Movie[]>> {
         return this.get<Movie[]>('/api/v1/movies', params);
     }
-
+    //get movie details method
     public async getMovieDetails(id: number): Promise<ApiResponse<Movie>> {
         return this.get<Movie>(`/api/v1/movies/${id}`);
     }
-
+    //get tv series method
     public async getTVSeries(params: Partial<PaginationParams> = { page: 1 }): Promise<ApiResponse<TVSeries[]>> {
         return this.get<TVSeries[]>('/api/v1/tvseries', params);
     }
-
+    //get tv series details method
     public async getTVSeriesDetails(id: number): Promise<ApiResponse<TVSeries>> {
         return this.get<TVSeries>(`/api/v1/tvseries/${id}`);
     }
 
+    //get categories method
     public async getCategories(params?: Record<string, any>): Promise<ApiResponse<Category[]>> {
         return this.get<Category[]>('/api/v1/categories', params);
     }
 
+    //logout method
     public logout(): void {
         this.token = null;
         localStorage.removeItem('auth_token');
     }
 
+    //get image url method
     public getImageUrl(path: string, type: 'cast' | 'poster' | 'backdrop' | 'still' = 'poster'): string {
         if (!path) return '';
         
@@ -136,7 +141,7 @@ export class ApiService {
 
         return fullUrl;
     }
-
+    //get method
     private async get<T>(endpoint: string, params?: Record<string, any>): Promise<ApiResponse<T>> {
         const url = new URL(this.baseUrl + endpoint);
         if (params) {
@@ -155,7 +160,7 @@ export class ApiService {
         }
 
         console.log('Requesting URL:', url.toString()); // Per debug
-
+        //make the request
         const response = await fetch(url.toString(), {
             method: 'GET',
             headers: this.getHeaders()
@@ -169,7 +174,7 @@ export class ApiService {
         console.log('API Response:', data); // Per debug
         return data;
     }
-
+    //post method
     private async post<T>(endpoint: string, data: Record<string, any>): Promise<AuthApiResponse<T>> {
         const response = await fetch(this.baseUrl + endpoint, {
             method: 'POST',
@@ -183,7 +188,7 @@ export class ApiService {
 
         return response.json();
     }
-
+    //get headers
     private getHeaders(): HeadersInit {
         const headers: HeadersInit = {
             'Content-Type': 'application/json',

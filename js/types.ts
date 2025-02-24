@@ -1,8 +1,9 @@
+// User types
 export interface UserCredentials {
     email: string;
     password: string;
 }
-
+// Registration types
 export interface UserRegistration extends UserCredentials {
     firstName: string;
     lastName: string;
@@ -12,7 +13,7 @@ export interface UserRegistration extends UserCredentials {
     country: string;
     phone: string;
 }
-
+// Validation result
 export interface ValidationResult {
     isValid: boolean;
     message?: string;

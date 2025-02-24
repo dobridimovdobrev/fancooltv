@@ -1,3 +1,4 @@
+// MediaDetailsManager class
 export class MediaDetailsManager {
     constructor(elements, apiService) {
         this.mediaId = '';
@@ -5,6 +6,7 @@ export class MediaDetailsManager {
         this.apiService = apiService;
         this.initialize();
     }
+    // initialize method
     initialize() {
         const urlParams = new URLSearchParams(window.location.search);
         this.mediaId = urlParams.get('id') || '';
@@ -18,6 +20,7 @@ export class MediaDetailsManager {
         }
         this.loadDetails();
     }
+    // load details method
     async loadDetails() {
         try {
             const details = await this.fetchDetails(this.mediaId);
@@ -28,6 +31,7 @@ export class MediaDetailsManager {
             this.showError('Failed to load media details');
         }
     }
+    // show error method
     showError(message) {
         const errorContainer = document.getElementById('errorContainer');
         if (errorContainer) {
@@ -35,6 +39,7 @@ export class MediaDetailsManager {
             errorContainer.classList.remove('d-none');
         }
     }
+    // hide error method
     hideError() {
         const errorContainer = document.getElementById('errorContainer');
         if (errorContainer) {

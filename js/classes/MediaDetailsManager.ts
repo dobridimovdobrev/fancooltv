@@ -1,7 +1,7 @@
 import { ApiService } from '../services/ApiService.js';
 import { MediaDetailsElements } from '../types/ui.types.js';
 import { BaseMedia } from '../types/media.types.js';
-
+// MediaDetailsManager class
 export abstract class MediaDetailsManager<T extends BaseMedia> {
     protected elements: MediaDetailsElements;
     protected apiService: ApiService;
@@ -13,6 +13,7 @@ export abstract class MediaDetailsManager<T extends BaseMedia> {
         this.initialize();
     }
 
+    // initialize method
     protected initialize(): void {
         const urlParams = new URLSearchParams(window.location.search);
         this.mediaId = urlParams.get('id') || '';
@@ -30,6 +31,7 @@ export abstract class MediaDetailsManager<T extends BaseMedia> {
         this.loadDetails();
     }
 
+    // load details method
     protected async loadDetails(): Promise<void> {
         try {
             const details = await this.fetchDetails(this.mediaId);
@@ -40,6 +42,7 @@ export abstract class MediaDetailsManager<T extends BaseMedia> {
         }
     }
 
+    // show error method
     protected showError(message: string): void {
         const errorContainer = document.getElementById('errorContainer');
         if (errorContainer) {
@@ -47,6 +50,8 @@ export abstract class MediaDetailsManager<T extends BaseMedia> {
             errorContainer.classList.remove('d-none');
         }
     }
+
+    // hide error method
 
     protected hideError(): void {
         const errorContainer = document.getElementById('errorContainer');

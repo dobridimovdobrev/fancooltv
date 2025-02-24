@@ -1,5 +1,7 @@
 import { ApiService } from './services/ApiService.js';
+// Menu manager class
 export class MenuManager {
+    // Constructor
     constructor() {
         this.apiService = new ApiService();
         this.desktopLoginLinks = document.querySelectorAll('.ms-auto.d-none.d-lg-flex .nav-item:last-child .nav-link');
@@ -13,6 +15,7 @@ export class MenuManager {
             }
         });
     }
+    // Update menu
     updateMenu() {
         const isAuthenticated = this.apiService.isAuthenticated();
         this.desktopLoginLinks.forEach(link => {
@@ -22,6 +25,7 @@ export class MenuManager {
             this.updateLoginLink(link, isAuthenticated);
         });
     }
+    // Update login link
     updateLoginLink(link, isAuthenticated) {
         if (isAuthenticated) {
             link.innerHTML = '<i class="fas fa-sign-out-alt"></i> Logout';

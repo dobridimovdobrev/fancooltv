@@ -2,12 +2,13 @@ import { Movie } from '../types/media.types.js';
 import { MediaDetailsManager } from './MediaDetailsManager.js';
 import { ApiService } from '../services/ApiService.js';
 import { MediaDetailsElements } from '../types/ui.types.js';
-
+// MovieDetailsManager class
 export class MovieDetailsManager extends MediaDetailsManager<Movie> {
     constructor(elements: MediaDetailsElements, apiService: ApiService) {
         super(elements, apiService);
     }
 
+    // fetch details method
     protected async fetchDetails(id: string): Promise<Movie> {
         const response = await this.apiService.getMovieDetails(parseInt(id, 10));
 
@@ -16,7 +17,7 @@ export class MovieDetailsManager extends MediaDetailsManager<Movie> {
         }
         throw new Error('Failed to fetch movie details');
     }
-
+    // display details method
     protected displayDetails(movie: Movie): void {
         // Set backdrop
         const backdrop = document.getElementById('backdrop');

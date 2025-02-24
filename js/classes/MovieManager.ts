@@ -3,18 +3,19 @@ import { MediaManager } from './MediaManager.js';
 import { ApiService } from '../services/ApiService.js';
 import { UIElements } from '../types/ui.types.js';
 import { ApiResponse, PaginationParams } from '../types/api.types.js';
-
+// MovieManager class
 export class MovieManager extends MediaManager<Movie> {
     constructor(elements: UIElements, apiService: ApiService) {
         super(elements, apiService);
     }
 
+    // search method
     public search(query: string): void {
         this.currentSearch = query;
         this.currentPage = 1;
         this.loadItems();
     }
-
+    // fetch items method
     protected async fetchItems(params: PaginationParams): Promise<ApiResponse<Movie[]>> {
         const response = await this.apiService.getMovies(params);
         console.log('Movie response:', response);
@@ -24,6 +25,7 @@ export class MovieManager extends MediaManager<Movie> {
         return response;
     }
 
+    // create item element method
     protected createItemElement(movie: Movie): HTMLElement {
         const template = this.elements.template.content.cloneNode(true) as DocumentFragment;
         const article = template.querySelector('.movie-card') as HTMLElement;

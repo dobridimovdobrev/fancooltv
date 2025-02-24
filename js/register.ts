@@ -27,14 +27,14 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
 
-    // Funzione per mostrare gli errori di validazione
+    // Function to show validation errors
     const showValidationErrors = (errors: Record<string, string[]>) => {
         errorContainer.innerHTML = '';
         for (const [field, messages] of Object.entries(errors)) {
             const input = document.getElementById(field) as HTMLElement;
             if (input) {
                 input.classList.add('is-invalid');
-                // Rimuovi eventuali feedback esistenti
+                // Remove any existing feedback
                 const existingFeedback = input.parentElement?.querySelector('.invalid-feedback');
                 if (existingFeedback) {
                     existingFeedback.remove();
@@ -47,7 +47,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    // Funzione per pulire gli errori di validazione
+    // Function to clear validation errors
     const clearValidationErrors = () => {
         errorContainer.innerHTML = '';
         const invalidInputs = registerForm.querySelectorAll('.is-invalid');
@@ -60,7 +60,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
 
-    // Validazione del form
+    // Validation function
     const validateForm = (): Record<string, string[]> | null => {
         const errors: Record<string, string[]> = {};
 

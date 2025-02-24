@@ -1,8 +1,9 @@
+// Login credentials interface
 export interface LoginCredentials {
     username: string;
     password: string;
 }
-
+// Register data interface
 export interface RegisterData {
     username: string;
     email: string;
@@ -13,7 +14,7 @@ export interface RegisterData {
     password: string;
     password_confirmation: string;
 }
-
+// Response interface
 export interface AuthResponse {
     token: string;
     user: {
@@ -22,7 +23,7 @@ export interface AuthResponse {
         email: string;
     };
 }
-
+// Validation error interface
 export interface ValidationError {
     field: string;
     message: string;

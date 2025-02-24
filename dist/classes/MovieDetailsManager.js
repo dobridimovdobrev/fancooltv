@@ -1,8 +1,10 @@
 import { MediaDetailsManager } from './MediaDetailsManager.js';
+// MovieDetailsManager class
 export class MovieDetailsManager extends MediaDetailsManager {
     constructor(elements, apiService) {
         super(elements, apiService);
     }
+    // fetch details method
     async fetchDetails(id) {
         const response = await this.apiService.getMovieDetails(parseInt(id, 10));
         if (response.data) {
@@ -10,6 +12,7 @@ export class MovieDetailsManager extends MediaDetailsManager {
         }
         throw new Error('Failed to fetch movie details');
     }
+    // display details method
     displayDetails(movie) {
         // Set backdrop
         const backdrop = document.getElementById('backdrop');

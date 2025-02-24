@@ -1,3 +1,4 @@
+// UI elements interface
 export interface UIElements {
     grid: HTMLElement;
     template: HTMLTemplateElement;
@@ -7,7 +8,7 @@ export interface UIElements {
     yearFilter?: HTMLSelectElement;
     loadMoreBtn?: HTMLButtonElement;
 }
-
+// Media details interface
 export interface MediaDetailsElements {
     poster: HTMLElement;
     title: HTMLElement;
@@ -22,7 +23,7 @@ export interface MediaDetailsElements {
     description: HTMLElement;
     trailer: HTMLElement;
 }
-
+// Extended media details interface
 export interface ExtendedMediaDetailsElements extends MediaDetailsElements {
     backdrop: HTMLElement;
     seasonTemplate: HTMLTemplateElement;
@@ -33,7 +34,7 @@ export interface ExtendedMediaDetailsElements extends MediaDetailsElements {
     seasonsContainer: HTMLElement;
     loadMoreButton: HTMLButtonElement;
 }
-
+// Card elements interface
 export interface CardElements {
     img: HTMLImageElement;
     title: HTMLElement;
@@ -44,7 +45,7 @@ export interface CardElements {
     detailsLink: HTMLAnchorElement;
     noImagePlaceholder: HTMLElement;
 }
-
+// State interface
 export interface State<T> {
     currentPage: number;
     lastPage: number | null;

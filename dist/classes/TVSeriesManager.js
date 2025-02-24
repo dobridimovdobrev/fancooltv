@@ -1,16 +1,20 @@
 import { MediaManager } from './MediaManager.js';
+// TVSeriesManager class
 export class TVSeriesManager extends MediaManager {
     constructor(elements, apiService) {
         super(elements, apiService);
     }
+    //search method
     search(query) {
         this.currentSearch = query;
         this.currentPage = 1;
         this.loadItems();
     }
+    //fetch items method
     async fetchItems(params) {
         return this.apiService.getTVSeries(params);
     }
+    //create item element method
     createItemElement(series) {
         const template = this.elements.template.content.cloneNode(true);
         const article = template.querySelector('.movie-card');

@@ -2,7 +2,7 @@ import { MovieManager } from './classes/MovieManager.js';
 import { ApiService } from './services/ApiService.js';
 import { requireAuth } from './utils/auth.js';
 document.addEventListener('DOMContentLoaded', () => {
-    // Verifica autenticazione prima di tutto
+    // Verify authentication before anything else
     requireAuth();
     const grid = document.getElementById('moviesGrid');
     const template = document.getElementById('movie-card-template');
@@ -26,7 +26,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
     const apiService = new ApiService();
     const movieManager = new MovieManager(elements, apiService);
-    // Aggiungi l'event listener per il pulsante di ricerca
+    // Add event listener to search button
     if (searchButton) {
         searchButton.addEventListener('click', () => {
             if (searchInput) {

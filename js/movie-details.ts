@@ -4,7 +4,7 @@ import { MediaDetailsElements } from './types/ui.types.js';
 import { requireAuth } from './utils/auth.js';
 
 document.addEventListener('DOMContentLoaded', () => {
-    // Verifica autenticazione prima di tutto
+    // Verify authentication before anything else
     requireAuth();
     
     const elements: MediaDetailsElements = {
@@ -22,7 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
         trailer: document.getElementById('trailer') as HTMLElement
     };
 
-    // Verifica che tutti gli elementi necessari siano presenti
+    // Verify that all required elements are present
     const missingElements = Object.entries(elements)
         .filter(([_, element]) => !element)
         .map(([key]) => key);

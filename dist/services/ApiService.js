@@ -1,3 +1,4 @@
+// API service class
 export class ApiService {
     constructor() {
         this.baseUrl = 'https://api.dobridobrev.com';
@@ -8,6 +9,7 @@ export class ApiService {
     isAuthenticated() {
         return this.token !== null;
     }
+    // Login method
     async login(credentials) {
         var _a;
         const response = await fetch(this.baseUrl + '/api/login', {
@@ -31,6 +33,7 @@ export class ApiService {
             throw new Error('Login failed: Invalid response format');
         }
     }
+    //register method
     async register(data) {
         console.log('Sending registration data:', data);
         const response = await fetch(this.baseUrl + '/api/register', {
@@ -51,34 +54,41 @@ export class ApiService {
             }
             throw new Error(responseData.message || 'Registration failed');
         }
-        // La registrazione è andata a buon fine, non ci aspettiamo più un token
+        // The registration was successful, no need for a token
         if (responseData.status === 'success') {
-            return; // L'utente dovrà fare login separatamente
+            return; // The user should log in separately
         }
         else {
             console.error('Unexpected response format:', responseData);
             throw new Error('Registration failed: Invalid response format');
         }
     }
+    //get movies method
     async getMovies(params = { page: 1 }) {
         return this.get('/api/v1/movies', params);
     }
+    //get movie details method
     async getMovieDetails(id) {
         return this.get(`/api/v1/movies/${id}`);
     }
+    //get tv series method
     async getTVSeries(params = { page: 1 }) {
         return this.get('/api/v1/tvseries', params);
     }
+    //get tv series details method
     async getTVSeriesDetails(id) {
         return this.get(`/api/v1/tvseries/${id}`);
     }
+    //get categories method
     async getCategories(params) {
         return this.get('/api/v1/categories', params);
     }
+    //logout method
     logout() {
         this.token = null;
         localStorage.removeItem('auth_token');
     }
+    //get image url method
     getImageUrl(path, type = 'poster') {
         if (!path)
             return '';
@@ -107,6 +117,7 @@ export class ApiService {
         }
         return fullUrl;
     }
+    //get method
     async get(endpoint, params) {
         const url = new URL(this.baseUrl + endpoint);
         if (params) {
@@ -126,6 +137,7 @@ export class ApiService {
             });
         }
         console.log('Requesting URL:', url.toString()); // Per debug
+        //make the request
         const response = await fetch(url.toString(), {
             method: 'GET',
             headers: this.getHeaders()
@@ -137,6 +149,7 @@ export class ApiService {
         console.log('API Response:', data); // Per debug
         return data;
     }
+    //post method
     async post(endpoint, data) {
         const response = await fetch(this.baseUrl + endpoint, {
             method: 'POST',
@@ -148,6 +161,7 @@ export class ApiService {
         }
         return response.json();
     }
+    //get headers
     getHeaders() {
         const headers = {
             'Content-Type': 'application/json',

@@ -1,6 +1,6 @@
 # CODEX Streaming Platform
 
-A modern, responsive streaming platform built with TypeScript, Bootstrap 5, SCSS, and RxJS.
+A modern, responsive streaming platform built with TypeScript, Bootstrap 5, SCSS.
 
 ## Features
 
@@ -32,7 +32,7 @@ npm run sass
 
 ## Project Structure
 
-- `src/` - TypeScript source files
+- `js/` - TypeScript source files
   - `login.ts` - Login form handling and validation
   - `register.ts` - Registration form handling and validation
   - `movies.ts` - Movies page functionality
@@ -50,7 +50,6 @@ npm run sass
 - TypeScript
 - Bootstrap 5
 - SCSS
-- RxJS
 - HTML5
 
 ## Browser Support

@@ -2,7 +2,7 @@ import { MovieDetailsManager } from './classes/MovieDetailsManager.js';
 import { ApiService } from './services/ApiService.js';
 import { requireAuth } from './utils/auth.js';
 document.addEventListener('DOMContentLoaded', () => {
-    // Verifica autenticazione prima di tutto
+    // Verify authentication before anything else
     requireAuth();
     const elements = {
         poster: document.getElementById('poster'),
@@ -18,7 +18,7 @@ document.addEventListener('DOMContentLoaded', () => {
         description: document.getElementById('plot'),
         trailer: document.getElementById('trailer')
     };
-    // Verifica che tutti gli elementi necessari siano presenti
+    // Verify that all required elements are present
     const missingElements = Object.entries(elements)
         .filter(([_, element]) => !element)
         .map(([key]) => key);

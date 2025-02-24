@@ -1,3 +1,4 @@
+//TVSeriesDetailsManager class
 export class TVSeriesDetailsManager {
     constructor(elements, apiService) {
         this.baseUrl = window.location.origin;
@@ -10,6 +11,7 @@ export class TVSeriesDetailsManager {
             this.elements.trailerIframe.src = '';
         });
     }
+    //fetch series details method
     async fetchSeriesDetails(seriesId) {
         const token = localStorage.getItem('auth_token');
         if (!token)
@@ -28,6 +30,7 @@ export class TVSeriesDetailsManager {
         const data = await response.json();
         return data.data;
     }
+    //update series details method
     updateSeriesDetails(series) {
         // Set backdrop
         if (series.backdrop) {
@@ -70,6 +73,7 @@ export class TVSeriesDetailsManager {
             }));
         }
     }
+    //update cast method
     updateCast(persons) {
         if (!persons || persons.length === 0)
             return;
@@ -90,6 +94,7 @@ export class TVSeriesDetailsManager {
             `;
         }).join('');
     }
+    //update seasons method
     updateSeasons(series, seasons, trailerUrl) {
         if (!seasons || seasons.length === 0)
             return;
@@ -125,6 +130,7 @@ export class TVSeriesDetailsManager {
             this.elements.seasons.appendChild(loadMoreBtn);
         }
     }
+    //render seasons method
     renderSeasons(seasons, trailerUrl) {
         // First remove all existing event listeners
         const existingAccordions = this.elements.seasons.querySelectorAll('.season-header');
@@ -230,6 +236,7 @@ export class TVSeriesDetailsManager {
             });
         });
     }
+    //initialize seasons method
     initializeSeasons() {
         const seasonsContainer = this.elements.seasonsContainer;
         if (!seasonsContainer)
@@ -244,6 +251,7 @@ export class TVSeriesDetailsManager {
         // Show/hide Load More button based on number of seasons
         this.updateLoadMoreButton(allSeasons.length);
     }
+    //update load more button method
     updateLoadMoreButton(totalSeasons) {
         const loadMoreButton = this.elements.loadMoreButton;
         if (!loadMoreButton)
@@ -259,6 +267,7 @@ export class TVSeriesDetailsManager {
             loadMoreButton.style.display = 'none';
         }
     }
+    //handle load more method
     handleLoadMore() {
         const seasonsContainer = this.elements.seasonsContainer;
         if (!seasonsContainer)
@@ -277,6 +286,7 @@ export class TVSeriesDetailsManager {
         // Update Load More button
         this.updateLoadMoreButton(totalSeasons);
     }
+    //play episode method
     playEpisode(trailerUrl, episodeTitle) {
         if (!trailerUrl)
             return;
@@ -285,6 +295,7 @@ export class TVSeriesDetailsManager {
         this.elements.trailerIframe.src = embedUrl;
         this.elements.trailerModal._element.querySelector('.modal-title').textContent = episodeTitle;
     }
+    //get you tube embed url method
     getYouTubeEmbedUrl(url) {
         var _a;
         // Handle both normal and shortened links
