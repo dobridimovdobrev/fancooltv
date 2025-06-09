@@ -1,1 +1,53 @@
-/* You can add global styles to this file, and also import other style files */
+/* Stili globali per l'applicazione Angular */
+@use "sass:color";
+
+// Import Bootstrap (viene gestito da Angular.json)
+
+// Abstracts
+@import "scss/abstracts/variables";
+@import "scss/abstracts/mixins";
+
+// Base
+@import "scss/base/reset";
+@import "scss/base/typography";
+@import "scss/base/base";
+
+// Components
+@import "scss/components/buttons";
+@import "scss/components/cards";
+@import "scss/components/modal";
+@import "scss/components/forms";
+@import "scss/components/episodes";
+@import "scss/components/cast";
+@import "scss/components/accordion";
+
+// Layout
+@import "scss/layout/grid";
+@import "scss/layout/header";
+@import "scss/layout/navigation";
+@import "scss/layout/footer";
+
+// Pages
+@import "scss/pages/home";
+@import "scss/pages/details";
+
+// Themes
+@import "scss/themes/theme";
+
+// Stili globali specifici per Angular
+body {
+  margin: 0;
+  font-family: $font-family-base;
+  background-color: $dark;
+  color: $light;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+// Fix per il footer che deve stare in fondo alla pagina
+app-root {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}

@@ -1,0 +1,123 @@
+// Form controls
+.form-control,
+.form-select {
+  background-color: rgba($dark, 0.4) !important;
+  border: 1px solid rgba($white, 0.1);
+  color: $white;
+  transition: $transition-base;
+  cursor: pointer;
+  
+  &::placeholder {
+    color: rgba($white, 0.5);
+  }
+  
+  &:focus {
+    background-color: rgba($dark, 0.6) !important;
+    border-color: $primary;
+    box-shadow: 0 0 0 0.25rem rgba($primary, 0.25);
+    color: $white;
+  }
+}
+
+// Form select arrow
+.form-select {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23ffffff' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+  
+  option {
+    background-color: rgba($dark, 0.9);
+    color: $white;
+  }
+}
+
+// Form groups
+.form-group {
+  margin-bottom: 1rem;
+  
+  label {
+    color: $white;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+  }
+}
+
+// Custom select
+.custom-select {
+  @extend .form-select;
+  cursor: pointer;
+  
+  option {
+    background-color: rgba($dark, 0.9);
+    color: $white;
+  }
+}
+
+// Input groups
+.input-group {
+  .input-group-text {
+    background-color: rgba($dark, 0.6);
+    border: 1px solid rgba($white, 0.1);
+    color: $gray-500;
+  }
+}
+
+// Form validation
+.was-validated {
+  .form-control:valid,
+  .form-select:valid {
+    border-color: rgba($primary, 0.5);
+    background-color: rgba($dark, 0.4) !important;
+    
+    &:focus {
+      border-color: $primary;
+      box-shadow: 0 0 0 0.25rem rgba($primary, 0.25);
+    }
+  }
+  
+  .form-control:invalid,
+  .form-select:invalid {
+    border-color: rgba(red, 0.5);
+    background-color: rgba($dark, 0.4) !important;
+    
+    &:focus {
+      border-color: red;
+      box-shadow: 0 0 0 0.25rem rgba(red, 0.25);
+    }
+  }
+}
+
+// Date input calendar icon
+input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+  opacity: 0.8;
+  cursor: pointer;
+}
+
+// Custom checkbox
+.custom-checkbox {
+  position: relative;
+  padding-left: 1.5rem;
+  
+  .custom-control-input {
+    position: absolute;
+    opacity: 0;
+    
+    &:checked ~ .custom-control-label::before {
+      background-color: $primary;
+      border-color: $primary;
+    }
+  }
+  
+  .custom-control-label {
+    cursor: pointer;
+    
+    &::before {
+      position: absolute;
+      left: 0;
+      width: 1rem;
+      height: 1rem;
+      border: 1px solid rgba($white, 0.2);
+      background-color: rgba($dark, 0.4);
+      transition: $transition-base;
+    }
+  }
+}

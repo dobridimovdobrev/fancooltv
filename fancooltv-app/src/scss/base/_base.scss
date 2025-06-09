@@ -1,0 +1,80 @@
+// Base styles
+body {
+  font-family: 'Inter', sans-serif;
+  background-color: $body-bg;
+  color: $white;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+// Global styles
+body {
+  font-family: 'Inter', sans-serif;
+  background-color: $body-bg;
+  color: $white;
+}
+
+// Custom background styles
+.bg-custom {
+  background: rgba(0, 5, 13, 0.5);
+  border-radius: 7px;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+.custom-style {
+  position: relative;
+  min-height: 100vh;
+  padding-top: 73px;
+  color: $white;
+  
+  &::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: #00050d;
+    background-size: 100% auto;
+    z-index: -1;
+  }
+}
+
+// Container styles
+.container {
+  position: relative;
+  z-index: 1;
+  padding: 1rem;
+}
+
+// Links
+a {
+  color: $primary;
+  text-decoration: none;
+  transition: $transition-base;
+
+  &:hover {
+    color: color.adjust($primary, $lightness: -10%);
+  }
+}
+
+// Images
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+// Lists
+ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+// Selection
+::selection {
+  background: rgba($primary, 0.3);
+  color: $white;
+}

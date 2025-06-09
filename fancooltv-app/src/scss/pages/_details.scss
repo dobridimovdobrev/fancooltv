@@ -1,0 +1,338 @@
+// Series details page
+.series-details {
+  padding: 2rem 0;
+
+  .series-header {
+    position: relative;
+    margin-bottom: 2rem;
+    
+    .backdrop {
+      width: 100%;
+      height: 400px;
+      object-fit: cover;
+      border-radius: $border-radius-lg;
+    }
+    
+    .header-content {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 2rem;
+      background: linear-gradient(to top, rgba($dark, 0.9), transparent);
+      
+      .series-title {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+      }
+      
+      .series-info {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        color: $gray-500;
+        
+        .rating {
+          color: $primary;
+        }
+      }
+    }
+  }
+
+  .series-overview {
+    margin-bottom: 2rem;
+    
+    h2 {
+      font-size: 1.5rem;
+      margin-bottom: 1rem;
+    }
+    
+    p {
+      color: $gray-500;
+      line-height: 1.6;
+    }
+  }
+
+  .series-metadata {
+    @include glass-effect;
+    padding: 1.5rem;
+    border-radius: $border-radius-lg;
+    margin-bottom: 2rem;
+    
+    .metadata-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.5rem;
+      
+      .label {
+        color: $primary;
+        font-weight: 500;
+        min-width: 100px;
+      }
+      
+      .value {
+        color: $gray-500;
+      }
+    }
+  }
+}
+
+// TV Series details page styles
+.series-details {
+    position: relative;
+    padding-top: 60vh;
+    margin-bottom: 4rem;
+    
+    .details-backdrop {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 70vh;
+        background-size: cover;
+        background-position: center;
+        
+        &::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(to bottom,
+                rgba($dark, 0.7) 0%,
+                rgba($dark, 0.8) 50%,
+                rgba($dark, 0.95) 100%
+            );
+        }
+    }
+    
+    .details-content {
+        position: relative;
+        z-index: 1;
+        margin-top: -20vh;
+        
+        .series-poster {
+            position: relative;
+            margin-bottom: 2rem;
+            
+            img {
+                width: 100%;
+                border-radius: $border-radius;
+                box-shadow: 0 5px 15px rgba($dark, 0.5);
+            }
+            
+            .play-trailer {
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                width: 60px;
+                height: 60px;
+                background: rgba($primary, 0.9);
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: $white;
+                font-size: 1.5rem;
+                cursor: pointer;
+                transition: $transition-base;
+                
+                &:hover {
+                    background: $primary;
+                    transform: translate(-50%, -50%) scale(1.1);
+                }
+            }
+        }
+        
+        .series-info {
+            .series-title {
+                font-size: 2.5rem;
+                font-weight: 700;
+                margin-bottom: 1rem;
+                
+                @include media-down($breakpoint-md) {
+                    font-size: 2rem;
+                }
+            }
+            
+            .series-meta {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 1.5rem;
+                margin-bottom: 1.5rem;
+                font-size: 0.9rem;
+                color: $gray-400;
+                
+                span {
+                    display: flex;
+                    align-items: center;
+                    gap: 0.5rem;
+                    
+                    i {
+                        color: $primary;
+                    }
+                }
+            }
+            
+            .series-genres {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 0.5rem;
+                margin-bottom: 1.5rem;
+                
+                .genre-tag {
+                    padding: 0.25rem 0.75rem;
+                    background: rgba($primary, 0.1);
+                    border: 1px solid rgba($primary, 0.3);
+                    border-radius: 20px;
+                    color: $primary;
+                    font-size: 0.875rem;
+                    transition: $transition-base;
+                    
+                    &:hover {
+                        background: rgba($primary, 0.2);
+                    }
+                }
+            }
+            
+            .series-overview {
+                font-size: 1rem;
+                line-height: 1.7;
+                color: $gray-300;
+                margin-bottom: 2rem;
+            }
+            
+            .series-actions {
+                display: flex;
+                gap: 1rem;
+                margin-bottom: 2rem;
+                
+                @include media-down($breakpoint-sm) {
+                    flex-direction: column;
+                }
+                
+                .btn {
+                    min-width: 150px;
+                }
+            }
+        }
+        
+        .details-info {
+          .meta-item {
+            i {
+              color: $primary;
+              margin-right: 0.5rem;
+              width: 20px;
+              text-align: center;
+            }
+          }
+          
+          .metadata-item {
+            margin-bottom: 1rem;
+            
+            i {
+              color: $primary;
+              margin-right: 0.5rem;
+              width: 20px;
+              text-align: center;
+            }
+            
+            span {
+              color: $gray-300;
+            }
+          }
+        }
+        
+        #metadata {
+          .meta-item {
+            i {
+              color: $primary;
+              margin-right: 0.5rem;
+              width: 20px;
+              text-align: center;
+            }
+          }
+        }
+        
+        #year, #rating, #duration, #category, #director {
+          margin-bottom: 0.75rem;
+          
+          i {
+            color: $primary;
+            margin-right: 0.5rem;
+            width: 20px;
+            text-align: center;
+          }
+        }
+    }
+    
+    .cast-section {
+      h3 {
+        margin-bottom: 1.5rem;
+        font-size: 1.5rem;
+      }
+    }
+    
+    .details-section {
+        margin-top: 3rem;
+        padding: 2rem;
+        background: rgba($dark, 0.3);
+        border: 1px solid rgba($light, 0.1);
+        border-radius: $border-radius;
+        @include glass-effect;
+        
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            color: $white;
+            
+            span {
+                color: $primary;
+            }
+        }
+    }
+}
+
+// Movie and TV Series metadata icons
+.fa-calendar::before,
+.fa-star::before,
+.fa-clock::before,
+.fa-film::before,
+.fa-tv::before,
+.fa-user::before,
+.fa-users::before {
+  color: $primary;
+}
+
+// Remove primary color from offcanvas menu icons
+.offcanvas {
+  .nav-link {
+    i::before {
+      color: inherit;
+    }
+  }
+}
+
+// Responsive adjustments
+@include media-down($breakpoint-md) {
+  .series-details {
+    .series-header {
+      .backdrop {
+        height: 300px;
+      }
+      
+      .header-content {
+        padding: 1.5rem;
+        
+        .series-title {
+          font-size: 1.5rem;
+        }
+      }
+    }
+  }
+}

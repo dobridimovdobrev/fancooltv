@@ -1,0 +1,63 @@
+// Import variables and mixins
+@import '../../../../src/scss/abstracts/variables';
+@import '../../../../src/scss/abstracts/mixins';
+
+// Navbar styles
+.custom-navbar {
+  transition: $transition-base;
+  padding: 1rem 0;
+  z-index: 1030;
+  
+  &.scrolled {
+    background-color: rgba($dark, 0.9);
+    box-shadow: 0 2px 10px rgba($dark, 0.3);
+    padding: 0.5rem 0;
+  }
+  
+  .navbar-brand {
+    font-weight: 700;
+    color: $white;
+    
+    &:hover {
+      color: $primary;
+    }
+  }
+  
+  .nav-link {
+    color: rgba($white, 0.8);
+    padding: 0.5rem 1rem;
+    font-weight: 500;
+    transition: $transition-base;
+    
+    &:hover, &.active {
+      color: $primary;
+    }
+  }
+  
+  .navbar-toggler {
+    border: none;
+    color: $white;
+    
+    &:focus {
+      box-shadow: none;
+    }
+  }
+}
+
+// Offcanvas menu
+.offcanvas {
+  .offcanvas-header {
+    border-bottom: 1px solid rgba($white, 0.1);
+  }
+  
+  .nav-link {
+    padding: 0.75rem 1rem;
+    color: rgba($white, 0.8);
+    transition: $transition-base;
+    
+    &:hover, &.active {
+      color: $primary;
+      background-color: rgba($white, 0.05);
+    }
+  }
+}

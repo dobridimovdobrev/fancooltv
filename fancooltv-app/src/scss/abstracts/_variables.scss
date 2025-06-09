@@ -1,0 +1,93 @@
+// Colors
+$body-bg: #00050d;
+$third: #00050d;
+$primary: #f8b547;
+$secondary: #6C757D;
+$success: #28A745;
+$info: #17A2B8;
+$warning: #FFC107;
+$danger: #DC3545;
+$white: #ffffff;
+$dark: #000000;
+$gray-500: #adb5bd;
+$light: #f8f9fa;
+$light-2: #e9ecef; // Aggiunto per risolvere l'errore di compilazione
+$black: #000000;
+
+// Grays
+$gray-100: #F8F9FA;
+$gray-200: #E9ECEF;
+$gray-300: #DEE2E6;
+$gray-400: #CED4DA;
+$gray-600: #6C757D;
+$gray-700: #495057;
+$gray-800: #343A40;
+$gray-900: #212529;
+
+// Breakpoints
+$breakpoint-sm: 450px;
+$breakpoint-md: 768px;
+$breakpoint-lg: 991px;
+$breakpoint-xl: 1199px;
+$breakpoint-xxl: 1400px;
+
+// Border radius
+$border-radius-sm: 4px;
+$border-radius: 6px;
+$border-radius-lg: 8px;
+$border-radius-xl: 12px;
+
+// Transitions
+$transition-base: all 0.3s ease;
+$transition-transform: transform 0.3s ease;
+
+// Z-index
+$z-index-header: 1000;
+$z-index-modal: 1050;
+$z-index-overlay: 2;
+
+// Typography
+$font-family-base: 'Poppins', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+$font-family-heading: $font-family-base;
+$font-size-base: 1rem;
+$font-size-lg: 1.25rem;
+$font-size-sm: 0.875rem;
+$line-height-base: 1.5;
+
+// Headings
+$headings-font-family: $font-family-heading;
+$headings-font-weight: 600;
+$headings-line-height: 1.2;
+$headings-margin-bottom: 0.5rem;
+$headings-color: $light;
+
+$h1-font-size: 2.5rem;
+$h2-font-size: 2rem;
+$h3-font-size: 1.75rem;
+$h4-font-size: 1.5rem;
+$h5-font-size: 1.25rem;
+$h6-font-size: 1rem;
+
+// Display headings
+$display1-size: 6rem;
+$display2-size: 5.5rem;
+$display3-size: 4.5rem;
+$display4-size: 3.5rem;
+
+$display1-weight: 300;
+$display2-weight: 300;
+$display3-weight: 300;
+$display4-weight: 300;
+
+$display-line-height: 1.1;
+
+// Paragraphs
+$paragraph-margin-bottom: 1rem;
+
+// Lead
+$lead-font-size: 1.25rem;
+$lead-font-weight: 300;
+
+// Body
+$body-color: $light;
+$body-bg: $dark;

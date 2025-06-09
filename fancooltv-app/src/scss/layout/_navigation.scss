@@ -1,0 +1,178 @@
+// Navigation styles
+.custom-navbar.navbar {
+    background: rgba(26, 29, 36, 0.9); 
+    backdrop-filter: blur(10px);        
+    -webkit-backdrop-filter: blur(10px); 
+    box-shadow: 0 2px 15px rgba(0, 0, 0, 0.4);
+    padding: 1rem 0;
+    transition: all 0.3s ease;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+
+    .navbar-brand {
+        color: $primary;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        
+        &:hover {
+            color: $white;
+        }
+    }
+
+    .navbar-nav {
+        .nav-item {
+            .nav-link {
+                color: $white;
+                font-weight: 600;
+                padding: 0.5rem 1.5rem;
+                border-radius: 6px;
+                transition: all 0.3s ease;
+
+                i.fa-home::before,
+                i.fa-film::before,
+                i.fa-tv::before,
+                i.fa-sign-in-alt::before {
+                    color: $white;
+                }
+
+                &:hover {
+                    color: $primary;
+                    i.fa-home::before,
+                    i.fa-film::before,
+                    i.fa-tv::before,
+                    i.fa-sign-in-alt::before {
+                        color: $primary;
+                    }
+                }
+
+                &.active {
+                    color: $primary;
+                    background: rgba($primary, 0.1);
+                    i.fa-home::before,
+                    i.fa-film::before,
+                    i.fa-tv::before,
+                    i.fa-sign-in-alt::before {
+                        color: $primary;
+                    }
+                }
+
+                i {
+                    margin-right: 6px;
+                    font-size: 0.9em;
+                }
+            }
+        }
+    }
+
+    .navbar-toggler {
+        color: $white !important;
+        border: 1px solid $white !important;
+        padding: 0.5rem 0.8rem;
+        border-radius: 6px;
+        background: transparent !important;
+        
+        .fa-bars {
+            color: $white !important;
+            font-size: 1.4rem;
+        }
+        
+        &:hover {
+            background: rgba(255, 255, 255, 0.1) !important;
+        }
+        
+        &:focus {
+            box-shadow: none;
+        }
+    }
+}
+
+// Mobile menu open style
+.navbar-collapse {
+    background-color: rgba(0, 5, 13, 0.98);
+    backdrop-filter: blur(10px);
+    margin: 1rem -1rem -1rem;
+    padding: 1rem;
+    border-top: 1px solid rgba(255,255,255,0.05);
+    
+    .navbar-nav {
+        .nav-link {
+            padding: 0.8rem 1rem;
+            
+            &:hover, &.active {
+                background-color: rgba(248, 181, 71, 0.15);
+                transform: translateX(5px);
+            }
+        }
+    }
+}
+
+@media (max-width: 991.98px) {
+    .navbar-collapse {
+        background-color: rgba(0, 5, 13, 0.98);
+        backdrop-filter: blur(10px);
+        margin: 1rem -1rem -1rem;
+        padding: 1rem;
+        border-top: 1px solid rgba(255,255,255,0.05);
+        
+        .navbar-nav {
+            .nav-link {
+                padding: 0.8rem 1rem;
+                
+                &:hover, &.active {
+                    background-color: rgba(248, 181, 71, 0.15);
+                    transform: translateX(5px);
+                }
+            }
+        }
+    }
+}
+
+// Offcanvas Menu Styles
+.offcanvas {
+    .offcanvas-header {
+        background-color: $third;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        padding: 1rem;
+
+        .offcanvas-title {
+            color: $white;
+            font-weight: 600;
+            font-size: 1.2rem;
+        }
+
+        .btn-close {
+            color: $light-2;
+            opacity: 0.8;
+            
+            &:hover {
+              opacity: 1;
+            }
+          }
+        
+    }
+
+    .offcanvas-body {
+        background-color: $third;
+        padding: 1rem;
+
+        .nav-link {
+            color: $white;
+            transition: all 0.3s ease;
+            padding: 0.8rem 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            
+            &:last-child {
+                border-bottom: none;
+            }
+            
+            &:hover {
+                color: $primary;
+                background-color: rgba($primary, 0.1);
+            }
+            
+            &.active {
+                color: $primary;
+                background-color: rgba($primary, 0.15);
+            }
+        }
+    }
+}
