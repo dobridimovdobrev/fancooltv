@@ -8,13 +8,6 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-// Global styles
-body {
-  font-family: 'Inter', sans-serif;
-  background-color: $body-bg;
-  color: $white;
-}
-
 // Custom background styles
 .bg-custom {
   background: rgba(0, 5, 13, 0.5);
@@ -36,7 +29,7 @@ body {
     left: 0;
     right: 0;
     bottom: 0;
-    background: #00050d;
+    background: $body-bg;
     background-size: 100% auto;
     z-index: -1;
   }

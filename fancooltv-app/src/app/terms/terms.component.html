@@ -1,1 +1,177 @@
-<p>terms works!</p>
+<div class="terms-page custom-style">
+  <!-- Navigation -->
+  <app-navbar></app-navbar>
+
+  <!-- Terms Content -->
+  <div class="container pt-5  mt-3">
+    <h1 class="text-white mb-4 text-center">Terms & Conditions</h1>
+    
+    <accordion [isAnimated]="true" class="custom-accordion">
+      <!-- Usage Terms -->
+      <accordion-group class="glass-effect">
+        <button class="btn btn-link bg-transparent text-white w-100 text-start" accordion-heading>
+          <div class="d-flex justify-content-between align-items-center">
+            <span>Usage Terms</span>
+            <i class="fa fa-angle-down"></i>
+          </div>
+        </button>
+        <div class="text-white-50">
+          <p>By accessing and using FanCoolTv, you agree to comply with these terms and conditions. Our service is intended for personal, non-commercial use only.</p>
+          <ul>
+            <li>Account sharing is not permitted</li>
+            <li>Content may not be downloaded or recorded</li>
+            <li>Minimum age requirement: 13 years</li>
+          </ul>
+        </div>
+      </accordion-group>
+
+      <!-- Privacy Policy -->
+      <accordion-group class="glass-effect">
+        <button class="btn btn-link bg-transparent text-white w-100 text-start" accordion-heading>
+          <div class="d-flex justify-content-between align-items-center">
+            <span>Privacy Policy</span>
+            <i class="fa fa-angle-down"></i>
+          </div>
+        </button>
+        <div class="text-white-50">
+          <p>We respect your privacy and are committed to protecting your personal data. Our privacy policy outlines how we collect, use, and safeguard your information.</p>
+          <p>Key points:</p>
+          <ul>
+            <li>We collect minimal personal information required for service provision</li>
+            <li>Your viewing history is used to provide personalized recommendations</li>
+            <li>We do not sell your personal data to third parties</li>
+          </ul>
+        </div>
+      </accordion-group>
+
+      <!-- Content Guidelines -->
+      <accordion-group class="glass-effect">
+        <button class="btn btn-link bg-transparent text-white w-100 text-start" accordion-heading>
+          <div class="d-flex justify-content-between align-items-center">
+            <span>Content Guidelines</span>
+            <i class="fa fa-angle-down"></i>
+          </div>
+        </button>
+        <div class="text-white-50">
+          <p>Our content guidelines ensure a safe and enjoyable experience:</p>
+          <ul>
+            <li>No hate speech or discriminatory content</li>
+            <li>No explicit or adult content</li>
+            <li>Family-friendly environment</li>
+          </ul>
+        </div>
+      </accordion-group>
+
+      <!-- Technical Requirements -->
+      <accordion-group class="glass-effect">
+        <button class="btn btn-link bg-transparent text-white w-100 text-start" accordion-heading>
+          <div class="d-flex justify-content-between align-items-center">
+            <span>Technical Requirements</span>
+            <i class="fa fa-angle-down"></i>
+          </div>
+        </button>
+        <div class="text-white-50">
+          <p>To ensure optimal streaming experience:</p>
+          <ul>
+            <li>Minimum internet speed: 5 Mbps</li>
+            <li>Supported browsers: Chrome, Firefox, Safari</li>
+            <li>HD streaming requires 10+ Mbps</li>
+          </ul>
+        </div>
+      </accordion-group>
+
+      <!-- Payment Terms -->
+      <accordion-group class="glass-effect">
+        <button class="btn btn-link bg-transparent text-white w-100 text-start" accordion-heading>
+          <div class="d-flex justify-content-between align-items-center">
+            <span>Payment Terms</span>
+            <i class="fa fa-angle-down"></i>
+          </div>
+        </button>
+        <div class="text-white-50">
+          <p>Payment and billing information:</p>
+          <ul>
+            <li>Secure payment processing</li>
+            <li>Multiple payment methods accepted</li>
+            <li>Automatic monthly renewal</li>
+          </ul>
+        </div>
+      </accordion-group>
+
+      <!-- Account Security -->
+      <accordion-group class="glass-effect">
+        <button class="btn btn-link bg-transparent text-white w-100 text-start" accordion-heading>
+          <div class="d-flex justify-content-between align-items-center">
+            <span>Account Security</span>
+            <i class="fa fa-angle-down"></i>
+          </div>
+        </button>
+        <div class="text-white-50">
+          <p>We take your account security seriously:</p>
+          <ul>
+            <li>Two-factor authentication available</li>
+            <li>Regular security updates</li>
+            <li>Immediate notification of suspicious activity</li>
+          </ul>
+        </div>
+      </accordion-group>
+
+      <!-- Intellectual Property -->
+      <accordion-group class="glass-effect">
+        <button class="btn btn-link bg-transparent text-white w-100 text-start" accordion-heading>
+          <div class="d-flex justify-content-between align-items-center">
+            <span>Intellectual Property</span>
+            <i class="fa fa-angle-down"></i>
+          </div>
+        </button>
+        <div class="text-white-50">
+          <p>Regarding intellectual property rights:</p>
+          <ul>
+            <li>All content is protected by copyright</li>
+            <li>No unauthorized distribution</li>
+            <li>Respect for third-party rights</li>
+          </ul>
+        </div>
+      </accordion-group>
+
+      <!-- Cancellation Policy -->
+      <accordion-group class="glass-effect">
+        <button class="btn btn-link bg-transparent text-white w-100 text-start" accordion-heading>
+          <div class="d-flex justify-content-between align-items-center">
+            <span>Cancellation Policy</span>
+            <i class="fa fa-angle-down"></i>
+          </div>
+        </button>
+        <div class="text-white-50">
+          <p>Our cancellation policy:</p>
+          <ul>
+            <li>Cancel anytime through account settings</li>
+            <li>Pro-rated refunds available</li>
+            <li>30-day money-back guarantee</li>
+          </ul>
+        </div>
+      </accordion-group>
+
+      <!-- User Responsibilities -->
+      <accordion-group class="glass-effect">
+        <button class="btn btn-link bg-transparent text-white w-100 text-start" accordion-heading>
+          <div class="d-flex justify-content-between align-items-center">
+            <span>User Responsibilities</span>
+            <i class="fa fa-angle-down"></i>
+          </div>
+        </button>
+        <div class="text-white-50">
+          <p>Your responsibilities as a user:</p>
+          <ul>
+            <li>Maintain accurate account information</li>
+            <li>Report technical issues promptly</li>
+            <li>Respect community guidelines</li>
+          </ul>
+        </div>
+      </accordion-group>
+    </accordion>
+  </div>
+</div>
+
+<!-- footer -->
+<app-footer></app-footer>

@@ -1,0 +1,65 @@
+@import "../../scss/abstracts/variables";
+@import "../../scss/abstracts/mixins";
+
+:host ::ng-deep {
+  .custom-accordion {
+    accordion-group {
+      margin-bottom: 1rem;
+      border-radius: 0.25rem;
+      
+      &.glass-effect {
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        background: rgba($dark, 0.3);
+        border: 1px solid rgba($white, 0.1);
+      }
+      
+      .card {
+        background: transparent;
+        border: none;
+      }
+      
+      .card-header {
+        background: transparent;
+        border: none;
+        padding: 0;
+        
+        button {
+          padding: 1rem !important;
+          text-decoration: none !important; // Rimuove sottolineatura
+          
+          &:hover, &:focus, &:active {
+            text-decoration: none !important;
+          }
+          
+          span {
+            font-size: 1.1rem;
+            font-weight: 500;
+            text-decoration: none !important; // Rimuove sottolineatura
+          }
+          
+          i.fa {
+            text-decoration: none !important; // Rimuove sottolineatura dalle icone
+            font-size: 1.2rem;
+          }
+        }
+      }
+      
+      .card-body {
+        padding: 1.5rem;
+        
+        p {
+          margin-bottom: 1rem;
+        }
+        
+        ul {
+          padding-left: 1.5rem;
+          
+          li {
+            margin-bottom: 0.75rem;
+          }
+        }
+      }
+    }
+  }
+}
