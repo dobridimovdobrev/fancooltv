@@ -9,57 +9,60 @@
           <div class="bg-custom border border-light border-opacity-10 p-4 fade-in">
             <div class="card-body">
               <h2 class="text-center mb-4">Create Account</h2>
-              <div id="errorContainer" class="mb-3"></div>
-              <form id="registerForm" class="needs-validation" novalidate>
+              <div *ngIf="error" class="alert alert-danger mb-3">{{error}}</div>
+              <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" class="needs-validation" novalidate>
                 <!-- Personal Information -->
                 <div class="mb-4">
                   <h5 class="mb-3">Personal Information</h5>
                   <div class="mb-3">
                     <label for="username" class="form-label">Username</label>
-                    <input type="text" class="form-control bg-dark text-light" id="username" required>
-                    <div class="invalid-feedback">
-                      Username is required.
+                    <input type="text" class="form-control bg-dark text-light" id="username" formControlName="username" [ngClass]="{'is-invalid': submitted && (f['username'].errors || hasServerError('username'))}">
+                    <div *ngIf="submitted && (f['username'].errors || hasServerError('username'))" class="invalid-feedback d-block">
+                      <span *ngIf="submitted && f['username'].errors?.['required']">Username è obbligatorio</span>
+                      <span *ngIf="hasServerError('username')">{{ getServerError('username') }}</span>
                     </div>
                   </div>
                   <div class="row">
                     <div class="col-md-6 mb-3">
                       <label for="first_name" class="form-label">First Name</label>
-                      <input type="text" class="form-control bg-dark text-light" id="first_name" required>
+                      <input type="text" class="form-control bg-dark text-light" id="first_name" formControlName="first_name" [ngClass]="{'is-invalid': submitted && f['first_name'].errors}">
                       <div class="invalid-feedback">
-                        First name is required.
+                        <span *ngIf="submitted && f['first_name'].errors?.['required']">Nome è obbligatorio</span>
                       </div>
                     </div>
                     <div class="col-md-6 mb-3">
                       <label for="last_name" class="form-label">Last Name</label>
-                      <input type="text" class="form-control bg-dark text-light" id="last_name" required>
+                      <input type="text" class="form-control bg-dark text-light" id="last_name" formControlName="last_name" [ngClass]="{'is-invalid': submitted && f['last_name'].errors}">
                       <div class="invalid-feedback">
-                        Last name is required.
+                        <span *ngIf="submitted && f['last_name'].errors?.['required']">Cognome è obbligatorio</span>
                       </div>
                     </div>
                   </div>
                   <div class="mb-3">
                     <label for="email" class="form-label">Email</label>
-                    <input type="email" class="form-control bg-dark text-light" id="email" required>
-                    <div class="invalid-feedback">
-                      Please enter a valid email address.
+                    <input type="email" class="form-control bg-dark text-light" id="email" formControlName="email" [ngClass]="{'is-invalid': submitted && (f['email'].errors || hasServerError('email'))}">
+                    <div *ngIf="submitted && (f['email'].errors || hasServerError('email'))" class="invalid-feedback d-block">
+                      <span *ngIf="submitted && f['email'].errors?.['required']">Email è obbligatoria</span>
+                      <span *ngIf="submitted && f['email'].errors?.['email']">Inserisci un indirizzo email valido</span>
+                      <span *ngIf="hasServerError('email')">{{ getServerError('email') }}</span>
                     </div>
                   </div>
                   <div class="mb-3">
                     <label for="gender" class="form-label">Gender</label>
-                    <select class="form-select bg-dark text-light" id="gender" required>
-                      <option value="">Choose...</option>
-                      <option value="male">Male</option>
-                      <option value="female">Female</option>
+                    <select class="form-select bg-dark text-light" id="gender" formControlName="gender" [ngClass]="{'is-invalid': submitted && f['gender'].errors}">
+                      <option value="">Scegli...</option>
+                      <option value="male">Maschio</option>
+                      <option value="female">Femmina</option>
                     </select>
                     <div class="invalid-feedback">
-                      Please select a gender.
+                      <span *ngIf="submitted && f['gender'].errors?.['required']">Genere è obbligatorio</span>
                     </div>
                   </div>
                   <div class="mb-3">
                     <label for="birthday" class="form-label">Birthday</label>
-                    <input type="date" class="form-control bg-dark text-light" id="birthday" required>
+                    <input type="date" class="form-control bg-dark text-light" id="birthday" formControlName="birthday" [ngClass]="{'is-invalid': submitted && f['birthday'].errors}">
                     <div class="invalid-feedback">
-                      Birthday is required.
+                      <span *ngIf="submitted && f['birthday'].errors?.['required']">Data di nascita è obbligatoria</span>
                     </div>
                   </div>
                 </div>
@@ -69,16 +72,18 @@
                   <h5 class="mb-3">Account Security</h5>
                   <div class="mb-3">
                     <label for="password" class="form-label">Password</label>
-                    <input type="password" class="form-control bg-dark text-light" id="password" required minlength="8">
+                    <input type="password" class="form-control bg-dark text-light" id="password" formControlName="password" [ngClass]="{'is-invalid': submitted && f['password'].errors}">
                     <div class="invalid-feedback">
-                      Password must be at least 8 characters long.
+                      <span *ngIf="submitted && f['password'].errors?.['required']">Password è obbligatoria</span>
+                      <span *ngIf="submitted && f['password'].errors?.['minlength']">La password deve essere di almeno 8 caratteri</span>
                     </div>
                   </div>
                   <div class="mb-3">
                     <label for="password_confirmation" class="form-label">Confirm Password</label>
-                    <input type="password" class="form-control bg-dark text-light" id="password_confirmation" required>
+                    <input type="password" class="form-control bg-dark text-light" id="password_confirmation" formControlName="password_confirmation" [ngClass]="{'is-invalid': submitted && (f['password_confirmation'].errors || passwordMismatch)}">
                     <div class="invalid-feedback">
-                      Passwords do not match.
+                      <span *ngIf="submitted && f['password_confirmation'].errors?.['required']">Conferma password è obbligatoria</span>
+                      <span *ngIf="submitted && passwordMismatch">Le password non corrispondono</span>
                     </div>
                   </div>
                 </div>
@@ -86,18 +91,18 @@
                 <!-- Terms and Conditions -->
                 <div class="mb-4">
                   <div class="form-check">
-                    <input class="form-check-input" type="checkbox" id="termsCheck" required>
+                    <input class="form-check-input" type="checkbox" id="termsCheck" formControlName="termsAccepted" [ngClass]="{'is-invalid': submitted && f['termsAccepted'].errors}">
                     <label class="form-check-label text-light" for="termsCheck">
                       I agree to the <a routerLink="/terms" class="text-light text-decoration-underline px-1" style="text-underline-offset: 3px" aria-label="Read terms and conditions" title="Read terms and conditions">Terms and Conditions</a>
                     </label>
                     <div class="invalid-feedback">
-                      You must agree to the terms and conditions.
+                      <span *ngIf="submitted && f['termsAccepted'].errors?.['required']">Devi accettare i termini e le condizioni</span>
                     </div>
                   </div>
                 </div>
 
                 <div class="d-grid">
-                  <button type="submit" class="btn btn-primary">Create Account</button>
+                  <button type="submit" class="btn btn-primary" [disabled]="loading">{{ loading ? 'Creazione in corso...' : 'Crea Account' }}</button>
                 </div>
                 <div class="text-center mt-3">
                   <a routerLink="/login" class="text-light text-decoration-underline px-1" style="text-underline-offset: 4px" aria-label="Already have an account? Login here" title="Already have an account? Login here">Already have an account? Login here</a>

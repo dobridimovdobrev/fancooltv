@@ -8,26 +8,27 @@
           <div class="bg-custom border border-light border-opacity-10 p-4 fade-in">
             <div class="card-body">
               <h2 class="text-center mb-4">Login</h2>
-              <form id="loginForm" class="needs-validation" novalidate>
+              <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="needs-validation" novalidate>
                 <div class="mb-3">
                   <label for="username" class="form-label">Username</label>
-                  <input type="text" class="form-control bg-dark text-light" id="username" required>
+                  <input type="text" class="form-control bg-dark text-light" id="username" formControlName="username" [ngClass]="{'is-invalid': submitted && f['username'].errors}">
                   <div class="invalid-feedback">
-                    Please enter your username
+                    <span *ngIf="submitted && f['username'].errors?.['required']">Username è obbligatorio</span>
                   </div>
                 </div>
                 <div class="mb-3">
                   <label for="password" class="form-label">Password</label>
-                  <input type="password" class="form-control bg-dark text-light" id="password" required>
+                  <input type="password" class="form-control bg-dark text-light" id="password" formControlName="password" [ngClass]="{'is-invalid': submitted && f['password'].errors}">
                   <div class="invalid-feedback">
-                    Please enter your password
+                    <span *ngIf="submitted && f['password'].errors?.['required']">Password è obbligatoria</span>
                   </div>
                 </div>
                 <div class="mb-3 form-check">
-                  <input type="checkbox" class="form-check-input" id="rememberMe">
+                  <input type="checkbox" class="form-check-input" id="rememberMe" formControlName="rememberMe">
                   <label class="form-check-label" for="rememberMe">Remember me</label>
                 </div>
-                <div id="errorMessage" class="alert alert-danger d-none"></div>
+                <div *ngIf="error" class="alert alert-danger">{{error}}</div>
+                <div *ngIf="success" class="alert alert-success">{{success}}</div>
                 <button type="submit" class="btn btn-primary w-100">Login</button>
                 <p class="text-center mt-3">
                   Don't have an account? <a routerLink="/register" class="text-primary">Register here</a>

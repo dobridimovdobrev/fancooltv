@@ -23,9 +23,15 @@
             <i class="fa-solid fa-tv"></i> TV Series
           </a>
         </li>
-        <li class="nav-item">
+        <!-- Login/Logout button based on authentication state -->
+        <li class="nav-item" *ngIf="!authService.isAuthenticated()">
           <a routerLink="/login" routerLinkActive="active" class="nav-link" aria-label="Login to your account" title="Login to your account">
             <i class="fa-solid fa-sign-in-alt"></i> Login
+          </a>
+        </li>
+        <li class="nav-item" *ngIf="authService.isAuthenticated()">
+          <a href="javascript:void(0)" class="nav-link" (click)="logout()" aria-label="Logout from your account" title="Logout from your account">
+            <i class="fa-solid fa-sign-out-alt"></i> Logout
           </a>
         </li>
       </ul>
@@ -61,9 +67,15 @@
           <i class="fa-solid fa-tv"></i> TV Series
         </a>
       </li>
-      <li class="nav-item">
+      <!-- Login/Logout button based on authentication state -->
+      <li class="nav-item" *ngIf="!authService.isAuthenticated()">
         <a routerLink="/login" routerLinkActive="active" class="nav-link" aria-label="Login to your account" title="Login to your account">
           <i class="fa-solid fa-sign-in-alt"></i> Login
+        </a>
+      </li>
+      <li class="nav-item" *ngIf="authService.isAuthenticated()">
+        <a href="javascript:void(0)" class="nav-link" (click)="logout()" aria-label="Logout from your account" title="Logout from your account">
+          <i class="fa-solid fa-sign-out-alt"></i> Logout
         </a>
       </li>
     </ul>
