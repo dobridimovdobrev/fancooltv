@@ -58,32 +58,32 @@ export class AuthService {
         map(() => undefined),
         catchError(error => {
           console.error('CSRF initialization failed:', error);
-          // In ambiente di sviluppo, continuiamo comunque con l'autenticazione
-          // In produzione, questo dovrebbe essere gestito correttamente
+          // In development environment, we continue with authentication anyway
+          // In production, this should be handled properly
           console.warn('Continuing without CSRF token - this is not secure for production');
-          return of(undefined); // Ritorniamo un valore valido invece di lanciare un errore
+          return of(undefined); // Return a valid value instead of throwing an error
         })
       );
   }
 
-  // Login method - versione ultra-semplificata
+  // Login method - ultra-simplified version
   public login(credentials: LoginCredentials): Observable<User> {
-    console.log('Tentativo di login con username:', credentials.username);
+    console.log('Login attempt with username:', credentials.username);
     
-    // Creiamo gli header specifici per questa richiesta
+    // Create specific headers for this request
     const headers = new HttpHeaders({
       'Content-Type': 'application/json',
       'Accept': 'application/json',
       'X-Requested-With': 'XMLHttpRequest'
     });
     
-    // Log completo della richiesta
+    // Complete log of the request
     console.log('URL completo:', `${this.baseUrl}/api/login`);
     console.log('Credenziali inviate:', JSON.stringify(credentials));
     console.log('Headers:', headers);
     
-    // Effettuiamo direttamente la richiesta di login
-    // Rimuoviamo withCredentials: true per evitare problemi CORS
+    // Perform the login request directly
+    // Remove withCredentials: true to avoid CORS issues
     return this.http.post<any>(
       `${this.baseUrl}/api/login`,
       credentials,
@@ -100,12 +100,12 @@ export class AuthService {
         console.log('Struttura risposta:', JSON.stringify(response));
         
         if (response && response.status === 'success') {
-          // Gestiamo la risposta che ha il token in response.message.token
+          // Handle the response that has the token in response.message.token
           if (response.message && response.message.token) {
-            // Salviamo il token
+            // Save the token
             localStorage.setItem('auth_token', response.message.token);
             
-            // Creiamo un oggetto utente base con i campi richiesti dall'interfaccia User
+            // Create a basic user object with the fields required by the User interface
             const user: User = {
               id: 0, // ID temporaneo
               username: credentials.username,
@@ -124,7 +124,7 @@ export class AuthService {
             this.currentUserSubject.next(user);
             return user;
           } 
-          // Gestiamo anche il formato originale se dovesse cambiare in futuro
+          // Handle the original format in case it changes in the future
           else if (response.data && response.data.token) {
             localStorage.setItem('auth_token', response.data.token);
             localStorage.setItem('current_user', JSON.stringify(response.data.user));
@@ -133,9 +133,9 @@ export class AuthService {
           }
         }
         
-        // Se arriviamo qui, il formato non è valido
-        console.error('Formato risposta login non valido:', response);
-        throw new Error('Login fallito: risposta non valida');
+        // If we get here, the format is not valid
+        console.error('Invalid login response format:', response);
+        throw new Error('Login failed: invalid response');
       }),
       catchError(error => {
         console.error('Errore di login completo:', error);
@@ -193,9 +193,9 @@ export class AuthService {
               }));
             }
             
-            // Se c'è un messaggio di errore specifico, lo utilizziamo
+            // If there is a specific error message, we use it
             if (error.error && error.error.message) {
-              console.log('Messaggio di errore dal server:', error.error.message);
+              console.log('Error message from server:', error.error.message);
               return throwError(() => new Error(error.error.message));
             }
             
@@ -263,7 +263,7 @@ export class AuthService {
 
   // Get headers for API requests
   private getHeaders(): HttpHeaders {
-    // Aggiungiamo l'header X-Requested-With che è fondamentale per le richieste CSRF con Laravel Sanctum
+    // Add the X-Requested-With header which is essential for CSRF requests with Laravel Sanctum
     let headers = new HttpHeaders({
       'Content-Type': 'application/json',
       'Accept': 'application/json',

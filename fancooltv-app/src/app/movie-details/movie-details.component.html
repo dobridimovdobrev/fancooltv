@@ -1,1 +1,83 @@
-<p>movie-details works!</p>
+<!-- navigation -->
+<app-navbar></app-navbar>
+<!-- TV Series Details Container -->
+<div class="movie-details-container">
+  <!-- Loading Spinner -->
+  <div *ngIf="loading" class="d-flex justify-content-center align-items-center" style="height: 300px;">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+  </div>
+  
+  <!-- Error Message -->
+  <div *ngIf="error && !loading" class="alert alert-danger container mt-5">
+    <p>{{ errorMessage }}</p>
+    <button class="btn btn-primary" (click)="goBack()">Torna ai film</button>
+  </div>
+  
+  <!-- Movie Details Content -->
+  <div *ngIf="movie && !loading">
+    <div id="backdrop" class="position-relative">
+      <div class="position-absolute w-100 h-100" style="background: linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(0,0,0,0.9))"></div>
+      <img [src]="getImageUrl(movie.backdrop, 'backdrop')" [alt]="movie.title + ' backdrop'" class="backdrop-img"
+           (error)="onImageError($event, '/assets/images/placeholder-backdrop.jpg')">
+    </div>
+    
+    <div class="container position-relative" style="margin-top: -150px">
+      <div class="row">
+        <div class="col-md-3 mb-4">
+          <div id="poster" class="rounded shadow-lg">
+            <img [src]="getImageUrl(movie.poster)" [alt]="movie.title + ' poster'" class="poster-img"
+                 (error)="onImageError($event, '/assets/images/placeholder-poster.jpg')">
+          </div>
+          
+          <!-- Back Button -->
+          <div class="mt-4 text-center">
+            <button class="btn btn-primary" (click)="goBack()">
+              <i class="fas fa-arrow-left me-2"></i>Torna ai film
+            </button>
+          </div>
+        </div>
+        <div class="col-md-9">
+          <div class="details-info mb-5">
+            <h1 id="title" class="mb-3">{{ movie.title }}</h1>
+            <div id="metadata" class="d-flex flex-wrap gap-3 mb-4">
+              <span class="meta-item"><i class="fas fa-calendar"></i> {{ movie.year }}</span>
+              <span class="meta-item"><i class="fas fa-clock"></i> {{ movie.duration }} min</span>
+              <span class="meta-item"><i class="fas fa-star"></i> {{ movie.imdb_rating }}</span>
+              <span class="meta-item"><i class="fas fa-film"></i> {{ movie.category.name }}</span>
+            </div>
+            
+            <p id="plot" class="mb-4">{{ movie.description }}</p>
+            
+            <!-- Trailer Section -->
+            <div *ngIf="trailerUrl" class="trailer-section">
+              <h3>Trailer</h3>
+              <div class="ratio ratio-16x9">
+                <iframe [src]="trailerUrl" title="Movie Trailer" allowfullscreen></iframe>
+              </div>
+            </div>
+            
+            <!-- Cast Section -->
+            <div *ngIf="cast && cast.length > 0" class="cast-section">
+              <h3>Cast</h3>
+              <div class="cast-grid">
+                <div *ngFor="let person of cast" class="cast-item">
+                  <div class="text-center">
+                    <img [src]="getImageUrl(person.profile_image, 'cast')" [alt]="person.name"
+                         class="cast-img"
+                         (error)="onImageError($event, '/assets/images/placeholder-profile.jpg')">
+                    <div class="cast-name">{{ person.name }}</div>
+                    <div *ngIf="person.character" class="cast-character text-muted">{{ person.character }}</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- footer -->
+<app-footer></app-footer>

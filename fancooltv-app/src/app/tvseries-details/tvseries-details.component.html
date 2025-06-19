@@ -1,1 +1,122 @@
-<p>tvseries-details works!</p>
+<!-- navigation -->
+<app-navbar></app-navbar>
+<!-- Series Details -->
+<div class="series-details-container">
+    <div *ngIf="loading" class="d-flex justify-content-center align-items-center" style="height: 300px">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
+
+    <div *ngIf="error" class="alert alert-danger">
+        {{ errorMessage }}
+    </div>
+
+    <ng-container *ngIf="!loading && !error && series">
+        <div id="backdrop" class="position-relative">
+            <div class="position-absolute w-100 h-100" style="background: linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(0,0,0,0.9))"></div>
+            <img [src]="getImageUrl(series.backdrop, 'backdrop')" [alt]="series.title + ' backdrop'" class="backdrop-img"
+                 (error)="onImageError($event, '/assets/images/placeholder-backdrop.jpg')">
+        </div>
+        
+        <div class="container position-relative" style="margin-top: -150px">
+            <div class="row">
+                <div class="col-md-3 mb-4">
+                    <div id="poster" class="rounded shadow-lg">
+                        <img [src]="getImageUrl(series.poster, 'poster')" [alt]="series.title + ' poster'" class="poster-img"
+                             (error)="onImageError($event, '/assets/images/placeholder-poster.jpg')">
+                    </div>
+                </div>
+                <div class="col-md-9">
+                    <div class="details-info mb-5">
+                        <h1 id="title" class="mb-3">{{ series.title }}</h1>
+                        <div id="metadata" class="d-flex flex-wrap gap-3 mb-4">
+                            <span id="year" *ngIf="series.year" class="meta-item"><i class="fas fa-calendar"></i> {{ series.year }}</span>
+                            <span id="rating" *ngIf="series.imdb_rating" class="meta-item"><i class="fas fa-star"></i> {{ series.imdb_rating }}</span>
+                            <span id="duration" *ngIf="series.total_seasons" class="meta-item"><i class="fas fa-tv"></i> {{ series.total_seasons }} Seasons</span>
+                            <span id="category" *ngIf="series.category" class="meta-item"><i class="fas fa-film"></i> {{ series.category.name }}</span>
+                        </div>
+                        <p id="description" class="mb-4">{{ series.description }}</p>
+                        <div id="trailer" class="mb-4" *ngIf="series.trailers && series.trailers.length > 0">
+                            <button class="btn btn-primary " (click)="openTrailerModal(trailerModal)">
+                                <i class="fas fa-play me-2"></i>Watch Trailer
+                            </button>
+                        </div>
+                        
+                        <!-- Cast Section -->
+                        <div id="cast" class="cast-section mt-4" *ngIf="series?.persons && series.persons.length > 0">
+                            <h3>Cast</h3>
+                            <div class="cast-grid">
+                                <div *ngFor="let person of series.persons" class="cast-item">
+                                    <div class="text-center">
+                                        <img [src]="getImageUrl(person.profile_image, 'cast')" [alt]="person.name"
+                                             class="cast-img"
+                                             (error)="onImageError($event, '/assets/images/placeholder-profile.jpg')">
+                                        <div class="cast-name">{{ person.name }}</div>
+                                        <div *ngIf="person.character" class="cast-character text-muted">{{ person.character }}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Seasons Section -->
+                        <div id="seasons" class="seasons-container mt-4" *ngIf="series?.seasons && series.seasons.length > 0">
+                            <h3>Seasons</h3>
+                            <div class="season-section mb-4" *ngFor="let season of series.seasons">
+                                <div class="season-header d-flex justify-content-between align-items-center p-3 bg-secondary bg-opacity-25 rounded" 
+                                     role="button" 
+                                     (click)="toggleSeason(season.season_number)">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <i class="fas" [ngClass]="{'fa-chevron-down': isSeasonExpanded(season.season_number), 'fa-chevron-right': !isSeasonExpanded(season.season_number)}"></i>
+                                        <span class="season-name">Season {{ season.season_number }}</span>
+                                    </div>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <span class="badge episodes-count">{{ season.episodes.length }} Episodes</span>
+                                        <span class="badge season-year">{{ season.year }}</span>
+                                    </div>
+                                </div>
+                                <div class="episodes-list" [ngClass]="{'show': isSeasonExpanded(season.season_number)}" *ngIf="season.episodes && season.episodes.length > 0">
+                                    <div class="episode-item p-2 mt-2 bg-secondary bg-opacity-10 rounded" *ngFor="let episode of season.episodes">
+                                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                                            <div style="display: flex; align-items: center; gap: 12px;">
+                                                <span class="episode-number text-white fs-5" style="min-width: 35px">{{ episode.episode_number }}</span>
+                                                <div class="episode-still rounded" 
+                                                     [style.background-image]="episode['still'] ? 'url(' + getImageUrl(episode['still'], 'still') + ')' : ''" 
+                                                     style="width: 160px; height: 90px; background-size: cover; background-position: center; background-color: #2a2a2a;">
+                                                </div>
+                                                <div>
+                                                    <h5 class="episode-title mb-2">{{ episode.title }}</h5>
+                                                    <p class="episode-description mb-0 text-muted">{{ episode.description }}</p>
+                                                </div>
+                                            </div>
+                                            <button class="btn btn-primary watch-button" (click)="openTrailerModal(trailerModal, episode['trailer'])">
+                                                <i class="fas fa-play me-2"></i>Watch
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </ng-container>
+</div>
+
+<!-- Trailer Modal Template -->
+<ng-template #trailerModal>
+    <div class="modal-header">
+        <h5 class="modal-title">Watch Episode</h5>
+        <button type="button" class="btn-close" aria-label="Close" (click)="closeTrailerModal()"></button>
+    </div>
+    <div class="modal-body">
+        <div class="ratio ratio-16x9">
+            <iframe [src]="trailerUrl" title="YouTube video player" frameborder="0" 
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                allowfullscreen></iframe>
+        </div>
+    </div>
+</ng-template>
+<!-- footer -->
+<app-footer></app-footer>

@@ -63,9 +63,9 @@ export class RegisterComponent implements OnInit {
     this.submitted = true;
     this.error = '';
     this.passwordMismatch = false;
-    this.serverErrors = {}; // Reset degli errori del server
+    this.serverErrors = {}; // Reset server errors
 
-    // Verifica se il form è valido
+    // Check if the form is valid
     if (this.registerForm.invalid) {
       return;
     }
@@ -78,11 +78,11 @@ export class RegisterComponent implements OnInit {
 
     this.loading = true;
 
-    // Formatta la data di nascita nel formato YYYY-MM-DD richiesto dal backend
+    // Format the birth date in YYYY-MM-DD format required by the backend
     let birthday = this.f['birthday'].value;
     if (birthday) {
-      // Se la data è già una stringa nel formato corretto, la usiamo così com'è
-      // Altrimenti, la formattiamo
+      // If the date is already a string in the correct format, we use it as is
+      // Otherwise, we format it
       if (birthday instanceof Date) {
         const year = birthday.getFullYear();
         const month = String(birthday.getMonth() + 1).padStart(2, '0');

@@ -1,1 +1,112 @@
-<p>tvseries works!</p>
+<!-- navigation -->
+<app-navbar></app-navbar>
+<div class="container-fluid mt-5 py-5">
+    <!-- Search and Filter -->
+    <div class="container mb-5">
+      <div class="row">
+        <div class="col-md-6 mb-3 mb-md-0">
+          <div class="input-group">
+            <input type="text" class="form-control bg-dark text-white border-secondary" placeholder="Search TV series..." 
+                   #searchInput (keyup.enter)="search(searchInput.value)">
+            <button class="btn btn-primary" type="button" (click)="search(searchInput.value)">
+              <i class="fas fa-search"></i> Search
+            </button>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="d-flex gap-3 justify-content-md-end">
+            <select class="form-select bg-dark text-white border-secondary" 
+                    (change)="filterByGenre($any($event.target).value)">
+              <option value="">All Genres</option>
+              <option *ngFor="let category of categories" [value]="category.category_id">
+                {{ category.name }}
+              </option>
+            </select>
+            <select class="form-select bg-dark text-white border-secondary" 
+                    (change)="filterByYear($any($event.target).value)">
+              <option value="">All Years</option>
+              <option *ngFor="let year of years" [value]="year">
+                {{ year }}
+              </option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TV Series Grid -->
+    <div class="container">
+      <!-- Error message -->
+      <div *ngIf="error" class="alert alert-danger mb-4">
+        {{ errorMessage }}
+      </div>
+      
+      <!-- TV Series Grid -->
+      <div class="row g-4">
+        <!-- TV Series Card -->
+        <div class="col-12 col-custom-2 col-custom-3 col-custom-4 col-custom-5" *ngFor="let item of series">
+          <article class="movie-card">
+            <div class="card-img-wrapper">
+              <img [src]="getImageUrl(item.poster)" [alt]="item.title + ' Poster'" 
+                   class="w-100 h-100 object-fit-cover"
+                   (error)="$any($event.target).parentElement.querySelector('.no-image-placeholder').classList.remove('d-none'); $any($event.target).classList.add('d-none')">
+              <div class="no-image-placeholder h-100 d-none d-flex align-items-center justify-content-center">
+                <i class="fa-solid fa-image"></i>
+              </div>
+              
+              <div class="release-date">
+                <i class="fa-solid fa-calendar-days"></i>
+                <span>{{ item.year }}</span>
+              </div>
+              
+              <div class="rating">
+                <i class="fa-solid fa-star"></i>
+                <span>{{ item.imdb_rating }}</span>
+              </div>
+            </div>
+
+            <div class="card-overlay">
+              <div class="overlay-content">
+                <h3 class="card-title">{{ item.title }}</h3>
+                
+                <div class="movie-meta">
+                  <div class="meta-item duration-item">
+                    <i class="fa-solid fa-clock"></i>
+                    <span>{{ item.total_seasons }} Seasons</span>
+                  </div>
+                  
+                  <div class="meta-item category-item">
+                    <i class="fa-solid fa-clapperboard"></i>
+                    <span>{{ item.category ? item.category.name : '' }}</span>
+                  </div>
+                </div>
+                
+                <a class="btn-details" [routerLink]="['/tvseries-details', item.tv_series_id]" 
+                   [attr.aria-label]="'View details for ' + item.title" 
+                   [attr.title]="'View details for ' + item.title">
+                  <span>Details</span>
+                  <i class="fa-solid fa-arrow-right"></i>
+                </a>
+              </div>
+            </div>
+          </article>
+        </div>
+      </div>
+
+      <!-- Loading Spinner -->
+      <div *ngIf="loading" class="text-center mt-4">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+      </div>
+
+      <!-- Load More Button -->
+      <div class="text-center mt-5" *ngIf="hasMorePages && !loading">
+        <button class="btn btn-outline-primary" (click)="loadMore()">
+          <i class="fas fa-plus me-2"></i>Load More
+        </button>
+      </div>
+    </div>
+</div>
+<!-- footer -->
+<app-footer></app-footer>
