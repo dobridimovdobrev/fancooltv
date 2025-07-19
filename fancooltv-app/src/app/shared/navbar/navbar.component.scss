@@ -61,3 +61,47 @@
     }
   }
 }
+
+// Stile per l'effetto glass nel dropdown menu - uguale alla navbar
+.glass-effect {
+  background-color: rgba($dark, 0.9);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba($white, 0.1);
+  box-shadow: 0 2px 10px rgba($dark, 0.3);
+  color: white;
+  
+  .dropdown-item {
+    color: white;
+    padding: 10px 15px;
+    
+    &:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+    
+    i {
+      margin-right: 10px;
+      width: 20px;
+      text-align: center;
+    }
+  }
+  
+  .dropdown-divider {
+    border-color: rgba(255, 255, 255, 0.2);
+  }
+}
+
+// Stile per l'icona utente nel dropdown
+.dropdown-toggle::after {
+  display: none; // Nascondiamo la freccia del dropdown
+}
+
+// Stile per tutte le icone nella navbar
+.nav-link i {
+  font-size: 1.5rem;
+  margin-right: 5px;
+}
+
+// Stile per l'icona utente
+.user-icon-link i {
+  font-size: 20px !important;
+}

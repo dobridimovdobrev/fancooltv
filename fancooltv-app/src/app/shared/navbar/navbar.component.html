@@ -23,16 +23,37 @@
             <i class="fa-solid fa-tv"></i> TV Series
           </a>
         </li>
-        <!-- Login/Logout button based on authentication state -->
+        <!-- Login button for non-authenticated users -->
         <li class="nav-item" *ngIf="!authService.isAuthenticated()">
-          <a routerLink="/login" routerLinkActive="active" class="nav-link" aria-label="Login to your account" title="Login to your account">
-            <i class="fa-solid fa-sign-in-alt"></i> Login
+          <a routerLink="/login" routerLinkActive="active" class="nav-link login-link" aria-label="Login to your account" title="Login to your account">
+            <i class="fa-solid fa-sign-in-alt"></i> <span>Login</span>
           </a>
         </li>
-        <li class="nav-item" *ngIf="authService.isAuthenticated()">
-          <a href="javascript:void(0)" class="nav-link" (click)="logout()" aria-label="Logout from your account" title="Logout from your account">
-            <i class="fa-solid fa-sign-out-alt"></i> Logout
+        
+        <!-- User dropdown menu for authenticated users -->
+        <li class="nav-item" dropdown *ngIf="authService.isAuthenticated()">
+          <a href="javascript:void(0)" id="userDropdown" dropdownToggle class="nav-link user-icon-link">
+            <i class="fa-solid fa-user-shield"></i>
           </a>
+          <div *dropdownMenu class="dropdown-menu dropdown-menu-end glass-effect">
+            <!-- Admin-only menu item -->
+            <a *ngIf="authService.isAdmin()" class="dropdown-item" routerLink="/dashboard">
+              <i class="fa-solid fa-tachometer-alt"></i> Dashboard
+            </a>
+            
+            <!-- Regular user menu items -->
+            <a *ngIf="!authService.isAdmin()" class="dropdown-item" routerLink="/profile">
+              <i class="fa-solid fa-user"></i> Profile
+            </a>
+            <a *ngIf="!authService.isAdmin()" class="dropdown-item" routerLink="/credits">
+              <i class="fa-solid fa-coins"></i> Credits
+            </a>
+            
+            <!-- Logout for all authenticated users -->
+            <a href="javascript:void(0)" class="dropdown-item" (click)="logout()">
+              <i class="fa-solid fa-sign-out-alt"></i> Logout
+            </a>
+          </div>
         </li>
       </ul>
     </div>
@@ -67,17 +88,41 @@
           <i class="fa-solid fa-tv"></i> TV Series
         </a>
       </li>
-      <!-- Login/Logout button based on authentication state -->
+      <!-- Login button for non-authenticated users -->
       <li class="nav-item" *ngIf="!authService.isAuthenticated()">
-        <a routerLink="/login" routerLinkActive="active" class="nav-link" aria-label="Login to your account" title="Login to your account">
-          <i class="fa-solid fa-sign-in-alt"></i> Login
+        <a routerLink="/login" routerLinkActive="active" class="nav-link login-link" aria-label="Login to your account" title="Login to your account">
+          <i class="fa-solid fa-sign-in-alt"></i> <span>Login</span>
         </a>
       </li>
-      <li class="nav-item" *ngIf="authService.isAuthenticated()">
-        <a href="javascript:void(0)" class="nav-link" (click)="logout()" aria-label="Logout from your account" title="Logout from your account">
-          <i class="fa-solid fa-sign-out-alt"></i> Logout
-        </a>
-      </li>
+      
+      <!-- User menu items for authenticated users -->
+      <ng-container *ngIf="authService.isAuthenticated()">
+        <!-- Admin-only menu item -->
+        <li class="nav-item" *ngIf="authService.isAdmin()">
+          <a routerLink="/dashboard" class="nav-link" aria-label="Go to dashboard" title="Go to dashboard">
+            <i class="fa-solid fa-tachometer-alt"></i> Dashboard
+          </a>
+        </li>
+        
+        <!-- Regular user menu items -->
+        <li class="nav-item" *ngIf="!authService.isAdmin()">
+          <a routerLink="/profile" class="nav-link" aria-label="View your profile" title="View your profile">
+            <i class="fa-solid fa-user"></i> Profile
+          </a>
+        </li>
+        <li class="nav-item" *ngIf="!authService.isAdmin()">
+          <a routerLink="/credits" class="nav-link" aria-label="View your credits" title="View your credits">
+            <i class="fa-solid fa-coins"></i> Credits
+          </a>
+        </li>
+        
+        <!-- Logout for all authenticated users -->
+        <li class="nav-item">
+          <a href="javascript:void(0)" class="nav-link" (click)="logout()" aria-label="Logout from your account" title="Logout from your account">
+            <i class="fa-solid fa-sign-out-alt"></i> Logout
+          </a>
+        </li>
+      </ng-container>
     </ul>
   </div>
 </div>

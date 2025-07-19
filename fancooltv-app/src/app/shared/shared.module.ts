@@ -4,6 +4,7 @@ import { RouterModule } from '@angular/router';
 import { NavbarComponent } from './navbar/navbar.component';
 import { FooterComponent } from './footer/footer.component';
 import { AccordionModule } from 'ngx-bootstrap/accordion';
+import { BsDropdownModule } from 'ngx-bootstrap/dropdown';
 
 @NgModule({
   declarations: [
@@ -13,12 +14,14 @@ import { AccordionModule } from 'ngx-bootstrap/accordion';
   imports: [
     CommonModule,
     RouterModule,
-    AccordionModule.forRoot()
+    AccordionModule.forRoot(),
+    BsDropdownModule.forRoot()
   ],
   exports: [
     NavbarComponent,
     FooterComponent,
-    AccordionModule
+    AccordionModule,
+    BsDropdownModule
   ]
 })
 export class SharedModule { }
