@@ -1,0 +1,78 @@
+<div class="admin-home-container">
+  <div class="dashboard-header">
+    <h2>Dashboard Admin</h2>
+    <p>Benvenuto nel pannello di amministrazione</p>
+  </div>
+
+  <div class="stats-cards">
+    <div class="stat-card">
+      <div class="card-icon">
+        <i class="fa-solid fa-film"></i>
+      </div>
+      <div class="card-content">
+        <h3>{{ stats.totalMovies }}</h3>
+        <p>Film</p>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="card-icon">
+        <i class="fa-solid fa-tv"></i>
+      </div>
+      <div class="card-content">
+        <h3>{{ stats.totalSeries }}</h3>
+        <p>Serie TV</p>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="card-icon">
+        <i class="fa-solid fa-user"></i>
+      </div>
+      <div class="card-content">
+        <h3>{{ stats.totalPersons }}</h3>
+        <p>Persone</p>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="card-icon">
+        <i class="fa-solid fa-users"></i>
+      </div>
+      <div class="card-content">
+        <h3>{{ stats.totalUsers }}</h3>
+        <p>Utenti</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="recent-activity">
+    <h3>Attività Recenti</h3>
+    <div class="activity-card">
+      <div class="activity-header">
+        <h4>Nuovi Contenuti</h4>
+        <span class="badge">{{ stats.recentUploads }}</span>
+      </div>
+      <p>Contenuti caricati negli ultimi 7 giorni</p>
+      <button class="btn btn-primary">Gestisci Contenuti</button>
+    </div>
+  </div>
+
+  <div class="quick-actions">
+    <h3>Azioni Rapide</h3>
+    <div class="action-buttons">
+      <button class="btn btn-primary">
+        <i class="fa-solid fa-plus"></i> Aggiungi Film
+      </button>
+      <button class="btn btn-primary">
+        <i class="fa-solid fa-plus"></i> Aggiungi Serie TV
+      </button>
+      <button class="btn btn-primary">
+        <i class="fa-solid fa-plus"></i> Aggiungi Persona
+      </button>
+      <button class="btn btn-primary">
+        <i class="fa-solid fa-upload"></i> Carica Video
+      </button>
+    </div>
+  </div>
+</div>

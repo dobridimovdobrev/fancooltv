@@ -1,0 +1,76 @@
+<div class="user-profile-container">
+  <div class="profile-header">
+    <div class="profile-avatar">
+      <img [src]="user.avatar" alt="Avatar utente">
+    </div>
+    <div class="profile-info">
+      <h2>{{ user.nome }} {{ user.cognome }}</h2>
+      <p class="username">@{{ user.username }}</p>
+      <p class="member-since">Membro dal {{ user.iscrittoDal }}</p>
+    </div>
+  </div>
+
+  <div class="profile-stats">
+    <div class="stat-item">
+      <span class="stat-value">{{ user.preferiti }}</span>
+      <span class="stat-label">Preferiti</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-value">{{ user.recensioni }}</span>
+      <span class="stat-label">Recensioni</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-value">{{ user.ultimoAccesso }}</span>
+      <span class="stat-label">Ultimo accesso</span>
+    </div>
+  </div>
+
+  <div class="profile-form">
+    <h3>Informazioni Personali</h3>
+    <form (ngSubmit)="updateProfile()">
+      <div class="form-group">
+        <label for="nome">Nome</label>
+        <input type="text" id="nome" name="nome" [(ngModel)]="user.nome" class="form-control">
+      </div>
+      
+      <div class="form-group">
+        <label for="cognome">Cognome</label>
+        <input type="text" id="cognome" name="cognome" [(ngModel)]="user.cognome" class="form-control">
+      </div>
+      
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email" [(ngModel)]="user.email" class="form-control">
+      </div>
+      
+      <div class="form-group">
+        <label for="username">Username</label>
+        <input type="text" id="username" name="username" [(ngModel)]="user.username" class="form-control">
+      </div>
+      
+      <button type="submit" class="btn btn-primary">Salva Modifiche</button>
+    </form>
+  </div>
+  
+  <div class="password-section">
+    <h3>Cambia Password</h3>
+    <form (ngSubmit)="changePassword()">
+      <div class="form-group">
+        <label for="currentPassword">Password Attuale</label>
+        <input type="password" id="currentPassword" name="currentPassword" class="form-control">
+      </div>
+      
+      <div class="form-group">
+        <label for="newPassword">Nuova Password</label>
+        <input type="password" id="newPassword" name="newPassword" class="form-control">
+      </div>
+      
+      <div class="form-group">
+        <label for="confirmPassword">Conferma Password</label>
+        <input type="password" id="confirmPassword" name="confirmPassword" class="form-control">
+      </div>
+      
+      <button type="submit" class="btn btn-primary">Cambia Password</button>
+    </form>
+  </div>
+</div>

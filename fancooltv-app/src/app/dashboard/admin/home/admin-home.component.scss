@@ -1,0 +1,144 @@
+@import '../../../../../src/scss/abstracts/variables';
+@import '../../../../../src/scss/abstracts/mixins';
+
+.admin-home-container {
+  padding: 1rem;
+  
+  .dashboard-header {
+    margin-bottom: 2rem;
+    
+    h2 {
+      color: $primary;
+      margin-bottom: 0.5rem;
+    }
+    
+    p {
+      color: rgba($white, 0.7);
+      font-size: 1rem;
+    }
+  }
+  
+  .stats-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+    
+    .stat-card {
+      background: rgba($dark, 0.7);
+      backdrop-filter: blur(10px);
+      border-radius: $border-radius;
+      padding: 1.5rem;
+      display: flex;
+      align-items: center;
+      border: 1px solid rgba($white, 0.1);
+      box-shadow: 0 4px 15px rgba($black, 0.2);
+      
+      .card-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background: rgba($primary, 0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 1rem;
+        
+        i {
+          font-size: 1.5rem;
+          color: $primary;
+        }
+      }
+      
+      .card-content {
+        h3 {
+          font-size: 1.8rem;
+          font-weight: 700;
+          margin: 0;
+          color: $white;
+        }
+        
+        p {
+          margin: 0;
+          color: rgba($white, 0.7);
+          font-size: 0.9rem;
+        }
+      }
+    }
+  }
+  
+  .recent-activity, .quick-actions {
+    background: rgba($dark, 0.7);
+    backdrop-filter: blur(10px);
+    border-radius: $border-radius;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    border: 1px solid rgba($white, 0.1);
+    box-shadow: 0 4px 15px rgba($black, 0.2);
+    
+    h3 {
+      color: $primary;
+      margin-bottom: 1rem;
+      font-size: 1.3rem;
+    }
+    
+    .activity-card {
+      .activity-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.5rem;
+        
+        h4 {
+          margin: 0;
+          color: $white;
+        }
+        
+        .badge {
+          background-color: $primary;
+          color: $white;
+          padding: 0.25rem 0.75rem;
+          border-radius: 20px;
+          font-size: 0.8rem;
+        }
+      }
+      
+      p {
+        color: rgba($white, 0.7);
+        margin-bottom: 1rem;
+      }
+    }
+    
+    .action-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      
+      .btn {
+        display: flex;
+        align-items: center;
+        
+        i {
+          margin-right: 0.5rem;
+        }
+      }
+    }
+  }
+}
+
+// Responsive adjustments
+@media (max-width: $breakpoint-md) {
+  .admin-home-container {
+    .stats-cards {
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    }
+    
+    .action-buttons {
+      flex-direction: column;
+      
+      .btn {
+        width: 100%;
+      }
+    }
+  }
+}

@@ -66,7 +66,7 @@ export class AuthService {
       );
   }
 
-  // Login method - ultra-simplified version
+  // Login method - versione completamente riscritta
   public login(credentials: LoginCredentials): Observable<User> {
     console.log('Login attempt with username:', credentials.username);
     
@@ -77,74 +77,119 @@ export class AuthService {
       'X-Requested-With': 'XMLHttpRequest'
     });
     
-    // Complete log of the request
-    console.log('URL completo:', `${this.baseUrl}/api/login`);
-    console.log('Credenziali inviate:', JSON.stringify(credentials));
-    console.log('Headers:', headers);
-    
     // Perform the login request directly
-    // Remove withCredentials: true to avoid CORS issues
     return this.http.post<any>(
       `${this.baseUrl}/api/login`,
       credentials,
       { headers: headers }
     ).pipe(
-      tap(response => {
-        console.log('Risposta login ricevuta:', response);
-        console.log('Tipo di risposta:', typeof response);
-        console.log('Struttura risposta:', JSON.stringify(response));
-      }),
+      // Primo controllo: il nuovo formato API con token diretto
       map(response => {
-        console.log('Risposta login ricevuta:', response);
-        console.log('Tipo di risposta:', typeof response);
-        console.log('Struttura risposta:', JSON.stringify(response));
+        console.log('Risposta login:', response);
         
-        if (response && response.status === 'success') {
-          // Handle the response that has the token in response.message.token
-          if (response.message && response.message.token) {
-            // Save the token
-            localStorage.setItem('auth_token', response.message.token);
-            
-            // Create a basic user object with the fields required by the User interface
-            const user: User = {
-              id: 0, // ID temporaneo
-              username: credentials.username,
-              email: '',
-              first_name: '',
-              last_name: '',
-              gender: '',
-              birthday: '',
-              role: 'user',
-              created_at: new Date().toISOString(),
-              updated_at: new Date().toISOString()
-            };
-            localStorage.setItem('current_user', JSON.stringify(user));
-            
-            // Aggiorniamo lo stato dell'utente corrente
-            this.currentUserSubject.next(user);
-            return user;
-          } 
-          // Handle the original format in case it changes in the future
-          else if (response.data && response.data.token) {
-            localStorage.setItem('auth_token', response.data.token);
+        // NUOVO FORMATO API: { token, role, user_id, success }
+        if (response && response.token) {
+          console.log('Formato API rilevato: nuovo formato con token diretto');
+          
+          // Salva il token
+          localStorage.setItem('auth_token', response.token);
+          
+          // Salva il ruolo dell'utente
+          const userRole = response.role || 'user';
+          localStorage.setItem('userRole', userRole);
+          
+          // Crea oggetto utente
+          const user: User = {
+            id: response.user_id || 0,
+            username: credentials.username,
+            email: '',
+            first_name: '',
+            last_name: '',
+            gender: '',
+            birthday: '',
+            role: userRole,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          };
+          
+          // Salva e aggiorna stato
+          localStorage.setItem('current_user', JSON.stringify(user));
+          this.currentUserSubject.next(user);
+          return user;
+        }
+        
+        // VECCHIO FORMATO API: { status: 'success', message: { token } }
+        else if (response && response.status === 'success' && response.message && response.message.token) {
+          console.log('Formato API rilevato: vecchio formato con status e message.token');
+          
+          // Salva il token
+          localStorage.setItem('auth_token', response.message.token);
+          
+          // Determina il ruolo (temporaneamente basato sul nome utente)
+          const isAdmin = credentials.username.toLowerCase().includes('admin');
+          const userRole = isAdmin ? 'admin' : 'user';
+          localStorage.setItem('userRole', userRole);
+          
+          // Crea oggetto utente
+          const user: User = {
+            id: 0,
+            username: credentials.username,
+            email: '',
+            first_name: '',
+            last_name: '',
+            gender: '',
+            birthday: '',
+            role: userRole,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          };
+          
+          // Salva e aggiorna stato
+          localStorage.setItem('current_user', JSON.stringify(user));
+          this.currentUserSubject.next(user);
+          return user;
+        }
+        
+        // FORMATO ALTERNATIVO: { data: { token, user } }
+        else if (response && response.data && response.data.token) {
+          console.log('Formato API rilevato: formato alternativo con data.token');
+          
+          // Salva il token
+          localStorage.setItem('auth_token', response.data.token);
+          
+          // Salva l'utente se presente
+          if (response.data.user) {
             localStorage.setItem('current_user', JSON.stringify(response.data.user));
             this.currentUserSubject.next(response.data.user);
             return response.data.user;
           }
+          
+          // Altrimenti crea un utente base
+          const user: User = {
+            id: 0,
+            username: credentials.username,
+            email: '',
+            first_name: '',
+            last_name: '',
+            gender: '',
+            birthday: '',
+            role: 'user',
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          };
+          
+          // Salva e aggiorna stato
+          localStorage.setItem('current_user', JSON.stringify(user));
+          this.currentUserSubject.next(user);
+          return user;
         }
         
-        // If we get here, the format is not valid
-        console.error('Invalid login response format:', response);
-        throw new Error('Login failed: invalid response');
+        // Se arriviamo qui, il formato non è valido
+        console.error('Formato risposta login non valido:', response);
+        throw new Error('Login fallito: formato risposta non valido');
       }),
       catchError(error => {
-        console.error('Errore di login completo:', error);
-        console.error('Status code:', error.status);
-        console.error('Error body:', error.error);
-        
-        if (error.error && error.error.message) {
-          return throwError(() => new Error(error.error.message));
-        }
+        console.error('Errore di login:', error);
         return throwError(() => new Error('Username o password non validi'));
       })
     );
