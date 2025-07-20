@@ -3,31 +3,43 @@ import { CommonModule } from '@angular/common';
 import { RouterModule, Routes } from '@angular/router';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
-// Placeholder per il componente che verrà implementato in futuro
-@Component({
-  template: `<div class="p-4"><h2>Gestione Film</h2><p>Questa sezione è in fase di sviluppo</p></div>`
-})
-export class AdminMoviesComponent {}
+// Import components
+import { AdminMoviesComponent } from './admin-movies.component';
+import { MovieFormComponent } from './movie-form.component';
+import { MovieFormPageComponent } from './movie-form-page.component';
+
+// Import NgxBootstrap module
+import { NgxBootstrapModule } from '../../../shared/ngx-bootstrap/ngx-bootstrap.module';
 
 const routes: Routes = [
   {
     path: '',
     component: AdminMoviesComponent
+  },
+  {
+    path: 'create',
+    component: MovieFormPageComponent
+  },
+  {
+    path: 'edit/:id',
+    component: MovieFormPageComponent
   }
 ];
 
 @NgModule({
   declarations: [
-    AdminMoviesComponent
+    AdminMoviesComponent,
+    MovieFormComponent,
+    MovieFormPageComponent
   ],
   imports: [
     CommonModule,
     FormsModule,
     ReactiveFormsModule,
+    NgxBootstrapModule,
     RouterModule.forChild(routes)
   ]
 })
 export class AdminMoviesModule { }
 
-// Aggiungiamo l'import di Component che mancava
-import { Component } from '@angular/core';
+// Nota: MovieFormPageComponent è già importato sopra

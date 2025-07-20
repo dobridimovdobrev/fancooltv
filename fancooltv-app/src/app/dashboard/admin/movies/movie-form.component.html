@@ -1,0 +1,348 @@
+<form [formGroup]="movieForm" (ngSubmit)="onSubmit()" class="movie-form">
+  <div class="row">
+    <!-- Basic Information Section -->
+    <div class="col-md-8">
+      <div class="card mb-4">
+        <div class="card-header">
+          <h5 class="mb-0">Basic Information</h5>
+        </div>
+        <div class="card-body">
+          <!-- Title -->
+          <div class="mb-3">
+            <label for="title" class="form-label">Title *</label>
+            <input type="text" class="form-control" id="title" formControlName="title">
+            <div *ngIf="movieForm.get('title')?.invalid && movieForm.get('title')?.touched" class="text-danger">
+              <small *ngIf="movieForm.get('title')?.errors?.['required']">Title is required</small>
+              <small *ngIf="movieForm.get('title')?.errors?.['maxlength']">Title cannot exceed 128 characters</small>
+            </div>
+          </div>
+
+          <!-- Il campo slug è stato rimosso perché viene generato automaticamente -->
+
+          <!-- Description -->
+          <div class="mb-3">
+            <label for="description" class="form-label">Description *</label>
+            <textarea class="form-control" id="description" rows="5" formControlName="description"></textarea>
+            <div *ngIf="movieForm.get('description')?.invalid && movieForm.get('description')?.touched" class="text-danger">
+              <small *ngIf="movieForm.get('description')?.errors?.['required']">Description is required</small>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Details Section -->
+      <div class="card mb-4">
+        <div class="card-header">
+          <h5 class="mb-0">Movie Details</h5>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <!-- Year -->
+            <div class="col-md-4 mb-3">
+              <label for="year" class="form-label">Year *</label>
+              <input type="number" class="form-control" id="year" formControlName="year">
+              <div *ngIf="movieForm.get('year')?.invalid && movieForm.get('year')?.touched" class="text-danger">
+                <small *ngIf="movieForm.get('year')?.errors?.['required']">Year is required</small>
+                <small *ngIf="movieForm.get('year')?.errors?.['min'] || movieForm.get('year')?.errors?.['max']">Year must be between 1900 and 2100</small>
+              </div>
+            </div>
+
+            <!-- Duration -->
+            <div class="col-md-4 mb-3">
+              <label for="duration" class="form-label">Duration (min)</label>
+              <input type="number" class="form-control" id="duration" formControlName="duration">
+              <div *ngIf="movieForm.get('duration')?.invalid && movieForm.get('duration')?.touched" class="text-danger">
+                <small *ngIf="movieForm.get('duration')?.errors?.['min']">Duration must be positive</small>
+              </div>
+            </div>
+
+            <!-- IMDb Rating -->
+            <div class="col-md-4 mb-3">
+              <label for="imdb_rating" class="form-label">IMDb Rating</label>
+              <input type="number" step="0.1" class="form-control" id="imdb_rating" formControlName="imdb_rating">
+              <div *ngIf="movieForm.get('imdb_rating')?.invalid && movieForm.get('imdb_rating')?.touched" class="text-danger">
+                <small *ngIf="movieForm.get('imdb_rating')?.errors?.['min'] || movieForm.get('imdb_rating')?.errors?.['max']">Rating must be between 0 and 10</small>
+              </div>
+            </div>
+          </div>
+
+          <div class="row">
+            <!-- Premiere Date -->
+            <div class="col-md-6 mb-3">
+              <label for="premiere_date" class="form-label">Premiere Date</label>
+              <input type="date" class="form-control" id="premiere_date" formControlName="premiere_date">
+            </div>
+
+            <!-- Status -->
+            <div class="col-md-6 mb-3">
+              <label for="status" class="form-label">Status *</label>
+              <select class="form-select" id="status" formControlName="status">
+                <option *ngFor="let option of statusOptions" [value]="option.value">{{ option.label }}</option>
+              </select>
+              <div *ngIf="movieForm.get('status')?.invalid && movieForm.get('status')?.touched" class="text-danger">
+                <small *ngIf="movieForm.get('status')?.errors?.['required']">Status is required</small>
+              </div>
+            </div>
+          </div>
+
+          <!-- Category -->
+          <div class="mb-3">
+            <label for="category_id" class="form-label">Category *</label>
+            <select class="form-select" id="category_id" formControlName="category_id">
+              <option [ngValue]="null">Select a category</option>
+              <option *ngFor="let category of categories" [ngValue]="category.category_id">{{ category.name }}</option>
+            </select>
+            <div *ngIf="movieForm.get('category_id')?.invalid && movieForm.get('category_id')?.touched" class="text-danger">
+              <small *ngIf="movieForm.get('category_id')?.errors?.['required']">Category is required</small>
+            </div>
+            <!-- Rimosso debug info -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Trailers Section -->
+      <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h5 class="mb-0">Trailers</h5>
+          <button type="button" class="btn btn-sm btn-primary" (click)="addTrailer()">
+            <i class="fa-solid fa-plus"></i> Add Trailer
+          </button>
+        </div>
+        <div class="card-body">
+          <div formArrayName="trailers">
+            <div *ngFor="let trailer of trailersArray.controls; let i = index" [formGroupName]="i" class="trailer-item mb-3 p-3 border border-secondary rounded">
+              <div class="d-flex justify-content-between mb-2">
+                <h6>Trailer #{{ i + 1 }}</h6>
+                <button type="button" class="btn btn-sm btn-danger" (click)="removeTrailer(i)">
+                  <i class="fa-solid fa-trash"></i>
+                </button>
+              </div>
+              <div class="row">
+                <div class="col-md-4 mb-2">
+                  <label class="form-label">Title</label>
+                  <input type="text" class="form-control" formControlName="title">
+                </div>
+                <div class="col-md-8 mb-2">
+                  <label class="form-label">URL</label>
+                  <input type="url" class="form-control" formControlName="url">
+                </div>
+              </div>
+            </div>
+            <div *ngIf="trailersArray.length === 0" class="text-center py-3">
+              <p style="color: #c3c3c3 !important;">No trailers added yet. Click "Add Trailer" to add one.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Video Files Section -->
+      <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h5 class="mb-0">Video Files</h5>
+          <button type="button" class="btn btn-sm btn-primary" (click)="addVideoFile()">
+            <i class="fa-solid fa-plus"></i> Add Video File
+          </button>
+        </div>
+        <div class="card-body">
+          <div formArrayName="video_files">
+            <div *ngFor="let videoFile of videoFilesArray.controls; let i = index" [formGroupName]="i" class="video-file-item mb-3 p-3 border border-secondary rounded">
+              <div class="d-flex justify-content-between mb-2">
+                <h6>Video File #{{ i + 1 }}</h6>
+                <button type="button" class="btn btn-sm btn-danger" (click)="removeVideoFile(i)">
+                  <i class="fa-solid fa-trash"></i>
+                </button>
+              </div>
+              <div class="row">
+                <div class="col-md-4 mb-2">
+                  <label class="form-label">Title</label>
+                  <input type="text" class="form-control" formControlName="title">
+                </div>
+                <div class="col-md-4 mb-2">
+                  <label class="form-label">Type</label>
+                  <input type="text" class="form-control" formControlName="type">
+                </div>
+                <div class="col-md-4 mb-2">
+                  <label class="form-label">URL</label>
+                  <input type="url" class="form-control" formControlName="url">
+                </div>
+              </div>
+            </div>
+            <div *ngIf="videoFilesArray.length === 0" class="text-center py-3">
+              <p style="color: #c3c3c3 !important;">No video files added yet. Click "Add Video File" to add one.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Cast Section -->
+      <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h5 class="mb-0">Cast</h5>
+          <button type="button" class="btn btn-sm btn-primary" (click)="addPerson()">
+            <i class="fa-solid fa-plus"></i> Add Person
+          </button>
+        </div>
+        <div class="card-body">
+          <div formArrayName="persons">
+            <div *ngFor="let person of personsArray.controls; let i = index" [formGroupName]="i" class="person-item mb-3 p-3 border border-secondary rounded">
+              <div class="d-flex justify-content-between mb-2">
+                <h6>Cast Member #{{ i + 1 }}</h6>
+                <button type="button" class="btn btn-sm btn-danger" (click)="removePerson(i)">
+                  <i class="fa-solid fa-trash"></i>
+                </button>
+              </div>
+              <div class="row">
+                <div class="col-md-12 mb-2">
+                  <label class="form-label">Person</label>
+                  <input type="text" class="form-control" [value]="getPersonName(personsArray.at(i).get('person_id')?.value)" readonly>
+                </div>
+                <!-- Il campo Character è stato rimosso come richiesto -->
+              </div>
+            </div>
+            <div *ngIf="personsArray.length === 0" class="text-center py-3">
+              <p style="color: #c3c3c3 !important;">No cast members added yet. Click "Add Person" to add one.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sidebar (Images) -->
+    <div class="col-md-4">
+      <!-- Poster Section -->
+      <div class="card mb-4">
+        <div class="card-header">
+          <h5 class="mb-0">Poster</h5>
+        </div>
+        <div class="card-body">
+          <div class="poster-preview mb-3">
+            <img *ngIf="movieForm.get('poster')?.value" [src]="apiService.getImageUrl(movieForm.get('poster')?.value, 'poster')" class="img-fluid rounded poster-image" alt="Movie Poster">
+            <div *ngIf="!movieForm.get('poster')?.value" class="poster-placeholder">
+              <i class="fa-solid fa-image fa-3x"></i>
+              <p>No poster uploaded</p>
+            </div>
+          </div>
+          <div class="mb-3">
+            <label for="poster" class="form-label">Poster URL</label>
+            <input type="text" class="form-control" id="poster" formControlName="poster">
+          </div>
+          <div class="mb-3">
+            <label for="posterFile" class="form-label">Upload Poster</label>
+            <input type="file" class="form-control" id="posterFile" (change)="onPosterUpload($event)" accept="image/*">
+            <div *ngIf="uploadingPoster" class="mt-2">
+              <div class="spinner-border spinner-border-sm text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+              </div>
+              <span class="ms-2">Uploading...</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Backdrop Section -->
+      <div class="card mb-4">
+        <div class="card-header">
+          <h5 class="mb-0">Backdrop</h5>
+        </div>
+        <div class="card-body">
+          <div class="backdrop-preview mb-3">
+            <img *ngIf="movieForm.get('backdrop')?.value" [src]="apiService.getImageUrl(movieForm.get('backdrop')?.value, 'backdrop')" class="img-fluid rounded" alt="Movie Backdrop">
+            <div *ngIf="!movieForm.get('backdrop')?.value" class="backdrop-placeholder">
+              <i class="fa-solid fa-image fa-3x"></i>
+              <p>No backdrop uploaded</p>
+            </div>
+          </div>
+          <div class="mb-3">
+            <label for="backdrop" class="form-label">Backdrop URL</label>
+            <input type="text" class="form-control" id="backdrop" formControlName="backdrop">
+          </div>
+          <div class="mb-3">
+            <label for="backdropFile" class="form-label">Upload Backdrop</label>
+            <input type="file" class="form-control" id="backdropFile" (change)="onBackdropUpload($event)" accept="image/*">
+            <div *ngIf="uploadingBackdrop" class="mt-2">
+              <div class="spinner-border spinner-border-sm text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+              </div>
+              <span class="ms-2">Uploading...</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- La sezione Additional Images è stata rimossa come richiesto -->
+    </div>
+  </div>
+
+  <!-- Form Actions -->
+  <div class="d-flex justify-content-end mt-4 mb-4">
+    <button type="button" class="btn btn-secondary me-2" (click)="onCancel()">Cancel</button>
+    <button type="submit" class="btn btn-primary" [disabled]="loading">
+      <span *ngIf="loading" class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+      {{ movie ? 'Update Movie' : 'Create Movie' }}
+    </button>
+  </div>
+</form>
+
+<!-- Template per il modal di ngx-bootstrap -->
+<ng-template #personModal>
+  <div class="modal-header">
+    <h4 class="modal-title">Search or Add Person</h4>
+    <button type="button" class="btn-close" aria-label="Close" (click)="modalRef?.hide()"></button>
+  </div>
+  <div class="modal-body">
+    <!-- Person search -->
+    <div class="mb-3">
+      <label class="form-label">Search Person</label>
+      <div class="input-group">
+        <input type="text" class="form-control" placeholder="Start typing to search..." #searchPersonInput (keyup.enter)="searchPerson(searchPersonInput.value)">
+        <button class="btn btn-outline-primary" type="button" (click)="searchPerson(searchPersonInput.value)">
+          <i class="fa-solid fa-search"></i> Search
+        </button>
+      </div>
+    </div>
+
+    <!-- Search results -->
+    <div *ngIf="!isLoadingPersons && persons.length > 0" class="mb-3">
+      <h6>Search Results</h6>
+      <div class="list-group">
+        <button type="button" class="list-group-item list-group-item-action" 
+                *ngFor="let person of persons; trackBy: trackByPersonId" 
+                (click)="selectPersonFromModal(person.person_id.toString())">
+          {{ person.name }}
+        </button>
+      </div>
+    </div>
+
+    <!-- Loading message -->
+    <div *ngIf="isLoadingPersons" class="text-center py-3">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+      <p class="mt-2">Loading people...</p>
+    </div>
+
+    <!-- No results message -->
+    <div *ngIf="!isLoadingPersons && persons.length === 0" class="alert alert-info">
+      No person found. You can add a new person using the form below.
+    </div>
+
+    <!-- Form to add a new person -->
+    <div class="mt-4">
+      <h6>Add New Person</h6>
+      <div class="mb-3">
+        <label class="form-label">Name</label>
+        <input type="text" class="form-control" #newPersonName>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Photo</label>
+        <input type="file" class="form-control" #newPersonPhoto accept="image/*">
+      </div>
+      <button type="button" class="btn btn-primary" (click)="addNewPersonFromModal(newPersonName.value, newPersonPhoto)">
+        <i class="fa-solid fa-plus"></i> Add Person
+      </button>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary" (click)="modalRef?.hide()">Close</button>
+  </div>
+</ng-template>

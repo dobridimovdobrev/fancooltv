@@ -6,7 +6,10 @@
       <button class="sidebar-toggle" (click)="toggleSidebar()">
         <i class="fa-solid fa-bars"></i>
       </button>
-      <h2>Dashboard</h2>
+      <div class="welcome-message">
+        <span class="welcome-text">Your IP: {{ userIp || 'Loading...' }}</span>
+        <button class="logout-btn" (click)="logout()">Logout</button>
+      </div>
     </div>
     
     <!-- Content area with router outlet for child routes -->

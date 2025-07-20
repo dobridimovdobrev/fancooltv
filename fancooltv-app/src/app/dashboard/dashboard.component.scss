@@ -4,13 +4,13 @@
 .dashboard-container {
   position: relative;
   min-height: 100vh;
-  background-color: $dark;
+  background-color: var(--custom-bg); // Usa la variabile custom-bg come la home page
   color: $white;
   overflow-x: hidden;
 }
 
 .dashboard-content {
-  padding-right: 280px; // Space for the sidebar
+  padding-left: 240px; // Spazio per la sidebar ridotta a 240px
   transition: $transition-base;
   
   .dashboard-header {
@@ -19,9 +19,48 @@
     align-items: center;
     border-bottom: 1px solid rgba($white, 0.1);
     
-    h2 {
-      margin: 0;
-      color: $primary;
+    .welcome-message {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+      
+      h2 {
+        margin: 0;
+        color: $primary;
+        font-size: 1.8rem;
+        font-weight: 600;
+      }
+      
+      p {
+        margin: 0.25rem 0 0 0;
+        color: rgba($white, 0.8);
+        font-size: 1rem;
+      }
+      
+      .welcome-text {
+        color: $white;
+        font-size: 1rem;
+      }
+      
+      .logout-btn {
+        padding: 0.5rem 1rem;
+        background-color: transparent;
+        color: $white;
+        border: 1px solid $white;
+        border-radius: $border-radius;
+        font-weight: 600;
+        cursor: pointer;
+        transition: $transition-base;
+        
+        &:hover {
+          transform: translateY(-3px);
+          box-shadow: 0 4px 15px rgba(#f7f7f7, 0.2);
+          background: rgba($white, 0.1);
+          border-color: $white;
+          color: $white;
+        }
+      }
     }
     
     .sidebar-toggle {
@@ -48,16 +87,16 @@
 // Responsive styles
 @media (max-width: $breakpoint-lg) {
   .dashboard-content {
-    padding-right: 240px;
+    padding-left: 240px; // Cambiato da right a left
   }
 }
 
 @media (max-width: $breakpoint-md) {
   .dashboard-content {
-    padding-right: 0;
+    padding-left: 0; // Cambiato da right a left
     
     &.sidebar-active {
-      transform: translateX(-100px);
+      transform: translateX(100px); // Cambiato da -100px a 100px per la direzione
     }
     
     .dashboard-header {

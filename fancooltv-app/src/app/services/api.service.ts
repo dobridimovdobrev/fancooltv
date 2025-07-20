@@ -3,8 +3,9 @@ import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { ApiResponse, PaginationParams } from '../models/api.models';
-import { Movie, Category } from '../models/media.models';
+import { Movie, Category, Person } from '../models/media.models';
 import { TVSeries } from '../models/tvseries.models';
+import { DashboardStats } from '../dashboard/admin/home/admin-home.component';
 
 @Injectable({
   providedIn: 'root'
@@ -87,6 +88,72 @@ export class ApiService {
   }
 
   /**
+   * Get dashboard statistics
+   */
+  public getDashboardStats(): Observable<ApiResponse<DashboardStats>> {
+    return this.get<DashboardStats>('/api/v1/dashboard/stats');
+  }
+
+  /**
+   * Get all persons/actors
+   */
+  public getPersons(params?: Record<string, any>): Observable<ApiResponse<Person[]>> {
+    return this.get<Person[]>('/api/v1/persons', params);
+  }
+  
+  /**
+   * Get a single person by ID
+   */
+  public getPerson(personId: string): Observable<ApiResponse<Person>> {
+    return this.get<Person>(`/api/v1/persons/${personId}`);
+  }
+
+  /**
+   * Upload image (poster, backdrop, etc)
+   */
+  public uploadImage(formData: FormData, type: string): Observable<{url: string}> {
+    return this.http.post<{url: string}>(`${this.baseUrl}/api/v1/upload/image/${type}`, formData, {
+      headers: this.getHeadersForUpload()
+    });
+  }
+  
+  /**
+   * Create a new person
+   */
+  public createPerson(personData: {name: string, photo: string}): Observable<ApiResponse<Person>> {
+    return this.http.post<ApiResponse<Person>>(`${this.baseUrl}/api/v1/persons`, personData, {
+      headers: this.getHeaders()
+    });
+  }
+
+  /**
+   * Create a new movie
+   */
+  public createMovie(movieData: Partial<Movie>): Observable<ApiResponse<Movie>> {
+    return this.http.post<ApiResponse<Movie>>(`${this.baseUrl}/api/v1/movies`, movieData, {
+      headers: this.getHeaders()
+    });
+  }
+
+  /**
+   * Update an existing movie
+   */
+  public updateMovie(id: number, movieData: Partial<Movie>): Observable<ApiResponse<Movie>> {
+    return this.http.put<ApiResponse<Movie>>(`${this.baseUrl}/api/v1/movies/${id}`, movieData, {
+      headers: this.getHeaders()
+    });
+  }
+
+  /**
+   * Delete a movie
+   */
+  public deleteMovie(id: number): Observable<ApiResponse<any>> {
+    return this.http.delete<ApiResponse<any>>(`${this.baseUrl}/api/v1/movies/${id}`, {
+      headers: this.getHeaders()
+    });
+  }
+
+  /**
    * Generic GET method for API calls
    */
   private get<T>(endpoint: string, params?: Record<string, any>): Observable<ApiResponse<T>> {
@@ -121,6 +188,23 @@ export class ApiService {
   private getHeaders(): HttpHeaders {
     let headers = new HttpHeaders({
       'Content-Type': 'application/json',
+      'Accept': 'application/json'
+    });
+
+    const token = localStorage.getItem('auth_token');
+    if (token) {
+      headers = headers.append('Authorization', `Bearer ${token}`);
+    }
+
+    return headers;
+  }
+  
+  /**
+   * Get headers for file upload requests with authentication if available
+   * Note: Content-Type is not set as it will be set automatically by the browser for FormData
+   */
+  private getHeadersForUpload(): HttpHeaders {
+    let headers = new HttpHeaders({
       'Accept': 'application/json'
     });
 

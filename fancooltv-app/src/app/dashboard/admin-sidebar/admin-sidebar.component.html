@@ -1,6 +1,8 @@
 <div class="admin-sidebar">
   <div class="sidebar-header">
-    <h3>Admin Panel</h3>
+    <a routerLink="/" class="brand-link">
+      <img src="assets/images/logo.png" alt="FanCoolTV Logo" class="logo-img">
+    </a>
   </div>
   
   <div class="sidebar-menu">
@@ -17,7 +19,9 @@
     </ul>
   </div>
   
+  <!-- No additional sections -->
+  
   <div class="sidebar-footer">
-    <p>FanCoolTV Admin</p>
+    <p>FanCoolTV {{ isAdminUser ? 'Admin' : 'User' }}</p>
   </div>
 </div>

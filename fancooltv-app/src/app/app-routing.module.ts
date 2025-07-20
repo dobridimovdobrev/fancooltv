@@ -19,6 +19,12 @@ const routes: Routes = [
     { path: 'tvseries', component: TvseriesComponent, canActivate: [AuthGuard] },
     { path: 'tvseries-details/:id', component: TvseriesDetailsComponent, canActivate: [AuthGuard] },
     { path: 'terms', component: TermsComponent },
+    // Dashboard route with lazy loading
+    { 
+      path: 'dashboard', 
+      loadChildren: () => import('./dashboard/dashboard.module').then(m => m.DashboardModule),
+      canActivate: [AuthGuard]
+    },
     // Rotta di fallback per reindirizzare alla home
     { path: '**', redirectTo: '' }
 ];

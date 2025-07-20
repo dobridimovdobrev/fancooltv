@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-admin-sidebar',
@@ -12,33 +13,48 @@ export class AdminSidebarComponent implements OnInit {
     {
       title: 'Dashboard',
       icon: 'fa-solid fa-gauge-high',
-      route: '/dashboard'
+      route: '/dashboard/admin'
     },
     {
       title: 'Movies',
       icon: 'fa-solid fa-film',
-      route: '/dashboard/movies'
+      route: '/dashboard/admin/movies'
     },
     {
       title: 'TV Series',
       icon: 'fa-solid fa-tv',
-      route: '/dashboard/tvseries'
+      route: '/dashboard/admin/tvseries'
     },
     {
       title: 'Persons',
       icon: 'fa-solid fa-user-group',
-      route: '/dashboard/persons'
+      route: '/dashboard/admin/persons'
     },
     {
       title: 'Users',
       icon: 'fa-solid fa-users',
-      route: '/dashboard/users'
+      route: '/dashboard/admin/users'
     }
   ];
 
-  constructor(private router: Router) { }
+  // Properties for username and role
+  userName: string = '';
+  isAdminUser: boolean = false;
+
+  constructor(private router: Router, public authService: AuthService) { }
 
   ngOnInit(): void {
+    // Get username and role
+    const currentUser = this.authService.currentUserValue;
+    if (currentUser) {
+      // Use first_name and last_name if available, otherwise username
+      if (currentUser.first_name) {
+        this.userName = currentUser.first_name;
+      } else {
+        this.userName = currentUser.username;
+      }
+      this.isAdminUser = this.authService.isAdmin();
+    }
   }
 
   // Check if the current route is active

@@ -1,0 +1,156 @@
+// Variabili colori
+$bg-custom: #00050d;
+$border-custom: #0a1020;
+$input-bg: #050a18;
+$text-color: #c3c3c3;
+$text-muted: #8a8a8a;
+$label-color: #ffffff;
+
+// Movie form styles
+.movie-form {
+  // Card styling
+  .card {
+    background-color: transparent !important;
+    border: 1px solid $border-custom;
+    
+    .card-header {
+      background-color: transparent !important;
+      border-bottom: 1px solid $border-custom;
+      color: $label-color;
+      
+      h5 {
+        color: $label-color;
+        font-weight: 600;
+      }
+    }
+    
+    .card-body {
+      background-color: transparent !important;
+    }
+  }
+  
+  // Titoli e label
+  h1, h2, h3, h4, h5, h6 {
+    color: $label-color !important;
+  }
+  
+  .form-label {
+    color: $text-color !important;
+    font-weight: 500;
+  }
+  
+  // Form controls
+  .form-control, .form-select {
+    background-color: $input-bg !important;
+    border: 1px solid $border-custom !important;
+    color: $text-color !important; // Colore grigio chiaro per il testo
+    
+    // Stile per i placeholder
+    &::placeholder {
+      color: $text-muted !important;
+      opacity: 0.7;
+    }
+    
+    &:focus {
+      background-color: #333;
+      border-color: #666;
+      box-shadow: 0 0 0 0.25rem rgba(255, 255, 255, 0.1);
+    }
+  }
+  
+  // Testo di aiuto e messaggi
+  .form-text, small {
+    color: $text-muted !important;
+  }
+  
+  // Messaggi di errore
+  .text-danger {
+    color: #ff6b6b !important;
+  }
+  
+  // Image placeholders
+  .poster-placeholder, .backdrop-placeholder {
+    background-color: $input-bg !important;
+    border: 1px dashed $border-custom !important;
+    border-radius: 4px;
+    color: #999;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    text-align: center;
+  }
+  
+  .poster-placeholder {
+    min-height: 300px;
+  }
+  
+  .backdrop-placeholder {
+    min-height: 150px;
+  }
+  
+  // Stile per i pulsanti
+  .btn {
+    &.btn-primary {
+      background-color: #007bff !important;
+      border-color: #0069d9 !important;
+      color: white !important;
+    }
+    
+    &.btn-secondary {
+      background-color: #6c757d !important;
+      border-color: #5a6268 !important;
+      color: white !important;
+    }
+    
+    &.btn-danger {
+      background-color: #dc3545 !important;
+      border-color: #bd2130 !important;
+      color: white !important;
+    }
+  }
+  
+  // Preview images
+  .poster-preview img, .backdrop-preview img {
+    width: 100%;
+    object-fit: cover;
+    border-radius: 4px;
+  }
+  
+  .poster-preview img {
+    max-height: 300px;
+    object-position: top; /* Mostra sempre la parte superiore dell'immagine */
+  }
+  
+  .backdrop-preview img {
+    max-height: 150px;
+  }
+  
+  // Array items (trailers, persons, etc.)
+  .trailer-item, .video-file-item, .person-item, .image-file-item {
+    background-color: rgba(0, 0, 0, 0.2);
+    transition: all 0.2s ease;
+    
+    &:hover {
+      background-color: rgba(0, 0, 0, 0.3);
+    }
+  }
+  
+  // Form validation
+  .text-danger {
+    font-size: 0.8rem;
+    margin-top: 0.25rem;
+  }
+  
+  // Required field indicator
+  .form-label:after {
+    content: " *";
+    color: #dc3545;
+  }
+  
+  // Remove required indicator for non-required fields
+  .form-label:not([for="title"]):not([for="description"]):not([for="year"]):not([for="status"]):not([for="category_id"]):after {
+    content: "";
+  }
+}

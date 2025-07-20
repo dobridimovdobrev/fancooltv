@@ -1,0 +1,168 @@
+// Stili per la gestione dei film nella dashboard
+
+// Variabili di colore personalizzate
+$bg-custom: #00050d; // Colore di sfondo uguale al body
+$border-custom: #0a1020;
+$input-bg: #050a18; // Input leggermente più chiari del body
+
+// Stili per la barra di ricerca e filtri
+.search-filter-card {
+  background-color: $bg-custom; // Utilizzo della variabile $bg-custom
+  border: 1px solid $border-custom;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  
+  .search-input {
+    background-color: $input-bg;
+    border-color: $border-custom;
+    color: #fff;
+    
+    &:focus {
+      box-shadow: 0 0 0 0.2rem rgba(66, 70, 86, 0.25);
+      border-color: #4e5564;
+    }
+    
+    &::placeholder {
+      color: #8a8d93;
+    }
+  }
+  
+  .filter-select {
+    background-color: $input-bg;
+    border-color: $border-custom;
+    color: #fff;
+    
+    &:focus {
+      box-shadow: 0 0 0 0.2rem rgba(66, 70, 86, 0.25);
+      border-color: #4e5564;
+    }
+    
+    option {
+      background-color: $input-bg;
+    }
+  }
+}
+
+// Stile per le miniature dei poster
+.movie-thumbnail {
+  width: 60px;
+  height: 80px;
+  position: relative;
+  overflow: hidden;
+  border-radius: 4px;
+  
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  
+  .no-image-placeholder {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #2a2a2a;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    
+    i {
+      font-size: 1.5rem;
+      color: #6c757d;
+    }
+  }
+}
+
+// Stili per la tabella
+.movie-table-card {
+  background-color: $bg-custom !important; // Utilizzo della variabile $bg-custom con !important
+  border: 1px solid $border-custom;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  
+  .card-body {
+    background-color: $bg-custom !important;
+  }
+  
+  .table-responsive {
+    background-color: $bg-custom !important;
+  }
+}
+
+.movie-table {
+  background-color: $bg-custom !important;
+  color: #fff;
+  
+  th, td {
+    vertical-align: middle;
+    border-color: #2c3038;
+  }
+  
+  th {
+    border-top: none;
+    font-weight: 600;
+    background-color: $input-bg;
+    color: #ffffff; // Colore bianco puro per i titoli delle colonne
+    text-transform: uppercase; // Rendere i titoli maiuscoli per maggiore enfasi
+    font-size: 0.9rem; // Dimensione leggermente più piccola
+    letter-spacing: 0.5px; // Spaziatura lettere per migliore leggibilità
+  }
+  
+  tbody {
+    background-color: $bg-custom !important;
+    
+    tr {
+      background-color: $bg-custom !important;
+      
+      td {
+        background-color: $bg-custom !important;
+        border-color: $border-custom;
+        color: #c3c3c3 !important; // Testo grigio chiaro per le celle
+        font-weight: 500; // Leggermente più in grassetto per migliore leggibilità
+      }
+      
+      &:hover {
+        background-color: $input-bg !important;
+        
+        td {
+          background-color: $input-bg !important;
+        }
+      }
+    }
+  }
+}
+
+// Stili per i badge e le etichette
+.badge {
+  font-weight: 500;
+  padding: 0.4em 0.6em;
+}
+
+// Stili per i pulsanti nelle azioni
+.btn-group {
+  .btn {
+    padding: 0.25rem 0.5rem;
+    
+    i {
+      font-size: 0.875rem;
+    }
+  }
+}
+
+// Stili per i modali
+::ng-deep .modal-content {
+  background-color: $bg-custom;
+  color: #fff;
+  
+  .modal-header {
+    border-bottom-color: #495057;
+    
+    .btn-close {
+      filter: invert(1) grayscale(100%) brightness(200%);
+    }
+  }
+  
+  .modal-footer {
+    border-top-color: #495057;
+  }
+}

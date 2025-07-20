@@ -16,16 +16,21 @@ export interface Category {
 export interface Movie {
     movie_id: number;
     title: string;
+    slug?: string;
+    description: string;
     year: number;
     duration: number;
     imdb_rating: number;
-    status: string;
+    premiere_date?: string;
+    status: 'published' | 'draft' | 'sheduled' | 'coming soon';
     category: Category;
+    category_id: number;
     poster: string;
-    description: string;
     backdrop: string;
     persons: Person[];
     trailers: Trailer[];
+    video_files?: VideoFile[];
+    image_files?: ImageFile[];
 }
 
 export interface Person {
@@ -56,4 +61,17 @@ export interface Episode {
     description?: string;
     duration?: number;
     trailer_url?: string;
+}
+
+export interface VideoFile {
+    id?: number;
+    url: string;
+    title?: string;
+    type?: string;
+}
+
+export interface ImageFile {
+    id?: number;
+    url: string;
+    type?: string; // poster, backdrop, still, etc.
 }

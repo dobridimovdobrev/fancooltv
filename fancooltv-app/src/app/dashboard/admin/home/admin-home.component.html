@@ -1,7 +1,8 @@
 <div class="admin-home-container">
   <div class="dashboard-header">
-    <h2>Dashboard Admin</h2>
-    <p>Benvenuto nel pannello di amministrazione</p>
+    <h2 *ngIf="isAdminUser">Hi, Admin {{ capitalizedName }}</h2>
+    <h2 *ngIf="!isAdminUser">Hi, User {{ capitalizedName }}</h2>
+    <p class="welcome-text">Welcome to the administration panel</p>
   </div>
 
   <div class="stats-cards">
@@ -11,7 +12,7 @@
       </div>
       <div class="card-content">
         <h3>{{ stats.totalMovies }}</h3>
-        <p>Film</p>
+        <p>Movies</p>
       </div>
     </div>
 
@@ -21,7 +22,7 @@
       </div>
       <div class="card-content">
         <h3>{{ stats.totalSeries }}</h3>
-        <p>Serie TV</p>
+        <p>TV Series</p>
       </div>
     </div>
 
@@ -31,7 +32,7 @@
       </div>
       <div class="card-content">
         <h3>{{ stats.totalPersons }}</h3>
-        <p>Persone</p>
+        <p>Persons</p>
       </div>
     </div>
 
@@ -41,37 +42,37 @@
       </div>
       <div class="card-content">
         <h3>{{ stats.totalUsers }}</h3>
-        <p>Utenti</p>
+        <p>Users</p>
       </div>
     </div>
   </div>
 
   <div class="recent-activity">
-    <h3>Attività Recenti</h3>
+    <h3>Recent Activities</h3>
     <div class="activity-card">
       <div class="activity-header">
-        <h4>Nuovi Contenuti</h4>
+        <h4>New Content</h4>
         <span class="badge">{{ stats.recentUploads }}</span>
       </div>
-      <p>Contenuti caricati negli ultimi 7 giorni</p>
-      <button class="btn btn-primary">Gestisci Contenuti</button>
+      <p>Content uploaded in the last 7 days</p>
+      <button class="btn btn-primary">Manage Content</button>
     </div>
   </div>
 
   <div class="quick-actions">
-    <h3>Azioni Rapide</h3>
+    <h3>Quick Actions</h3>
     <div class="action-buttons">
       <button class="btn btn-primary">
-        <i class="fa-solid fa-plus"></i> Aggiungi Film
+        <i class="fa-solid fa-plus"></i> Add Movie
       </button>
       <button class="btn btn-primary">
-        <i class="fa-solid fa-plus"></i> Aggiungi Serie TV
+        <i class="fa-solid fa-plus"></i> Add TV Series
       </button>
       <button class="btn btn-primary">
-        <i class="fa-solid fa-plus"></i> Aggiungi Persona
+        <i class="fa-solid fa-plus"></i> Add Person
       </button>
       <button class="btn btn-primary">
-        <i class="fa-solid fa-upload"></i> Carica Video
+        <i class="fa-solid fa-upload"></i> Upload Video
       </button>
     </div>
   </div>

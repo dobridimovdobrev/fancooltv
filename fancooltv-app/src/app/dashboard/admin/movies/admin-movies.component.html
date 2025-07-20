@@ -1,0 +1,124 @@
+<div class="container-fluid p-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="mb-0">Movies Management</h2>
+    <a routerLink="create" class="btn btn-primary">
+      <i class="fas fa-plus me-2"></i>Add Movie
+    </a>
+  </div>
+
+  <!-- Search and Filter -->
+  <div class="card search-filter-card mb-4">
+    <div class="card-body">
+      <div class="row">
+        <div class="col-md-6 mb-3 mb-md-0">
+          <div class="input-group">
+            <input #searchInput type="text" class="form-control search-input" placeholder="Search movies...">
+            <button class="btn btn-primary" type="button" (click)="onSearchClick()">
+              <i class="fas fa-search"></i> Search
+            </button>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="d-flex gap-3 justify-content-md-end">
+            <select class="form-select filter-select" (change)="onCategoryChange($event)">
+              <option value="">All Categories</option>
+              <option *ngFor="let category of categories" [value]="category.category_id">{{ category.name }}</option>
+            </select>
+            <select class="form-select filter-select" (change)="onYearChange($event)">
+              <option value="">All Years</option>
+              <option *ngFor="let year of years" [value]="year">{{ year }}</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Movies Table -->
+  <div class="card movie-table-card">
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table movie-table table-hover mb-0">
+          <thead>
+            <tr>
+              <th style="width: 80px">Poster</th>
+              <th>Title</th>
+              <th>Year</th>
+              <th>Category</th>
+              <th>Duration</th>
+              <th>Status</th>
+              <th>Rating</th>
+              <th style="width: 150px">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngIf="loading">
+              <td colspan="7" class="text-center py-4">
+                <div class="spinner-border text-primary" role="status">
+                  <span class="visually-hidden">Loading...</span>
+                </div>
+              </td>
+            </tr>
+            <tr *ngIf="noResults && !loading">
+              <td colspan="7" class="text-center py-4">
+                <p class="mb-0">No results found</p>
+                <p class="text-muted small">Try changing filters or search terms</p>
+              </td>
+            </tr>
+            <tr *ngFor="let movie of movies">
+              <td>
+                <div class="movie-thumbnail">
+                  <img [src]="getImageUrl(movie.poster)" [alt]="movie.title + ' Poster'" class="img-fluid rounded"
+                       (error)="onImageError($event)">
+                  <div class="no-image-placeholder d-none">
+                    <i class="fa-solid fa-image"></i>
+                  </div>
+                </div>
+              </td>
+              <td>{{ movie.title }}</td>
+              <td>{{ movie.year }}</td>
+              <td>{{ movie.category && movie.category.name }}</td>
+              <td>{{ movie.duration }} min</td>
+              <td>
+                <span class="badge" [ngClass]="{
+                  'bg-success': movie.status === 'published',
+                  'bg-warning': movie.status === 'sheduled' || movie.status === 'coming soon',
+                  'bg-secondary': movie.status === 'draft'
+                }">
+                  {{ movie.status | titlecase }}
+                </span>
+              </td>
+              <td>
+                <span class="badge" style="background-color: #ffc107; color: #212529;">
+                  <i class="fa-solid fa-star me-1" style="color: #c3c3c3 !important;"></i>{{ movie.imdb_rating }}
+                </span>
+              </td>
+              <td>
+                <div class="btn-group">
+                  <a [routerLink]="['edit', movie.movie_id]" class="btn btn-sm btn-outline-info" title="Edit">
+                    <i class="fas fa-edit"></i>
+                  </a>
+                  <button class="btn btn-sm btn-outline-danger" (click)="deleteMovie(movie.movie_id)" title="Delete">
+                    <i class="fas fa-trash"></i>
+                  </button>
+                  <a [routerLink]="['/movie-details', movie.movie_id]" target="_blank" class="btn btn-sm btn-outline-primary" title="View">
+                    <i class="fas fa-eye"></i>
+                  </a>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pagination -->
+  <div class="d-flex justify-content-center mt-4" *ngIf="movies.length > 0 && !loading">
+    <button (click)="loadMore()" class="btn btn-outline-primary" [disabled]="loading || movies.length >= totalItems">
+      <i class="fas fa-plus me-2"></i>Load More
+    </button>
+  </div>
+</div>
+
+<!-- I modali sono stati rimossi in favore delle pagine dedicate per la creazione e modifica dei film -->

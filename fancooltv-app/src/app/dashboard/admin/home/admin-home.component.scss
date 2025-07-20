@@ -12,9 +12,11 @@
       margin-bottom: 0.5rem;
     }
     
-    p {
-      color: rgba($white, 0.7);
-      font-size: 1rem;
+    .welcome-text {
+      color: $white;
+      font-size: 1.1rem;
+      margin-top: 0.25rem;
+      opacity: 0.8;
     }
   }
   

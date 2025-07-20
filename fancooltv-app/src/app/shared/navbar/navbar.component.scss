@@ -17,9 +17,18 @@
   .navbar-brand {
     font-weight: 700;
     color: $white;
+    display: flex;
+    align-items: center;
     
     &:hover {
       color: $primary;
+    }
+    
+    // Stile per il logo nella navbar
+    .navbar-logo {
+      height: 40px;
+      width: auto;
+      object-fit: contain;
     }
   }
   

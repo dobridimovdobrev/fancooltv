@@ -2,7 +2,7 @@
 <nav class="navbar navbar-expand-lg navbar-dark fixed-top bg-transparent custom-navbar">
   <div class="container-fluid">
     <a class="navbar-brand" routerLink="/" aria-label="Return to homepage" title="Return to homepage">
-      FanCoolTv Streaming
+      <img src="assets/images/logo.png" alt="FanCoolTV Logo" class="navbar-logo">
     </a>
     
     <!-- Desktop Menu -->
@@ -37,15 +37,15 @@
           </a>
           <div *dropdownMenu class="dropdown-menu dropdown-menu-end glass-effect">
             <!-- Admin-only menu item -->
-            <a *ngIf="authService.isAdmin()" class="dropdown-item" routerLink="/dashboard">
+            <a *ngIf="authService.isAdmin()" class="dropdown-item" routerLink="/dashboard/admin">
               <i class="fa-solid fa-tachometer-alt"></i> Dashboard
             </a>
             
             <!-- Regular user menu items -->
-            <a *ngIf="!authService.isAdmin()" class="dropdown-item" routerLink="/profile">
+            <a *ngIf="!authService.isAdmin()" class="dropdown-item" routerLink="/dashboard/user/profile">
               <i class="fa-solid fa-user"></i> Profile
             </a>
-            <a *ngIf="!authService.isAdmin()" class="dropdown-item" routerLink="/credits">
+            <a *ngIf="!authService.isAdmin()" class="dropdown-item" routerLink="/dashboard/user/credits">
               <i class="fa-solid fa-coins"></i> Credits
             </a>
             
@@ -99,19 +99,19 @@
       <ng-container *ngIf="authService.isAuthenticated()">
         <!-- Admin-only menu item -->
         <li class="nav-item" *ngIf="authService.isAdmin()">
-          <a routerLink="/dashboard" class="nav-link" aria-label="Go to dashboard" title="Go to dashboard">
+          <a routerLink="/dashboard/admin" class="nav-link" aria-label="Go to dashboard" title="Go to dashboard">
             <i class="fa-solid fa-tachometer-alt"></i> Dashboard
           </a>
         </li>
         
         <!-- Regular user menu items -->
         <li class="nav-item" *ngIf="!authService.isAdmin()">
-          <a routerLink="/profile" class="nav-link" aria-label="View your profile" title="View your profile">
+          <a routerLink="/dashboard/user/profile" class="nav-link" aria-label="View your profile" title="View your profile">
             <i class="fa-solid fa-user"></i> Profile
           </a>
         </li>
         <li class="nav-item" *ngIf="!authService.isAdmin()">
-          <a routerLink="/credits" class="nav-link" aria-label="View your credits" title="View your credits">
+          <a routerLink="/dashboard/user/credits" class="nav-link" aria-label="View your credits" title="View your credits">
             <i class="fa-solid fa-coins"></i> Credits
           </a>
         </li>
