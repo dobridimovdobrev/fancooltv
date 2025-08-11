@@ -1,0 +1,265 @@
+import { Component, OnInit, ViewChild } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
+import { ApiService } from '../../../../services/api.service';
+import { Movie } from '../../../../models/media.models';
+import { MovieFormComponent } from '../movie-form.component';
+
+@Component({
+  selector: 'app-movie-form-page',
+  templateUrl: './movie-form-page.component.html',
+  styleUrls: ['./movie-form-page.component.scss']
+})
+export class MovieFormPageComponent implements OnInit {
+  // Reference to the form component to access its methods
+  @ViewChild(MovieFormComponent) movieForm!: MovieFormComponent;
+  
+  // Current movie being edited (null for new movies)
+  movie: Movie | null = null;
+  
+  // UI states
+  loading = false;
+  isEdit = false;
+  pageTitle = 'Create New Movie';
+  
+  // Messaggi di feedback
+  successMessage = '';
+  errorMessage = '';
+  showSuccessMessage = false;
+  showErrorMessage = false;
+  
+  constructor(
+    private apiService: ApiService,
+    private route: ActivatedRoute,
+    private router: Router
+  ) {}
+  
+  ngOnInit(): void {
+    // Check if we're in edit mode by looking for an ID parameter
+    const movieId = this.route.snapshot.paramMap.get('id');
+    
+    if (movieId) {
+      this.isEdit = true;
+      this.pageTitle = 'Edit Movie';
+      this.loadMovie(+movieId); // Convert to number with +
+    }
+  }
+  
+  /**
+   * Load movie details for editing
+   */
+  loadMovie(id: number): void {
+    this.loading = true;
+    
+    this.apiService.getMovieDetails(id).subscribe({
+      next: (response) => {
+        this.movie = response.data;
+        this.loading = false;
+        console.log('Movie loaded for editing:', this.movie);
+      },
+      error: (error) => {
+        console.error('Error loading movie:', error);
+        this.loading = false;
+        // Redirect back to movies list if movie not found
+        this.router.navigate(['/dashboard/admin/movies']);
+      }
+    });
+  }
+  
+  /**
+   * Handle form submission from the movie-form component
+   */
+  onFormSubmit(formData: any): void {
+    // Se formData è null, significa che il form non è valido
+    // e la validazione è già stata gestita nel componente del form
+    if (!formData) {
+      console.log('Form validation failed');
+      return;
+    }
+    
+    this.loading = true;
+    console.log('Form submitted with data:', formData);
+    
+    // Verifica se le immagini sono URL temporanei (blob:)
+    // In tal caso, avvisa l'utente che le immagini non saranno salvate permanentemente
+    const hasTempPoster = formData.poster && formData.poster.startsWith('blob:');
+    const hasTempBackdrop = formData.backdrop && formData.backdrop.startsWith('blob:');
+    
+    if (hasTempPoster || hasTempBackdrop) {
+      const imageTypes = [];
+      if (hasTempPoster) imageTypes.push('poster');
+      if (hasTempBackdrop) imageTypes.push('backdrop');
+      
+      console.warn(`Utilizzo di URL temporanei per le immagini: ${imageTypes.join(', ')}`);
+    }
+    
+    if (this.isEdit && this.movie?.movie_id) {
+      // Update existing movie
+      console.log('Aggiornamento film con ID:', this.movie.movie_id);
+      console.log('Titolo originale:', this.movie.title);
+      console.log('Nuovo titolo:', formData.title);
+      
+      // Aggiungiamo l'ID del film originale nei dati per il backend
+      formData.original_movie_id = this.movie.movie_id;
+      
+      this.apiService.updateMovie(this.movie.movie_id, formData).subscribe({
+        next: (response) => {
+          console.log('Movie updated successfully:', response.data);
+          this.loading = false;
+          
+          // Mostra un messaggio di successo con avviso per le immagini temporanee
+          if (hasTempPoster || hasTempBackdrop) {
+            this.successMessage = 'Film aggiornato con successo, ma alcune immagini potrebbero non essere state caricate correttamente sul server. Si consiglia di verificare e ricaricarle in seguito.';
+          } else {
+            this.successMessage = 'Film aggiornato con successo!';
+          }
+          
+          this.showSuccessMessage = true;
+          this.showErrorMessage = false;
+          
+          // Rimaniamo sulla stessa pagina
+        },
+        error: (error) => {
+          console.error('Error updating movie:', error);
+          this.loading = false;
+          
+          // Mostra un messaggio di errore più dettagliato
+          let errorMessage = 'Errore durante l\'aggiornamento del film. ';
+          
+          // Gestione specifica per gli errori comuni
+          if (error.error && error.error.message) {
+            // Errore di titolo duplicato
+            if (error.error.message.includes('title has already been taken')) {
+              errorMessage = 'Esiste già un altro film con questo titolo. Prova con un titolo diverso.';
+              
+              // Evidenziamo il campo titolo come errato
+              if (this.movieForm && this.movieForm.movieForm) {
+                const titleControl = this.movieForm.movieForm.get('title');
+                if (titleControl) {
+                  titleControl.setErrors({ 'duplicateTitle': true });
+                  this.movieForm.markFormGroupTouched(this.movieForm.movieForm);
+                }
+              }
+            }
+            // Errore di slug duplicato
+            else if (error.error.message.includes('Duplicate entry') && error.error.message.includes('slug_unique')) {
+              errorMessage = 'Si è verificato un errore con lo slug del film. Il sistema genererà automaticamente uno slug unico.';
+              
+              // Rigenerazione automatica dello slug
+              if (this.movieForm && this.movieForm.movieForm) {
+                const title = this.movieForm.movieForm.get('title')?.value;
+                if (title) {
+                  // Genera un nuovo slug con timestamp per garantire l'unicità
+                  const newSlug = this.movieForm.generateSlug(title);
+                  this.movieForm.movieForm.get('slug')?.setValue(newSlug);
+                  
+                  // Ritenta la creazione del film con il nuovo slug
+                  setTimeout(() => {
+                    this.errorMessage = 'Riprovo con un nuovo slug generato automaticamente...';
+this.showErrorMessage = true;
+this.showSuccessMessage = false;
+                    this.onFormSubmit(this.movieForm.prepareFormData());
+                  }, 1000);
+                  return;
+                }
+              }
+            }
+          } else if (error.error && error.error.message) {
+            errorMessage += error.error.message;
+          } else if (error.message) {
+            errorMessage += error.message;
+          } else {
+            errorMessage += 'Riprova più tardi.';
+          }
+          
+          this.errorMessage = errorMessage;
+this.showErrorMessage = true;
+this.showSuccessMessage = false;
+        }
+      });
+    } else {
+      // Create new movie
+      this.apiService.createMovie(formData).subscribe({
+        next: (response) => {
+          console.log('Movie created successfully:', response.data);
+          this.loading = false;
+          
+          // Mostra un messaggio di successo con avviso per le immagini temporanee
+          if (hasTempPoster || hasTempBackdrop) {
+            this.successMessage = 'Film creato con successo, ma alcune immagini potrebbero non essere state caricate correttamente sul server. Si consiglia di verificare e ricaricarle in seguito.';
+          } else {
+            this.successMessage = 'Film creato con successo!';
+          }
+          
+          this.showSuccessMessage = true;
+          this.showErrorMessage = false;
+          
+          // Rimaniamo sulla stessa pagina invece di navigare alla lista film
+        },
+        error: (error) => {
+          console.error('Error creating movie:', error);
+          this.loading = false;
+          
+          // Mostra un messaggio di errore più dettagliato
+          let errorMessage = 'Errore durante la creazione del film. ';
+          
+          // Gestione specifica per gli errori comuni
+          if (error.error && error.error.message) {
+            // Errore di titolo duplicato
+            if (error.error.message.includes('title has already been taken')) {
+              errorMessage = 'Il titolo del film è già presente nel database. Prova con un titolo diverso.';
+              
+              // Evidenziamo il campo titolo come errato
+              if (this.movieForm && this.movieForm.movieForm) {
+                const titleControl = this.movieForm.movieForm.get('title');
+                if (titleControl) {
+                  titleControl.setErrors({ 'duplicateTitle': true });
+                  this.movieForm.markFormGroupTouched(this.movieForm.movieForm);
+                }
+              }
+            }
+            // Errore di slug duplicato
+            else if (error.error.message.includes('Duplicate entry') && error.error.message.includes('slug_unique')) {
+              errorMessage = 'Si è verificato un errore con lo slug del film. Il sistema genererà automaticamente uno slug unico.';
+              
+              // Rigenerazione automatica dello slug
+              if (this.movieForm && this.movieForm.movieForm) {
+                const title = this.movieForm.movieForm.get('title')?.value;
+                if (title) {
+                  // Genera un nuovo slug con timestamp per garantire l'unicità
+                  const newSlug = this.movieForm.generateSlug(title);
+                  this.movieForm.movieForm.get('slug')?.setValue(newSlug);
+                  
+                  // Ritenta la creazione del film con il nuovo slug
+                  setTimeout(() => {
+                    this.errorMessage = 'Riprovo con un nuovo slug generato automaticamente...';
+this.showErrorMessage = true;
+this.showSuccessMessage = false;
+                    this.onFormSubmit(this.movieForm.prepareFormData());
+                  }, 1000);
+                  return;
+                }
+              }
+            } else {
+              errorMessage += error.error.message;
+            }
+          } else if (error.message) {
+            errorMessage += error.message;
+          } else {
+            errorMessage += 'Riprova più tardi.';
+          }
+          
+          this.errorMessage = errorMessage;
+this.showErrorMessage = true;
+this.showSuccessMessage = false;
+        }
+      });
+    }
+  }
+  
+  /**
+   * Handle cancel button click
+   */
+  onCancel(): void {
+    this.router.navigate(['/dashboard/admin/movies']);
+  }
+}

@@ -1,0 +1,89 @@
+// Loading Spinner Component Styles
+
+.loading-spinner-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+
+  &.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    z-index: 9999;
+    backdrop-filter: blur(2px);
+  }
+
+  &.loading-small {
+    padding: 10px;
+  }
+
+  &.loading-large {
+    padding: 40px;
+  }
+
+  .loading-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+
+    .spinner-border {
+      &.text-primary {
+        color: var(--bs-primary) !important;
+      }
+
+      &.text-secondary {
+        color: var(--bs-secondary) !important;
+      }
+
+      &.text-light {
+        color: var(--bs-light) !important;
+      }
+    }
+
+    .loading-message {
+      color: var(--bs-light);
+      font-size: 0.875rem;
+      font-weight: 500;
+      text-align: center;
+      margin-top: 8px;
+    }
+  }
+}
+
+// Size variations
+.loading-small .loading-content {
+  gap: 8px;
+
+  .loading-message {
+    font-size: 0.75rem;
+  }
+}
+
+.loading-large .loading-content {
+  gap: 16px;
+
+  .spinner-border {
+    width: 3rem;
+    height: 3rem;
+  }
+
+  .loading-message {
+    font-size: 1rem;
+  }
+}
+
+// Animation improvements
+.spinner-border {
+  animation: spinner-border 0.75s linear infinite;
+}
+
+@keyframes spinner-border {
+  to {
+    transform: rotate(360deg);
+  }
+}

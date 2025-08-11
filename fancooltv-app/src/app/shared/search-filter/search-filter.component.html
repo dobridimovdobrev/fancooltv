@@ -1,0 +1,59 @@
+<div class="search-filter-container">
+  <div class="container mb-5">
+    <div class="row">
+      <!-- Search Input -->
+      <div class="col-md-6 mb-3 mb-md-0">
+        <div class="input-group search-input-group">
+          <input #searchInput 
+                 type="text" 
+                 class="form-control bg-dark text-white border-secondary" 
+                 [placeholder]="placeholder"
+                 (keypress)="onSearchKeyPress($event)">
+          
+          <button class="btn btn-outline-secondary clear-btn" 
+                  type="button" 
+                  (click)="clearSearch()"
+                  [attr.aria-label]="'Clear search'"
+                  *ngIf="getCurrentSearchValue()">
+            <i class="fas fa-times"></i>
+          </button>
+          
+          <button class="btn btn-primary search-btn" 
+                  type="button" 
+                  (click)="onSearchClick()"
+                  [attr.aria-label]="'Search'">
+            <i class="fas fa-search"></i>
+            <span class="d-none d-sm-inline ms-2">Search</span>
+          </button>
+        </div>
+      </div>
+      
+      <!-- Filters -->
+      <div class="col-md-6">
+        <div class="d-flex gap-3 justify-content-md-end filter-controls">
+          <!-- Category Filter -->
+          <select *ngIf="showCategoryFilter" 
+                  class="form-select bg-dark text-white border-secondary category-select" 
+                  (change)="onCategoryChange($event)"
+                  [attr.aria-label]="'Filter by category'">
+            <option value="">All Genres</option>
+            <option *ngFor="let category of categories" [value]="category.category_id">
+              {{ category.name }}
+            </option>
+          </select>
+          
+          <!-- Year Filter -->
+          <select *ngIf="showYearFilter" 
+                  class="form-select bg-dark text-white border-secondary year-select" 
+                  (change)="onYearChange($event)"
+                  [attr.aria-label]="'Filter by year'">
+            <option value="">All Years</option>
+            <option *ngFor="let year of years" [value]="year">
+              {{ year }}
+            </option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

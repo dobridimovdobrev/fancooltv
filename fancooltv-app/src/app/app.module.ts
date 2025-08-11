@@ -16,6 +16,8 @@ import { TvseriesComponent } from './tvseries/tvseries.component';
 import { TermsComponent } from './terms/terms.component';
 import { LoginComponent } from './auth/login/login.component';
 import { RegisterComponent } from './auth/register/register.component';
+import { MoviesListWrapperComponent } from './movies/movies-list-wrapper/movies-list-wrapper.component';
+import { TvseriesListWrapperComponent } from './tvseries/tvseries-list-wrapper/tvseries-list-wrapper.component';
 import { AuthInterceptor } from './interceptors/auth.interceptor';
 
 @NgModule({
@@ -28,7 +30,9 @@ import { AuthInterceptor } from './interceptors/auth.interceptor';
     TvseriesComponent,
     TermsComponent,
     LoginComponent,
-    RegisterComponent
+    RegisterComponent,
+    MoviesListWrapperComponent,
+    TvseriesListWrapperComponent
   ],
   imports: [
     BrowserModule,

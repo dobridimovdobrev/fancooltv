@@ -1,0 +1,74 @@
+<form [formGroup]="personForm" (ngSubmit)="onSubmit()" class="person-form">
+  <div class="row">
+    <!-- Basic Information -->
+    <div class="col-md-8">
+      <div class="card mb-4">
+        <div class="card-header">
+          <h5 class="mb-0">Person Information</h5>
+        </div>
+        <div class="card-body bg-dark">
+          <!-- Name -->
+          <div class="mb-3">
+            <label for="name" class="form-label">Name *</label>
+            <input type="text" class="form-control" id="name" formControlName="name">
+            <div *ngIf="personForm.get('name')?.invalid && personForm.get('name')?.touched" class="text-danger">
+              <small *ngIf="personForm.get('name')?.errors?.['required']">Name is required</small>
+              <small *ngIf="personForm.get('name')?.errors?.['maxlength']">Name cannot exceed 100 characters</small>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sidebar (Image) -->
+    <div class="col-md-4">
+      <div class="card mb-4 bg-dark border-dark">
+        <div class="card-header bg-dark border-dark">
+          <h5 class="mb-0 text-white">Photo</h5>
+        </div>
+        <div class="card-body bg-dark">
+          <div class="photo-preview mb-3">
+            <img *ngIf="personForm.get('profile_image')?.value" 
+                 [src]="apiService.getImageUrl(personForm.get('profile_image')?.value, 'person')" 
+                 class="img-fluid rounded photo-image" 
+                 (error)="onImageError($event)"
+                 alt="Person Photo">
+            <div *ngIf="!personForm.get('profile_image')?.value" class="photo-placeholder">
+              <i class="fa-solid fa-user fa-3x"></i>
+              <p>No photo uploaded</p>
+            </div>
+          </div>
+          <div class="mb-3">
+            <label for="profile_image" class="form-label text-white">Photo URL</label>
+            <input type="text" class="form-control bg-dark text-white" id="profile_image" formControlName="profile_image">
+            <div *ngIf="personForm.get('profile_image')?.invalid && personForm.get('profile_image')?.touched" class="text-danger">
+              <small *ngIf="personForm.get('profile_image')?.errors?.['required']">Photo is required</small>
+            </div>
+          </div>
+          <div class="mb-3">
+            <label for="photoFile" class="form-label text-white">Upload Photo</label>
+            <input type="file" class="form-control bg-dark text-white" id="photoFile" (change)="onPhotoUpload($event)" accept="image/*">
+            <div *ngIf="uploadingPhoto" class="mt-2">
+              <div class="spinner-border spinner-border-sm text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+              </div>
+              <span class="ms-2">Upload in progress...</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Form Actions -->
+  <div class="d-flex justify-content-end mt-4 mb-4">
+    <button type="button" class="btn btn-secondary me-2" (click)="onCancel()">
+      <i class="fas fa-times me-2"></i>Cancel
+    </button>
+    <button type="submit" class="btn btn-primary" [disabled]="loading">
+      <i class="fas fa-save me-2" *ngIf="!loading"></i>
+      <span *ngIf="loading" class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+      {{ person ? 'Update Person' : 'Create Person' }}
+    </button>
+  </div>
+</form>

@@ -1,0 +1,130 @@
+<!-- Navigation -->
+<app-navbar></app-navbar>
+
+<!-- Main Content -->
+<div class="container-fluid mt-5 py-5">
+  <!-- Page Title -->
+  <div class="container mb-4" *ngIf="title">
+    <div class="row">
+      <div class="col-12">
+        <h1 class="page-title text-white mb-0">{{ title }}</h1>
+      </div>
+    </div>
+  </div>
+
+  <!-- Search and Filter Component -->
+  <app-search-filter
+    [placeholder]="searchPlaceholder"
+    [categories]="categories"
+    [years]="years"
+    [showCategoryFilter]="true"
+    [showYearFilter]="true"
+    (searchQuery)="onSearchQuery($event)"
+    (searchClick)="onSearchClick($event)"
+    (categoryChange)="onCategoryChange($event)"
+    (yearChange)="onYearChange($event)">
+  </app-search-filter>
+
+  <!-- Content Area -->
+  <div class="container">
+    <!-- Error Message -->
+    <app-error-message
+      *ngIf="error"
+      [message]="errorMessage"
+      [type]="'danger'"
+      [dismissible]="true"
+      [showIcon]="true"
+      (dismissed)="onErrorDismiss()">
+    </app-error-message>
+
+    <!-- No Results Message -->
+    <div *ngIf="noResults && !loading && !error" class="alert alert-info mb-4">
+      <div class="text-center">
+        <i class="fas fa-search mb-3" style="font-size: 3rem; opacity: 0.5;"></i>
+        <h4>No Results Found</h4>
+        <p class="mb-3">We couldn't find any {{ mediaType === 'movie' ? 'movies' : 'TV series' }} matching your criteria.</p>
+        <button class="btn btn-outline-primary" (click)="resetFilters()">
+          <i class="fas fa-refresh me-2"></i>
+          Clear Filters
+        </button>
+      </div>
+    </div>
+
+    <!-- Loading Spinner for Initial Load -->
+    <app-loading-spinner
+      *ngIf="loading && items.length === 0"
+      [size]="'large'"
+      [message]="'Loading ' + (mediaType === 'movie' ? 'movies' : 'TV series') + '...'"
+      [showMessage]="true"
+      [color]="'primary'">
+    </app-loading-spinner>
+
+    <!-- Media Grid -->
+    <div *ngIf="!loading || items.length > 0" class="row g-4">
+      <div *ngFor="let item of items; trackBy: trackByItemId" 
+           class="col-12 col-custom-2 col-custom-3 col-custom-4 col-custom-5">
+        <app-media-card
+          [mediaItem]="transformToMediaItem(item)"
+          [mediaType]="mediaType"
+          (imageError)="onImageError($event)"
+          (cardClick)="onCardClick(item.id)">
+        </app-media-card>
+      </div>
+    </div>
+
+    <!-- Load More Section -->
+    <div *ngIf="items.length > 0 && hasMorePages" class="text-center mt-5">
+      <button 
+        class="btn btn-outline-primary btn-lg load-more-btn"
+        [disabled]="isLoadingMore"
+        (click)="onLoadMore()">
+        <span *ngIf="!isLoadingMore">
+          <i class="fas fa-plus me-2"></i>
+          Load More {{ mediaType === 'movie' ? 'Movies' : 'TV Series' }}
+        </span>
+        <span *ngIf="isLoadingMore">
+          <app-loading-spinner
+            [size]="'small'"
+            [message]="'Loading...'"
+            [showMessage]="false"
+            [color]="'primary'">
+          </app-loading-spinner>
+          Loading...
+        </span>
+      </button>
+    </div>
+
+    <!-- End of Results Message -->
+    <div *ngIf="items.length > 0 && !hasMorePages && !loading" class="text-center mt-5">
+      <div class="end-of-results">
+        <i class="fas fa-check-circle text-success mb-2" style="font-size: 2rem;"></i>
+        <p class="text-muted mb-0">You've reached the end of the results</p>
+      </div>
+    </div>
+
+    <!-- Retry Button for Errors -->
+    <div *ngIf="error && items.length === 0" class="text-center mt-4">
+      <button class="btn btn-primary" (click)="retryLoading()">
+        <i class="fas fa-refresh me-2"></i>
+        Try Again
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Debug Info (only in development) -->
+<div *ngIf="false" class="container mt-4">
+  <div class="card bg-dark text-light">
+    <div class="card-header">
+      <h5>Debug Info</h5>
+    </div>
+    <div class="card-body">
+      <p><strong>Media Type:</strong> {{ mediaType }}</p>
+      <p><strong>Items Count:</strong> {{ items.length }}</p>
+      <p><strong>Loading:</strong> {{ loading }}</p>
+      <p><strong>Has More Pages:</strong> {{ hasMorePages }}</p>
+      <p><strong>Current Filters:</strong></p>
+      <pre>{{ getCurrentFilters() | json }}</pre>
+    </div>
+  </div>
+</div>

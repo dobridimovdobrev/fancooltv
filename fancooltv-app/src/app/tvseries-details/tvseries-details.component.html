@@ -16,7 +16,7 @@
         <div id="backdrop" class="position-relative">
             <div class="position-absolute w-100 h-100" style="background: linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(0,0,0,0.9))"></div>
             <img [src]="getImageUrl(series.backdrop, 'backdrop')" [alt]="series.title + ' backdrop'" class="backdrop-img"
-                 (error)="onImageError($event, '/assets/images/placeholder-backdrop.jpg')">
+                 (error)="$any($event.target).style.display='none'">
         </div>
         
         <div class="container position-relative" style="margin-top: -150px">
@@ -24,7 +24,7 @@
                 <div class="col-md-3 mb-4">
                     <div id="poster" class="rounded shadow-lg">
                         <img [src]="getImageUrl(series.poster, 'poster')" [alt]="series.title + ' poster'" class="poster-img"
-                             (error)="onImageError($event, '/assets/images/placeholder-poster.jpg')">
+                             (error)="$any($event.target).style.display='none'">
                     </div>
                 </div>
                 <div class="col-md-9">

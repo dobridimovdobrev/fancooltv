@@ -41,7 +41,7 @@
             <div class="card-img-wrapper">
               <img [src]="getImageUrl(movie.poster)" [alt]="movie.title + ' Poster'" class="w-100 h-100 object-fit-cover"
                    (error)="onImageError($event)">
-              <div class="no-image-placeholder h-100 d-none align-items-center justify-content-center">
+              <div class="no-image-placeholder h-100 d-none d-flex align-items-center justify-content-center">
                 <i class="fa-solid fa-image"></i>
               </div>
               

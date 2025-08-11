@@ -100,9 +100,17 @@ export class MovieDetailsComponent implements OnInit {
   /**
    * Ottiene l'URL dell'immagine
    */
-  getImageUrl(path: string | undefined, type: string = 'poster'): string {
-    if (!path) return '';
-    return this.movieService.getImageUrl(path, type as any);
+  getImageUrl(path: string | undefined | any, type: string = 'poster'): string {
+    // Handle poster/backdrop object format from API
+    if (path && typeof path === 'object' && path.url) {
+      return path.url;
+    }
+    // Handle string format
+    if (typeof path === 'string') {
+      return this.movieService.getImageUrl(path, type as any);
+    }
+    // Return empty string for null/undefined
+    return '';
   }
   
   /**

@@ -55,7 +55,10 @@ export class ApiService {
    * Get image URL with proper formatting
    */
   public getImageUrl(path: string, type: 'cast' | 'poster' | 'backdrop' | 'still' = 'poster'): string {
-    if (!path) return '';
+    // Check if path is null, undefined, or empty string
+    if (!path || typeof path !== 'string') {
+      return '';
+    }
     
     // If path is already a complete URL, return it
     if (path.startsWith('http://') || path.startsWith('https://')) {

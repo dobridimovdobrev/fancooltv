@@ -1,0 +1,220 @@
+// Color variables (same as movie list for consistency)
+$bg-custom: #00050d; // Background color same as body
+$border-custom: #0a1020;
+$input-bg: #050a18; // Inputs slightly lighter than body
+$text-color: #c3c3c3;
+$text-muted: #8a8a8a;
+$label-color: #ffffff;
+
+// Style for search filter card
+.search-filter-card {
+  background-color: $bg-custom !important;
+  border: 1px solid $border-custom;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  margin-bottom: 1.5rem;
+  
+  .search-input {
+    background-color: $input-bg !important;
+    border-color: $border-custom !important;
+    color: #fff !important;
+    
+    &:focus {
+      box-shadow: 0 0 0 0.2rem rgba(66, 70, 86, 0.25);
+      border-color: #4e5564;
+    }
+    
+    &::placeholder {
+      color: #8a8d93;
+    }
+  }
+  
+  .input-group-text {
+    background-color: $input-bg !important;
+    color: $text-color !important;
+    border-color: $border-custom !important;
+  }
+}
+
+// Style for persons table
+.person-table-card {
+  background-color: $bg-custom !important;
+  border: 1px solid $border-custom;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  border-radius: 0.5rem;
+  overflow: hidden;
+  
+  .card-body {
+    background-color: $bg-custom !important;
+  }
+  
+  .table-responsive {
+    background-color: $bg-custom !important;
+  }
+}
+
+.person-table {
+  background-color: $bg-custom !important;
+  color: #fff;
+  
+  th, td {
+    vertical-align: middle;
+    border-color: #2c3038;
+  }
+  
+  th {
+    border-top: none;
+    font-weight: 600;
+    background-color: $input-bg !important;
+    color: #ffffff !important;
+    text-transform: uppercase;
+    font-size: 0.9rem;
+    letter-spacing: 0.5px;
+  }
+  
+  tbody {
+    background-color: $bg-custom !important;
+    
+    tr {
+      background-color: $bg-custom !important;
+      
+      td {
+        background-color: $bg-custom !important;
+        border-color: $border-custom;
+        color: #c3c3c3 !important;
+        font-weight: 500;
+      }
+      
+      &:hover {
+        background-color: $input-bg !important;
+        
+        td {
+          background-color: $input-bg !important;
+        }
+      }
+    }
+  }
+}
+
+// Person thumbnails
+.person-thumbnail {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 2px solid $border-custom;
+  background-color: $input-bg;
+  
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  
+  .no-image-placeholder {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #2a2a2a;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    
+    i {
+      font-size: 1.5rem;
+      color: #6c757d;
+    }
+  }
+}
+
+// Pagination style
+.pagination-info {
+  font-size: 0.875rem;
+  color: $text-color !important;
+}
+
+.pagination {
+  .page-item {
+    &.active .page-link {
+      background-color: $input-bg !important;
+      border-color: $border-custom !important;
+      color: $label-color !important;
+    }
+    
+    &.disabled .page-link {
+      background-color: $input-bg !important;
+      border-color: $border-custom !important;
+      color: $text-muted !important;
+    }
+    
+    .page-link {
+      background-color: $input-bg !important;
+      border-color: $border-custom !important;
+      color: $text-color !important;
+      
+      &:hover {
+        background-color: #00050d !important;
+      }
+      
+      &:focus {
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.15);
+      }
+    }
+  }
+}
+
+// Action buttons style
+.btn-group {
+  .btn {
+    margin-right: 0.25rem;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+    
+    i {
+      font-size: 0.875rem;
+    }
+  }
+}
+
+// Load more button style
+.load-more-btn {
+  background-color: $input-bg !important;
+  border-color: $border-custom !important;
+  color: $text-color !important;
+  
+  &:hover {
+    background-color: #00050d !important;
+  }
+}
+
+// Style for custom primary buttons
+.custom-primary-btn {
+  background-color: $input-bg !important;
+  border-color: $border-custom !important;
+  color: $text-color !important;
+  
+  &:hover {
+    background-color: #00050d !important;
+  }
+}
+
+// Override default primary buttons
+.btn-primary {
+  background-color: #f7ab2e !important;
+  border-color: #f7ab2e !important;
+  color: #212529 !important;
+  transition: all 0.3s ease;
+  
+  &:hover, &:focus {
+    background-color: #e09a29 !important; // Versione più scura del giallo (5% più scuro)
+    border-color: #e09a29 !important;
+    color: #ffffff !important; // Testo bianco in hover
+    transform: translateY(-2px);
+  }
+}
+
+// Style for table row hover
+table.table-dark tbody tr:hover {
+  background-color: #00050d !important;
+}

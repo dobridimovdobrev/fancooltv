@@ -1,0 +1,11 @@
+// Movies List Wrapper Component Styles
+// This component is just a wrapper, all styling is handled by MediaListComponent
+
+:host {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+// Any specific movies-only customizations can go here
+// For now, we inherit all styles from MediaListComponent

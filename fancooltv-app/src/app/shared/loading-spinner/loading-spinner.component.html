@@ -1,0 +1,10 @@
+<div [ngClass]="getContainerClasses()">
+  <div class="loading-content">
+    <div [ngClass]="getSpinnerClasses()" role="status" [attr.aria-label]="message">
+      <span class="visually-hidden">{{ message }}</span>
+    </div>
+    <div *ngIf="showMessage" class="loading-message">
+      {{ message }}
+    </div>
+  </div>
+</div>

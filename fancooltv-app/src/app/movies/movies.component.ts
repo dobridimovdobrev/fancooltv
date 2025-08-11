@@ -40,6 +40,14 @@ export class MoviesComponent implements OnInit, AfterViewInit {
     this.movieService.movies$.subscribe(movies => {
       this.movies = movies;
       this.noResults = this.movies.length === 0;
+      
+      // DEBUG: Log movie data to check poster/backdrop fields
+      console.log('Movies data received:', movies);
+      if (movies.length > 0) {
+        console.log('First movie poster:', movies[0].poster);
+        console.log('First movie backdrop:', movies[0].backdrop);
+        console.log('First movie complete data:', movies[0]);
+      }
     });
     
     // Sottoscriversi allo stato di caricamento
@@ -125,8 +133,17 @@ export class MoviesComponent implements OnInit, AfterViewInit {
   /**
    * Ottiene l'URL dell'immagine
    */
-  getImageUrl(path: string, type: string = 'poster'): string {
-    return this.movieService.getImageUrl(path, type as any);
+  getImageUrl(path: string | any, type: string = 'poster'): string {
+    // Handle poster object format from API
+    if (path && typeof path === 'object' && path.url) {
+      return path.url;
+    }
+    // Handle string format
+    if (typeof path === 'string') {
+      return this.movieService.getImageUrl(path, type as any);
+    }
+    // Return empty string for null/undefined
+    return '';
   }
   
   /**

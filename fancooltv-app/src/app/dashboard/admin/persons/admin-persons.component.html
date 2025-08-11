@@ -1,0 +1,119 @@
+<div class="container-fluid p-4 persons-list-container">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="mb-0 text-white">Persons Management</h2>
+    <button class="btn btn-primary" (click)="createPerson()">
+      <i class="fas fa-plus me-2"></i>New Person
+    </button>
+  </div>
+
+  <!-- Search bar -->
+  <div class="card search-filter-card mb-4">
+    <div class="card-body">
+      <div class="row">
+        <div class="col-md-12">
+          <div class="input-group">
+            <input #searchInput type="text" class="form-control search-input" placeholder="Search persons...">
+            <button class="btn btn-primary" type="button" (click)="onSearchClick()">
+              <i class="fas fa-search"></i> Search
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Persons Table -->
+  <div class="card person-table-card">
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table person-table table-hover mb-0">
+          <thead>
+            <tr>
+              <th style="width: 80px">Photo</th>
+              <th>Name</th>
+              <th>ID</th>
+              <th style="width: 150px">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngIf="loading">
+              <td colspan="4" class="text-center py-4">
+                <div class="spinner-border text-primary" role="status">
+                  <span class="visually-hidden">Loading...</span>
+                </div>
+                <p class="mt-2 mb-0">Loading persons...</p>
+              </td>
+            </tr>
+            <tr *ngIf="noResults && !loading">
+              <td colspan="4" class="text-center py-4">
+                <p class="mb-0">No results found</p>
+                <p class="text-muted small">Try changing your search terms</p>
+              </td>
+            </tr>
+            <tr *ngFor="let person of filteredPersons">
+              <td>
+                <div class="person-thumbnail">
+                  <img [src]="apiService.getImageUrl(person.profile_image, 'person')" 
+                       [alt]="person.name + ' Photo'" 
+                       class="img-fluid rounded"
+                       (error)="onImageError($event)">
+                </div>
+              </td>
+              <td class="align-middle">{{ person.name }}</td>
+              <td class="align-middle">{{ person.person_id }}</td>
+              <td class="align-middle">
+                <div class="btn-group">
+                  <button class="btn btn-sm btn-outline-info" title="Edit" (click)="editPerson(person.person_id)">
+                    <i class="fas fa-edit"></i>
+                  </button>
+                  <button class="btn btn-sm btn-outline-danger" title="Delete" (click)="deletePerson(person.person_id)">
+                    <i class="fas fa-trash"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Error message -->
+  <div *ngIf="error" class="alert alert-danger mt-4">
+    {{ error }}
+    <button class="btn btn-sm btn-outline-danger ms-2" (click)="loadPersons()">Retry</button>
+  </div>
+
+  <!-- Pagination -->
+  <div class="d-flex justify-content-between align-items-center mt-4" *ngIf="filteredPersons.length > 0 && !loading">
+    <nav aria-label="Page navigation" *ngIf="totalPages > 1">
+      <ul class="pagination mb-0">
+        <li class="page-item" [class.disabled]="currentPage === 1">
+          <a class="page-link" href="javascript:void(0)" (click)="goToPage(currentPage - 1)" aria-label="Previous">
+            <span aria-hidden="true">&laquo;</span>
+          </a>
+        </li>
+        <!-- Numeri di pagina -->
+        <ng-container *ngFor="let link of paginationLinks">
+          <!-- Link numerici -->
+          <li class="page-item" *ngIf="link.url && !isNaN(link.label)" [class.active]="link.active">
+            <a class="page-link" href="javascript:void(0)" (click)="goToPage(+link.label)">{{ link.label }}</a>
+          </li>
+          <!-- Puntini di sospensione -->
+          <li class="page-item disabled" *ngIf="link.label === '...' || link.label === '&laquo; Previous' || link.label === 'Next &raquo;'">
+            <span class="page-link">{{ link.label === '...' ? '...' : (link.label === '&laquo; Previous' ? '&laquo;' : '&raquo;') }}</span>
+          </li>
+        </ng-container>
+        <li class="page-item" [class.disabled]="currentPage === totalPages">
+          <a class="page-link" href="javascript:void(0)" (click)="goToPage(currentPage + 1)" aria-label="Next">
+            <span aria-hidden="true">&raquo;</span>
+          </a>
+        </li>
+      </ul>
+    </nav>
+    
+    <div class="pagination-info">
+      <span class="text-white">Showing {{ filteredPersons.length }} of {{ totalItems }} persons</span>
+    </div>
+  </div>
+</div>
