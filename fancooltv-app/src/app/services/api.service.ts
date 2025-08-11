@@ -54,7 +54,12 @@ export class ApiService {
   /**
    * Get image URL with proper formatting
    */
-  public getImageUrl(path: string, type: 'cast' | 'poster' | 'backdrop' | 'still' = 'poster'): string {
+  public getImageUrl(path: string | any, type: 'cast' | 'poster' | 'backdrop' | 'still' = 'poster'): string {
+    // Handle poster/backdrop object format from API
+    if (path && typeof path === 'object' && path.url) {
+      return path.url;
+    }
+    
     // Check if path is null, undefined, or empty string
     if (!path || typeof path !== 'string') {
       return '';

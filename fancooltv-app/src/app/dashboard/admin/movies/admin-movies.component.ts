@@ -166,8 +166,17 @@ export class AdminMoviesComponent implements OnInit {
   /**
    * Get image URL with proper formatting
    */
-  getImageUrl(path: string): string {
-    return this.apiService.getImageUrl(path, 'poster');
+  getImageUrl(path: string | any): string {
+    // Handle poster/backdrop object format from API
+    if (path && typeof path === 'object' && path.url) {
+      return path.url;
+    }
+    // Handle string format
+    if (typeof path === 'string') {
+      return this.apiService.getImageUrl(path, 'poster');
+    }
+    // Return empty string for null/undefined
+    return '';
   }
   
   /**
