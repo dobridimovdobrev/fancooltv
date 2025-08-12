@@ -4,13 +4,13 @@ import { RouterModule } from '@angular/router';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { NgxBootstrapModule } from '../../../shared/ngx-bootstrap/ngx-bootstrap.module';
 
-import { AdminCountriesComponent } from './admin-countries.component';
-import { CountryFormComponent } from './country-form.component';
+import { AdminCategoriesComponent } from './admin-categories.component';
+import { CategoryFormComponent } from './category-form.component';
 
 @NgModule({
   declarations: [
-    AdminCountriesComponent,
-    CountryFormComponent
+    AdminCategoriesComponent,
+    CategoryFormComponent
   ],
   imports: [
     CommonModule,
@@ -20,17 +20,17 @@ import { CountryFormComponent } from './country-form.component';
     RouterModule.forChild([
       {
         path: '',
-        component: AdminCountriesComponent
+        component: AdminCategoriesComponent
       },
       {
         path: 'create',
-        component: CountryFormComponent
+        component: CategoryFormComponent
       },
       {
         path: 'edit/:id',
-        component: CountryFormComponent
+        component: CategoryFormComponent
       }
     ])
   ]
 })
-export class AdminCountriesModule { }
+export class AdminCategoriesModule { }

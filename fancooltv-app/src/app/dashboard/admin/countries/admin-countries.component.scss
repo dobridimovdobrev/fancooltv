@@ -54,24 +54,6 @@ $transition-base: all 0.2s ease-in-out;
       color: #8a8d93; // Same as movies/users
     }
   }
-  
-  .filter-select {
-    background-color: $input-bg !important;
-    border: 1px solid $border-custom !important;
-    color: $white !important;
-    
-    &:focus {
-      background-color: $input-bg !important;
-      border-color: $primary !important;
-      color: $white !important;
-      box-shadow: 0 0 0 0.2rem rgba($primary, 0.25) !important;
-    }
-    
-    option {
-      background-color: $input-bg !important;
-      color: $white !important;
-    }
-  }
 
   // Clear button (X) like Google
   .btn-clear {
@@ -128,7 +110,7 @@ $transition-base: all 0.2s ease-in-out;
   background-color: transparent !important; // Force transparent background
   
   thead {
-    background: rgba($primary, 0.2);
+    background: rgba($primary, 0.4);
     
     th {
       border: none;
@@ -149,7 +131,7 @@ $transition-base: all 0.2s ease-in-out;
       transition: $transition-base;
       
       &:hover {
-        background-color: lighten($bg-custom, 5%) !important; // Force hover background
+        background-color: #050916 !important; // Custom hover background
         transform: translateY(-1px);
       }
       
@@ -318,6 +300,118 @@ $transition-base: all 0.2s ease-in-out;
 }
 
 // Text muted override
+
+// Modern Glass Modal styles - Perfect Centering Standard
+.modal-dialog {
+  max-width: 420px !important; // Compact width like in image
+  margin: 0 auto !important; // Center horizontally
+  position: absolute !important; // Absolute positioning for perfect centering
+  top: 50% !important; // Center vertically
+  left: 50% !important; // Center horizontally  
+  transform: translate(-50%, -50%) !important; // Perfect centering
+  z-index: 1055 !important; // Above backdrop
+}
+
+.modal-content {
+  background: rgba(0, 5, 13, 0.9) !important; // Glass effect - semi-transparent
+  backdrop-filter: blur(25px) !important; // Glass blur effect
+  -webkit-backdrop-filter: blur(25px) !important; // Safari support
+  border: 1px solid rgba(248, 181, 71, 0.15) !important; // Subtle golden border
+  border-radius: 20px !important; // More rounded like in image
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6), 
+              0 0 0 1px rgba(248, 181, 71, 0.08) !important; // Modern shadow with glow
+  color: $text-color;
+  overflow: hidden; // Clean edges
+  
+  .modal-header {
+    padding: 1.25rem 1.5rem !important;
+    
+    .modal-title {
+      color: $white;
+      font-weight: 600;
+      font-size: 1.25rem;
+    }
+    /* button close */
+  }
+  
+  .modal-body {
+    color: $text-color;
+    padding: 2rem 1.5rem !important;
+    
+    .text-center {
+      h5 {
+        color: $white;
+        font-weight: 600;
+        margin-bottom: 1rem;
+      }
+      
+      p {
+        color: rgba(195, 195, 195, 0.9);
+        font-size: 1rem;
+        line-height: 1.5;
+        
+        strong {
+          color: $white;
+          font-weight: 600;
+        }
+      }
+    }
+  }
+  
+  .modal-footer {
+    background: rgba(248, 181, 71, 0.05) !important; // Very subtle tint
+    border-top: 1px solid rgba(248, 181, 71, 0.2) !important;
+    padding: 1.25rem 1.5rem !important;
+    display: flex !important; // Flex layout
+    flex-direction: row !important; // Horizontal layout
+    gap: 1rem !important; // Space between buttons
+    
+    .btn {
+      flex: 1 !important; // Equal size buttons that take full space
+      border-radius: 8px !important; // Modern button radius
+      font-weight: 500 !important;
+      padding: 0.75rem 1.5rem !important;
+      transition: all 0.3s ease !important;
+      white-space: nowrap !important; // Prevent text wrapping
+      min-width: 120px !important; // Minimum width to prevent text breaking
+      font-size: 0.9rem !important; // Slightly smaller font to fit better
+      
+      &.btn-secondary {
+        background: rgba(108, 117, 125, 0.8) !important;
+        border: 1px solid rgba(108, 117, 125, 0.6) !important;
+        backdrop-filter: blur(10px) !important;
+        
+        &:hover {
+          background: rgba(108, 117, 125, 1) !important;
+          transform: translateY(-1px) !important;
+          box-shadow: 0 8px 25px rgba(108, 117, 125, 0.3) !important;
+        }
+      }
+      
+      &.btn-danger {
+        background: rgba(220, 53, 69, 0.9) !important;
+        border: 1px solid rgba(220, 53, 69, 0.7) !important;
+        backdrop-filter: blur(10px) !important;
+        
+        &:hover:not(:disabled) {
+          background: rgba(220, 53, 69, 1) !important;
+          transform: translateY(-1px) !important;
+          box-shadow: 0 8px 25px rgba(220, 53, 69, 0.4) !important;
+        }
+        
+        &:disabled {
+          opacity: 0.6 !important;
+          transform: none !important;
+        }
+      }
+    }
+  }
+}
+
+// Modal backdrop enhancement
+.modal-backdrop {
+  background-color: rgba(0, 0, 0, 0.6) !important; // Darker backdrop for glass effect
+}
 .text-muted {
   color: rgba($white, 0.6) !important;
 }
@@ -348,14 +442,6 @@ $transition-base: all 0.2s ease-in-out;
         font-size: 1.25rem;
       }
       
-      .btn-close {
-        filter: invert(1) grayscale(100%) brightness(200%);
-        opacity: 0.8;
-        
-        &:hover {
-          opacity: 1;
-        }
-      }
     }
     
     .modal-body {
@@ -428,13 +514,16 @@ $transition-base: all 0.2s ease-in-out;
 
 // Center modal vertically in viewport
 ::ng-deep .modal.show .modal-dialog {
-  transform: translate(0, 0);
-  margin: auto;
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+  position: absolute !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  margin: 0 !important;
+  width: 30rem !important;
+  max-width: 30rem !important;
 }
+
+
 
 // Responsive adjustments
 @media (max-width: 768px) {

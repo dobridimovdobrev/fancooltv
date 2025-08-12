@@ -1,6 +1,7 @@
 // Stili per la gestione dei film nella dashboard
 
 // Variabili di colore personalizzate
+$primary : #F8B445;
 $bg-custom: #00050d; // Colore di sfondo uguale al body
 $border-custom: #0a1020;
 $input-bg: #050a18; // Input leggermente più chiari del body
@@ -126,22 +127,36 @@ $input-bg: #050a18; // Input leggermente più chiari del body
 }
 
 .movie-table {
-  background-color: $bg-custom !important;
+  background-color: transparent !important; // Force transparent background
   color: #fff;
-  
+
+  thead {
+    background: rgba($primary, 0.4);
+    border-radius: 8px 8px 0 0; // Rounded top corners
+    
+    th {
+      border: none;
+      color: #ffffff;
+      font-weight: 600;
+      padding: 1rem 0.75rem; // Same padding as Countries/Categories
+      font-size: 0.875rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      background-color: transparent !important; // Force transparent
+      
+      &:first-child {
+        border-top-left-radius: 8px; // Round first cell top-left
+      }
+      
+      &:last-child {
+        border-top-right-radius: 8px; // Round last cell top-right
+      }
+    }
+  }
+
   th, td {
     vertical-align: middle;
     border-color: #2c3038;
-  }
-  
-  th {
-    border-top: none;
-    font-weight: 600;
-    background-color: $input-bg;
-    color: #ffffff; // Colore bianco puro per i titoli delle colonne
-    text-transform: uppercase; // Rendere i titoli maiuscoli per maggiore enfasi
-    font-size: 0.9rem; // Dimensione leggermente più piccola
-    letter-spacing: 0.5px; // Spaziatura lettere per migliore leggibilità
   }
   
   tbody {
@@ -185,20 +200,3 @@ $input-bg: #050a18; // Input leggermente più chiari del body
   }
 }
 
-// Stili per i modali
-::ng-deep .modal-content {
-  background-color: $bg-custom;
-  color: #fff;
-  
-  .modal-header {
-    border-bottom-color: #495057;
-    
-    .btn-close {
-      filter: invert(1) grayscale(100%) brightness(200%);
-    }
-  }
-  
-  .modal-footer {
-    border-top-color: #495057;
-  }
-}

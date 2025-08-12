@@ -1,0 +1,95 @@
+<div class="admin-categories-container">
+  <!-- Page Header -->
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 mb-0">Categories Management</h1>
+    <button class="btn btn-primary" (click)="createCategory()">
+      <i class="fas fa-plus me-2"></i>Add Category
+    </button>
+  </div>
+
+  <!-- Categories Table Card -->
+  <div class="card countries-table-card">
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table countries-table table-hover mb-0">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th style="width: 120px">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Loading State -->
+            <tr *ngIf="loading">
+              <td colspan="2" class="text-center py-4">
+                <div class="spinner-border text-primary" role="status">
+                  <span class="visually-hidden">Loading...</span>
+                </div>
+                <p class="mt-2 mb-0">Loading categories...</p>
+              </td>
+            </tr>
+
+            <!-- No Results State -->
+            <tr *ngIf="noResults && !loading">
+              <td colspan="2" class="text-center py-4">
+                <i class="fas fa-folder-open fa-3x text-muted mb-3"></i>
+                <p class="mb-0">No categories found</p>
+                <p class="text-muted small">Start by creating your first category</p>
+              </td>
+            </tr>
+
+            <!-- Categories Data -->
+            <tr *ngFor="let category of categories" class="country-row">
+              <td>
+                <div class="country-name">
+                  <strong>{{ category.name }}</strong>
+                </div>
+              </td>
+              <td>
+                <div class="btn-group">
+                  <button 
+                    class="btn btn-sm btn-outline-info" 
+                    (click)="editCategory(category.category_id)" 
+                    title="Edit Category">
+                    <i class="fas fa-edit"></i>
+                  </button>
+                  <button 
+                    class="btn btn-sm btn-outline-danger" 
+                    (click)="deleteCategory(category.category_id)" 
+                    title="Delete Category">
+                    <i class="fas fa-trash"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<ng-template #deleteModal>
+  <div class="modal-header">
+    <h4 class="modal-title">Confirm Message</h4>
+    <button type="button" class="btn-close" aria-label="Close" (click)="cancelDelete()"></button>
+  </div>
+  <div class="modal-body">
+    <div class="text-center">
+      <h5>Are you sure?</h5>
+      <p class="mb-3">
+        Do you want to delete the category <strong>"{{ categoryToDelete?.name }}"</strong>?
+      </p>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-danger" (click)="confirmDelete()" [disabled]="loading">
+      <span *ngIf="loading" class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+      <i *ngIf="!loading" class="fas fa-trash me-2"></i>Delete
+    </button>
+    <button type="button" class="btn btn-secondary" (click)="cancelDelete()">
+      <i class="fas fa-times me-2"></i>Cancel
+    </button>
+  </div>
+</ng-template>

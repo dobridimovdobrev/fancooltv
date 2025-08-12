@@ -16,6 +16,11 @@ export class AdminSidebarComponent implements OnInit {
       route: '/dashboard/admin/home'
     },
     {
+      title: 'Categories',
+      icon: 'fa-solid fa-tags',
+      route: '/dashboard/admin/categories'
+    },
+    {
       title: 'Movies',
       icon: 'fa-solid fa-film',
       route: '/dashboard/admin/movies'

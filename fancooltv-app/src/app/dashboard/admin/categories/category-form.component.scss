@@ -1,0 +1,204 @@
+// Variables - Same as country form
+$primary: #f8b547;
+$bg-custom: #00050d;
+$border-custom: #0a1020;
+$input-bg: #050a18;
+$white: #fff;
+$text-color: #c3c3c3;
+$text-muted: #8a8a8a;
+$label-color: #ffffff;
+$dark: #20273d;
+$border-radius: 0.375rem;
+$border-radius-lg: 0.5rem;
+$transition-base: all 0.2s ease-in-out;
+
+// Form container
+.category-form {
+  .card {
+    background-color: $bg-custom;
+    border: 1px solid $border-custom;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    
+    .card-header {
+      background-color: $bg-custom;
+      border-bottom: 1px solid $border-custom;
+      padding: 1rem 1.5rem;
+      
+      h5 {
+        color: $white;
+        font-weight: 600;
+        margin-bottom: 0;
+      }
+    }
+    
+    .card-body {
+      padding: 1.5rem;
+    }
+  }
+}
+
+// Form elements
+.form-label {
+  color: $label-color;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+}
+
+.form-control {
+  background-color: $input-bg;
+  border: 1px solid $border-custom;
+  color: $white;
+  border-radius: $border-radius;
+  transition: $transition-base;
+  
+  &:focus {
+    background-color: $input-bg;
+    border-color: #4e5564;
+    color: $white;
+    box-shadow: 0 0 0 0.2rem rgba(66, 70, 86, 0.25);
+  }
+  
+  &::placeholder {
+    color: $text-muted;
+  }
+  
+  &:disabled {
+    background-color: darken($input-bg, 5%);
+    border-color: darken($border-custom, 5%);
+    color: $text-muted;
+  }
+}
+
+.form-select {
+  background-color: $input-bg;
+  border: 1px solid $border-custom;
+  color: $white;
+  border-radius: $border-radius;
+  transition: $transition-base;
+  
+  &:focus {
+    background-color: $input-bg;
+    border-color: #4e5564;
+    color: $white;
+    box-shadow: 0 0 0 0.2rem rgba(66, 70, 86, 0.25);
+  }
+  
+  option {
+    background-color: $input-bg;
+    color: $white;
+  }
+}
+
+.form-text {
+  color: $text-muted;
+  font-size: 0.875rem;
+}
+
+// Button styles
+.btn {
+  border-radius: $border-radius;
+  font-weight: 500;
+  transition: $transition-base;
+  
+  &.btn-primary {
+    background-color: $primary;
+    border-color: $primary;
+    color: $dark;
+    
+    &:hover:not(:disabled) {
+      background-color: darken($primary, 10%);
+      border-color: darken($primary, 10%);
+      transform: translateY(-1px);
+    }
+    
+    &:disabled {
+      background-color: desaturate($primary, 50%);
+      border-color: desaturate($primary, 50%);
+      opacity: 0.6;
+    }
+  }
+  
+  &.btn-secondary {
+    background-color: #6c757d;
+    border-color: #6c757d;
+    color: $white;
+    
+    &:hover:not(:disabled) {
+      background-color: darken(#6c757d, 10%);
+      border-color: darken(#6c757d, 10%);
+    }
+  }
+  
+  &.btn-outline-secondary {
+    color: #6c757d;
+    border-color: #6c757d;
+    
+    &:hover:not(:disabled) {
+      background-color: #6c757d;
+      border-color: #6c757d;
+      color: $white;
+    }
+  }
+}
+
+// Validation styles
+.text-danger {
+  color: #dc3545 !important;
+  
+  small {
+    font-size: 0.875rem;
+  }
+}
+
+.is-invalid {
+  border-color: #dc3545;
+  
+  &:focus {
+    border-color: #dc3545;
+    box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+  }
+}
+
+// Loading spinner
+.spinner-border-sm {
+  width: 1rem;
+  height: 1rem;
+}
+
+// Help section
+.card .card-body {
+  p.small {
+    color: $text-color;
+    line-height: 1.5;
+    
+    strong {
+      color: $white;
+    }
+    
+    &.text-muted {
+      color: $text-muted !important;
+    }
+  }
+}
+
+// Page title
+h1 {
+  color: $white;
+  font-weight: 700;
+}
+
+// Responsive design
+@media (max-width: 768px) {
+  .category-form {
+    .card {
+      .card-header,
+      .card-body {
+        padding: 1rem;
+      }
+    }
+  }
+  
+  .d-grid {
+    gap: 0.75rem !important;
+  }
+}

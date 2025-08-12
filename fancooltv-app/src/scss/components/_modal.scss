@@ -16,15 +16,6 @@
       font-weight: 600;
       color: $white;
     }
-    
-    .btn-close {
-      filter: invert(1) grayscale(100%) brightness(200%);
-      opacity: 0.8;
-      
-      &:hover {
-        opacity: 1;
-      }
-    }
   }
   
   .modal-body {
@@ -34,6 +25,68 @@
   .modal-footer {
     border-top: 1px solid rgba($white, 0.1);
     padding: 1.5rem;
+  }
+}
+
+// Centralized close button styling for all modals
+.btn-close {
+  width: 28px !important;
+  height: 28px !important;
+  border: 1px solid white !important;
+  border-radius: 8px !important;
+  background: transparent !important;
+  color: white !important;
+  opacity: 1 !important;
+  position: relative !important;
+  
+  // KILL Bootstrap's default background completely
+  background-image: none !important;
+  
+  // Create white X with pseudo-element to avoid Bootstrap conflicts
+  &::before {
+    content: '✕' !important;
+    color: white !important;
+    font-size: 1.5rem !important;
+    font-weight: bold !important;
+    position: absolute !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    line-height: 1 !important;
+  }
+  
+  // Light hover effect - only slight elevation
+  &:hover {
+    transform: translateY(-1px) !important;
+    opacity: 1 !important;
+    border-color: white !important;
+    background-image: none !important;
+    
+    &::before {
+      color: white !important;
+    }
+  }
+  
+  &:focus {
+    outline: none !important;
+    opacity: 1 !important;
+    border-color: white !important;
+    box-shadow: none !important;
+    background-image: none !important;
+    
+    &::before {
+      color: white !important;
+    }
+  }
+  
+  &:active {
+    transform: translateY(0) !important;
+    opacity: 1 !important;
+    background-image: none !important;
+    
+    &::before {
+      color: white !important;
+    }
   }
 }
 
@@ -75,15 +128,7 @@
     background-color: $third;
   }
   
-  .btn-close {
-    filter: invert(1) grayscale(100%) brightness(200%);
-    opacity: 0.8;
-    
-    &:hover {
-      opacity: 1;
-    }
-  }
-  
+ 
   .nav-link {
     color: $white;
     transition: $transition-base;

@@ -16,6 +16,10 @@ const routes: Routes = [
     loadChildren: () => import('./home/admin-home.module').then(m => m.AdminHomeModule)
   },
   {
+    path: 'categories',
+    loadChildren: () => import('./categories/admin-categories.module').then(m => m.AdminCategoriesModule)
+  },
+  {
     path: 'movies',
     loadChildren: () => import('./movies/admin-movies.module').then(m => m.AdminMoviesModule)
   },
