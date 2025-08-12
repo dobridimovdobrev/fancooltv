@@ -14,6 +14,8 @@ export interface User {
   country_id?: number;
   user_status: 'active' | 'inactive';
   role_id: number;
+  ip_address?: string;
+  last_activity?: string;
   created_at?: string;
   updated_at?: string;
 }

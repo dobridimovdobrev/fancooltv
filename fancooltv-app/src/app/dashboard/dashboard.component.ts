@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { AuthService } from '../services/auth.service';
+import { UserService } from '../services/user.service';
 import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 
@@ -18,6 +19,7 @@ export class DashboardComponent implements OnInit {
 
   constructor(
     public authService: AuthService,
+    private userService: UserService,
     private router: Router,
     private http: HttpClient
   ) { }
@@ -29,62 +31,31 @@ export class DashboardComponent implements OnInit {
     } else {
       // Get user data
       this.loadUserData();
-      // Get user IP
-      this.getUserIp();
+      // Get user IP from backend
+      this.getUserIpFromBackend();
     }
   }
   
-  // Get user IP from external service
-  getUserIp(): void {
-    // Prima prova con ipify.org
-    this.http.get('https://api.ipify.org?format=json')
-      .subscribe({
-        next: (response: any) => {
-          if (response && response.ip) {
-            this.userIp = response.ip;
-          } else {
-            this.tryAlternativeIpService();
-          }
-        },
-        error: (error) => {
-          console.error('Error fetching IP from ipify:', error);
-          this.tryAlternativeIpService();
-        }
-      });
-  }
-
-  // Metodo alternativo per ottenere l'IP
-  tryAlternativeIpService(): void {
-    // Prova con jsonip.com come alternativa
-    this.http.get('https://jsonip.com')
-      .subscribe({
-        next: (response: any) => {
-          if (response && response.ip) {
-            this.userIp = response.ip;
+  // Get user IP from backend
+  getUserIpFromBackend(): void {
+    const currentUser = this.authService.currentUserValue;
+    if (currentUser && currentUser.id) {
+      this.userService.getUserById(currentUser.id).subscribe({
+        next: (response) => {
+          if (response && response.data && response.data.ip_address) {
+            this.userIp = response.data.ip_address;
           } else {
             this.userIp = 'Not available';
           }
         },
         error: (error) => {
-          console.error('Error fetching IP from alternative service:', error);
-          
-          // Ultima risorsa: prova con httpbin
-          this.http.get('https://httpbin.org/ip')
-            .subscribe({
-              next: (response: any) => {
-                if (response && response.origin) {
-                  this.userIp = response.origin;
-                } else {
-                  this.userIp = 'Not available';
-                }
-              },
-              error: (finalError) => {
-                console.error('All IP services failed:', finalError);
-                this.userIp = 'Not available';
-              }
-            });
+          console.error('Error fetching IP from backend:', error);
+          this.userIp = 'Not available';
         }
       });
+    } else {
+      this.userIp = 'Not available';
+    }
   }
   
   // Load user data from auth service
