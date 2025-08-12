@@ -1,0 +1,166 @@
+<div class="container-fluid p-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="mb-0">Users Management</h2>
+    <button class="btn btn-primary" (click)="createUser()">
+      <i class="fas fa-plus me-2"></i>Add User
+    </button>
+  </div>
+
+  <!-- Search and Filter -->
+  <div class="card search-filter-card mb-4">
+    <div class="card-body">
+      <div class="row">
+        <div class="col-md-6 mb-3 mb-md-0">
+          <div class="input-group position-relative">
+            <input 
+              #searchInput 
+              type="text" 
+              class="form-control search-input" 
+              placeholder="Search users..."
+              (keyup.enter)="onSearchClick()"
+              (input)="onSearchInputChange()"
+              [(ngModel)]="searchTerm"
+            >
+            <!-- Clear button (X) like Google -->
+            <button 
+              *ngIf="searchTerm && searchTerm.length > 0"
+              type="button" 
+              class="btn btn-clear position-absolute" 
+              (click)="clearSearch()"
+              title="Clear search">
+              <i class="fas fa-times"></i>
+            </button>
+            <button class="btn btn-primary" type="button" (click)="onSearchClick()">
+              <i class="fas fa-search"></i> Search
+            </button>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="d-flex gap-3 justify-content-md-end">
+            <select class="form-select filter-select" (change)="onStatusChange($event)">
+              <option value="">All Status</option>
+              <option value="active">Active</option>
+              <option value="inactive">Inactive</option>
+            </select>
+            <select class="form-select filter-select" (change)="onRoleChange($event)">
+              <option value="">All Roles</option>
+              <option value="1">Admin</option>
+              <option value="2">User</option>
+              <option value="3">Moderator</option>
+            </select>
+            <select class="form-select filter-select" (change)="onGenderChange($event)">
+              <option value="">All Genders</option>
+              <option value="male">Male</option>
+              <option value="female">Female</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Users Table -->
+  <div class="card user-table-card">
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table user-table table-hover mb-0">
+          <thead>
+            <tr>
+              <th style="width: 80px">Avatar</th>
+              <th>Name</th>
+              <th>Username</th>
+              <th>Email</th>
+              <th>Role</th>
+              <th>Status</th>
+              <th>Gender</th>
+              <th>Birthday</th>
+              <th style="width: 150px">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngIf="loading">
+              <td colspan="9" class="text-center py-4">
+                <div class="spinner-border text-primary" role="status">
+                  <span class="visually-hidden">Loading...</span>
+                </div>
+              </td>
+            </tr>
+            <tr *ngIf="noResults && !loading">
+              <td colspan="9" class="text-center py-4">
+                <p class="mb-0">No results found</p>
+                <p class="text-muted small">Try changing filters or search terms</p>
+              </td>
+            </tr>
+            <tr *ngFor="let user of users">
+              <td>
+                <div class="user-avatar">
+                  <div class="avatar-placeholder">
+                    <i class="fas fa-user"></i>
+                  </div>
+                </div>
+              </td>
+              <td>
+                <div class="user-name">
+                  <strong>{{ getUserFullName(user) }}</strong>
+                  <small class="text-muted d-block">ID: {{ user.user_id }}</small>
+                </div>
+              </td>
+              <td>
+                <span class="username">{{ user.username }}</span>
+              </td>
+              <td>
+                <span class="email">{{ user.email }}</span>
+              </td>
+              <td>
+                <span class="badge" [ngClass]="{
+                  'bg-danger': user.role_id === 1,
+                  'bg-primary': user.role_id === 2,
+                  'bg-warning': user.role_id === 3
+                }">
+                  {{ getRoleName(user.role_id) }}
+                </span>
+              </td>
+              <td>
+                <span class="badge" [ngClass]="getStatusBadgeClass(user.user_status)">
+                  {{ user.user_status | titlecase }}
+                </span>
+              </td>
+              <td>
+                <span class="gender">
+                  <i class="fas" [ngClass]="{
+                    'fa-mars text-primary': user.gender === 'male',
+                    'fa-venus text-danger': user.gender === 'female'
+                  }"></i>
+                  {{ user.gender | titlecase }}
+                </span>
+              </td>
+              <td>
+                <span class="birthday">{{ formatDate(user.birthday) }}</span>
+              </td>
+              <td>
+                <div class="btn-group">
+                  <button class="btn btn-sm btn-outline-info" (click)="editUser(user.user_id)" title="Edit">
+                    <i class="fas fa-edit"></i>
+                  </button>
+                  <button class="btn btn-sm btn-outline-primary" (click)="viewUser(user.user_id)" title="View">
+                    <i class="fas fa-eye"></i>
+                  </button>
+                  <button class="btn btn-sm btn-outline-danger" (click)="deleteUser(user.user_id)" title="Delete">
+                    <i class="fas fa-trash"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pagination - Show only if total users > 10 and there are more to load -->
+  <div class="d-flex justify-content-center mt-4" *ngIf="totalItems > 10 && users.length < totalItems && !loading">
+    <button (click)="loadMore()" class="btn btn-outline-primary load-more-btn" [disabled]="loading">
+      <i class="fas fa-plus me-2"></i>Load More Users
+    </button>
+  </div>
+</div>

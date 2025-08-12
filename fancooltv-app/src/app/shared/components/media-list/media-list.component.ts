@@ -129,7 +129,7 @@ export class MediaListComponent implements OnInit, OnDestroy {
       });
 
       // Load initial items
-      this.loadItems();
+      this.loadItems(true);
     } catch (error) {
       console.error('Error during initial data loading:', error);
       this.error = true;
@@ -242,7 +242,11 @@ export class MediaListComponent implements OnInit, OnDestroy {
   /**
    * Get image URL for media item
    */
-  getImageUrl(path: string): string {
+  getImageUrl(path: string | any): string {
+    // Handle both string and object formats for image paths
+    if (typeof path === 'object' && path?.url) {
+      return this.imageService.getImageUrl(path.url, 'poster');
+    }
     return this.imageService.getImageUrl(path, 'poster');
   }
 
@@ -289,7 +293,10 @@ export class MediaListComponent implements OnInit, OnDestroy {
     return {
       ...item,
       id: this.mediaType === 'movie' ? item.movie_id || item.id : item.tv_series_id || item.id,
-      poster: this.getImageUrl(item.poster)
+      poster: this.getImageUrl(item.poster),
+      // Map duration for movies and total_seasons for TV series
+      duration: this.mediaType === 'movie' ? item.duration : undefined,
+      total_seasons: this.mediaType === 'tvseries' ? item.total_seasons : undefined
     };
   }
 

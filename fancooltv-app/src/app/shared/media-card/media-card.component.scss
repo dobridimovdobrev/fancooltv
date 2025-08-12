@@ -114,61 +114,68 @@
 
       .movie-meta {
         display: flex;
-        flex-direction: column;
-        gap: 8px;
-        margin-bottom: 16px;
+        justify-content: center;
+        gap: 1rem;
+        margin-bottom: 1rem;
+        width: 100%;
+
+        @media (max-width: 449px) {
+          justify-content: space-between;
+        }
 
         .meta-item {
-          display: flex;
+          display: inline-flex;
           align-items: center;
-          font-size: 0.875rem;
-          color: rgba(255, 255, 255, 0.9);
+          gap: 0.35rem;
+          font-size: 0.75rem;
+          color: white;
+          padding: 4px 8px;
+          border-radius: 20px;
+          background: rgba(0, 0, 0, 0.85);
+          backdrop-filter: blur(8px);
+          box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+          margin: 0;
 
           i {
-            margin-right: 6px;
+            color: rgba(255, 255, 255, 0.6);
             font-size: 0.75rem;
-            width: 12px;
-            text-align: center;
           }
-        }
 
-        .duration-item i {
-          color: #17a2b8;
-        }
+          span {
+            white-space: nowrap;
+          }
 
-        .category-item i {
-          color: #28a745;
+          &.category-item i {
+            color: #f8b547;
+          }
         }
       }
 
       .btn-details {
-        display: inline-flex;
+        display: flex;
+        background: rgba(#f8b547, 0.2);
         align-items: center;
+        justify-content: space-between;
         gap: 8px;
-        background: var(--bs-primary);
-        color: white;
-        padding: 8px 16px;
-        border-radius: 6px;
+        color: #f8b547;
         text-decoration: none;
-        font-weight: 600;
-        font-size: 0.875rem;
+        font-size: 0.9rem;
+        font-weight: 500;
+        padding: 8px 16px;
+        border-radius: 20px;
+        border: none;
         transition: all 0.3s ease;
+        width: 100%;
 
         &:hover {
-          background: var(--bs-primary);
-          filter: brightness(1.1);
-          transform: translateX(2px);
-          color: white;
+          background: rgba(#f8b547, 0.6);
+          color: #f8f9fa;
+          transform: translateX(5px);
           text-decoration: none;
         }
 
         i {
-          font-size: 0.75rem;
-          transition: transform 0.3s ease;
-        }
-
-        &:hover i {
-          transform: translateX(2px);
+          font-size: 0.8rem;
         }
       }
     }

@@ -1,0 +1,144 @@
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-12">
+      <!-- Page Header -->
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0">{{ isEditMode ? 'Edit Country' : 'Add New Country' }}</h1>
+        <button type="button" class="btn btn-secondary" (click)="onCancel()">
+          <i class="fas fa-arrow-left me-2"></i>Back to Countries
+        </button>
+      </div>
+
+      <!-- Country Form -->
+      <form [formGroup]="countryForm" (ngSubmit)="onSubmit()" class="country-form">
+        <div class="row">
+          <!-- Main Form Section -->
+          <div class="col-md-8">
+            <!-- Basic Information Section -->
+            <div class="card mb-4">
+              <div class="card-header">
+                <h5 class="mb-0">Basic Information</h5>
+              </div>
+              <div class="card-body">
+                <!-- Country Name -->
+                <div class="mb-3">
+                  <label for="name" class="form-label">Country Name *</label>
+                  <input type="text" class="form-control" id="name" formControlName="name" placeholder="Enter country name">
+                  <div *ngIf="countryForm.get('name')?.invalid && countryForm.get('name')?.touched" class="text-danger">
+                    <small *ngIf="countryForm.get('name')?.errors?.['required']">Country name is required</small>
+                    <small *ngIf="countryForm.get('name')?.errors?.['maxlength']">Country name cannot exceed 100 characters</small>
+                  </div>
+                </div>
+
+                <!-- Continent -->
+                <div class="mb-3">
+                  <label for="continent" class="form-label">Continent *</label>
+                  <select class="form-select" id="continent" formControlName="continent">
+                    <option value="">Select a continent</option>
+                    <option *ngFor="let continent of continents" [value]="continent.code">
+                      {{ continent.name }}
+                    </option>
+                  </select>
+                  <div *ngIf="countryForm.get('continent')?.invalid && countryForm.get('continent')?.touched" class="text-danger">
+                    <small *ngIf="countryForm.get('continent')?.errors?.['required']">Continent is required</small>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Country Codes Section -->
+            <div class="card mb-4">
+              <div class="card-header">
+                <h5 class="mb-0">Country Codes</h5>
+              </div>
+              <div class="card-body">
+                <div class="row">
+                  <!-- ISO 2-Char Code -->
+                  <div class="col-md-6 mb-3">
+                    <label for="iso_char2" class="form-label">ISO 2-Char Code *</label>
+                    <input type="text" class="form-control" id="iso_char2" formControlName="iso_char2" 
+                           placeholder="e.g., US" maxlength="2" style="text-transform: uppercase;">
+                    <div *ngIf="countryForm.get('iso_char2')?.invalid && countryForm.get('iso_char2')?.touched" class="text-danger">
+                      <small *ngIf="countryForm.get('iso_char2')?.errors?.['required']">ISO 2-char code is required</small>
+                      <small *ngIf="countryForm.get('iso_char2')?.errors?.['minlength'] || countryForm.get('iso_char2')?.errors?.['maxlength']">Must be exactly 2 characters</small>
+                    </div>
+                  </div>
+
+                  <!-- ISO 3-Char Code -->
+                  <div class="col-md-6 mb-3">
+                    <label for="iso_char3" class="form-label">ISO 3-Char Code *</label>
+                    <input type="text" class="form-control" id="iso_char3" formControlName="iso_char3" 
+                           placeholder="e.g., USA" maxlength="3" style="text-transform: uppercase;">
+                    <div *ngIf="countryForm.get('iso_char3')?.invalid && countryForm.get('iso_char3')?.touched" class="text-danger">
+                      <small *ngIf="countryForm.get('iso_char3')?.errors?.['required']">ISO 3-char code is required</small>
+                      <small *ngIf="countryForm.get('iso_char3')?.errors?.['minlength'] || countryForm.get('iso_char3')?.errors?.['maxlength']">Must be exactly 3 characters</small>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Phone Prefix -->
+                <div class="mb-3">
+                  <label for="phone_prefix" class="form-label">Phone Prefix *</label>
+                  <input type="text" class="form-control" id="phone_prefix" formControlName="phone_prefix" 
+                         placeholder="e.g., +1" maxlength="10">
+                  <div *ngIf="countryForm.get('phone_prefix')?.invalid && countryForm.get('phone_prefix')?.touched" class="text-danger">
+                    <small *ngIf="countryForm.get('phone_prefix')?.errors?.['required']">Phone prefix is required</small>
+                    <small *ngIf="countryForm.get('phone_prefix')?.errors?.['maxlength']">Phone prefix cannot exceed 10 characters</small>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Preview Section -->
+          <div class="col-md-4">
+            <div class="card mb-4">
+              <div class="card-header">
+                <h5 class="mb-0">Preview</h5>
+              </div>
+              <div class="card-body">
+                <!-- Flag Preview -->
+                <div class="text-center mb-3">
+                  <div class="country-flag-preview">
+                    <span *ngIf="countryForm.get('iso_char2')?.value && countryForm.get('iso_char2')?.value.length === 2" 
+                          class="fi fi-{{ countryForm.get('iso_char2')?.value.toLowerCase() }}" 
+                          title="{{ countryForm.get('name')?.value || 'Country' }} flag"></span>
+                    <div *ngIf="!countryForm.get('iso_char2')?.value || countryForm.get('iso_char2')?.value.length !== 2" 
+                         class="flag-placeholder">
+                      <i class="fas fa-flag"></i>
+                      <p class="mt-2 mb-0">Flag Preview</p>
+                      <small class="text-muted">Enter ISO 2-char code</small>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Country Info Preview -->
+                <div class="country-info-preview">
+                  <h6 class="mb-2">{{ countryForm.get('name')?.value || 'Country Name' }}</h6>
+                  <p class="mb-1"><strong>Continent:</strong> 
+                    {{ countryForm.get('continent')?.value ? getContinentName(countryForm.get('continent')?.value) : 'Not selected' }}
+                  </p>
+                  <p class="mb-1"><strong>ISO Codes:</strong> 
+                    {{ countryForm.get('iso_char2')?.value || 'XX' }} / {{ countryForm.get('iso_char3')?.value || 'XXX' }}
+                  </p>
+                  <p class="mb-0"><strong>Phone:</strong> 
+                    {{ countryForm.get('phone_prefix')?.value || '+XXX' }}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="d-flex justify-content-end mt-4 mb-4">
+          <button type="button" class="btn btn-secondary me-2" (click)="onCancel()">Cancel</button>
+          <button type="submit" class="btn btn-primary" [disabled]="loading">
+            <span *ngIf="loading" class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+            {{ isEditMode ? 'Update Country' : 'Create Country' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

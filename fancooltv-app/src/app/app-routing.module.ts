@@ -4,9 +4,7 @@ import { AuthGuard } from './guards/auth.guard';
 import { HomeComponent } from './home/home.component';
 import { LoginComponent } from './auth/login/login.component';
 import { RegisterComponent } from './auth/register/register.component';
-import { MoviesComponent } from './movies/movies.component';
 import { MovieDetailsComponent } from './movie-details/movie-details.component';
-import { TvseriesComponent } from './tvseries/tvseries.component';
 import { TvseriesDetailsComponent } from './tvseries-details/tvseries-details.component';
 import { TermsComponent } from './terms/terms.component';
 import { MoviesListWrapperComponent } from './movies/movies-list-wrapper/movies-list-wrapper.component';
@@ -16,14 +14,11 @@ const routes: Routes = [
     { path: '', component: HomeComponent },
     { path: 'login', component: LoginComponent },
     { path: 'register', component: RegisterComponent },
-    { path: 'movies', component: MoviesComponent, canActivate: [AuthGuard] },
+    { path: 'movies', component: MoviesListWrapperComponent, canActivate: [AuthGuard] },
     { path: 'movie-details/:id', component: MovieDetailsComponent, canActivate: [AuthGuard] },
-    { path: 'tvseries', component: TvseriesComponent, canActivate: [AuthGuard] },
+    { path: 'tvseries', component: TvseriesListWrapperComponent, canActivate: [AuthGuard] },
     { path: 'tvseries-details/:id', component: TvseriesDetailsComponent, canActivate: [AuthGuard] },
     { path: 'terms', component: TermsComponent },
-    // Test routes for new MediaListComponent wrappers
-    { path: 'movies-test', component: MoviesListWrapperComponent, canActivate: [AuthGuard] },
-    { path: 'tvseries-test', component: TvseriesListWrapperComponent, canActivate: [AuthGuard] },
     // Dashboard route with lazy loading
     { 
       path: 'dashboard', 

@@ -29,6 +29,7 @@ $breakpoint-xl: 1200px;
 
 // Movie Details Component Styles
 .movie-details-container {
+  margin-top: 82px;
   min-height: calc(100vh - 150px);
   color: $white;
   
@@ -223,6 +224,7 @@ $breakpoint-xl: 1200px;
           .cast-img {
             border-color: $primary;
             box-shadow: 0 0 15px rgba($primary, 0.3);
+          
           }
         }
   
@@ -233,6 +235,7 @@ $breakpoint-xl: 1200px;
           border: 1px solid rgba(255, 255, 255, 0.1);
           background-color: rgba(0, 0, 0, 0.2);
           transition: all 0.2s ease;
+          object-fit: cover;
         }
   
         .cast-name {

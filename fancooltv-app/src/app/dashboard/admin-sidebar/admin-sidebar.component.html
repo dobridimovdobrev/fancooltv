@@ -7,10 +7,11 @@
   
   <div class="sidebar-menu">
     <ul class="nav flex-column">
-      <li class="nav-item" *ngFor="let item of menuItems">
+      <li class="nav-item" *ngFor="let item of menuItems; let i = index">
         <a class="nav-link" 
            [routerLink]="item.route" 
            routerLinkActive="active"
+           [routerLinkActiveOptions]="i === 0 ? { exact: true } : { exact: false }"
            [class.active]="isActive(item.route)">
           <i [class]="item.icon"></i>
           <span>{{ item.title }}</span>

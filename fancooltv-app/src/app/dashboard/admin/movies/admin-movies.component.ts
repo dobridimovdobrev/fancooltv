@@ -152,6 +152,32 @@ export class AdminMoviesComponent implements OnInit {
     this.currentPage = 1;
     this.loadMovies();
   }
+
+  /**
+   * Handle search input change (for real-time updates)
+   */
+  onSearchInputChange(): void {
+    // Update searchTerm from input - no automatic search, only on Enter or Search button
+    // This is just to keep the model in sync for the clear button visibility
+  }
+
+  /**
+   * Clear search input and reload all movies
+   */
+  clearSearch(): void {
+    this.searchTerm = '';
+    this.searchInput.nativeElement.value = '';
+    this.selectedCategory = '';
+    this.selectedYear = '';
+    // Reset filter selects
+    const categorySelect = document.querySelector('.filter-select') as HTMLSelectElement;
+    const yearSelect = document.querySelectorAll('.filter-select')[1] as HTMLSelectElement;
+    if (categorySelect) categorySelect.value = '';
+    if (yearSelect) yearSelect.value = '';
+    // Reset pagination and reload all movies
+    this.currentPage = 1;
+    this.loadMovies();
+  }
   
   /**
    * Load more movies (pagination)

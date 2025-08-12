@@ -25,14 +25,14 @@
       <h3 class="card-title">{{ mediaItem.title }}</h3>
       
       <div class="movie-meta">
-        <div class="meta-item duration-item" *ngIf="getDurationText()">
+        <div class="meta-item duration-item">
           <i class="fa-solid fa-clock"></i>
-          <span class="duration-value">{{ getDurationText() }}</span>
+          <span class="duration-value">{{ getDurationText() || (mediaType === 'movie' ? mediaItem.duration + ' min' : mediaItem.total_seasons + ' Seasons') }}</span>
         </div>
         
-        <div class="meta-item category-item" *ngIf="getCategoryName()">
+        <div class="meta-item category-item">
           <i class="fa-solid fa-clapperboard"></i>
-          <span class="category-value">{{ getCategoryName() }}</span>
+          <span class="category-value">{{ getCategoryName() || mediaItem.category?.name || mediaItem.category }}</span>
         </div>
       </div>
       

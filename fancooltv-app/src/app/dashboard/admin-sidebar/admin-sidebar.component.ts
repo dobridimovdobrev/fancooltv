@@ -13,7 +13,7 @@ export class AdminSidebarComponent implements OnInit {
     {
       title: 'Dashboard',
       icon: 'fa-solid fa-gauge-high',
-      route: '/dashboard/admin'
+      route: '/dashboard/admin/home'
     },
     {
       title: 'Movies',
@@ -34,6 +34,11 @@ export class AdminSidebarComponent implements OnInit {
       title: 'Users',
       icon: 'fa-solid fa-users',
       route: '/dashboard/admin/users'
+    },
+    {
+      title: 'Countries',
+      icon: 'fa-solid fa-globe',
+      route: '/dashboard/admin/countries'
     }
   ];
 

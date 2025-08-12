@@ -62,7 +62,7 @@
                         <!-- Seasons Section -->
                         <div id="seasons" class="seasons-container mt-4" *ngIf="series?.seasons && series.seasons.length > 0">
                             <h3>Seasons</h3>
-                            <div class="season-section mb-4" *ngFor="let season of series.seasons">
+                            <div class="season-section mb-4" *ngFor="let season of getVisibleSeasons()">
                                 <div class="season-header d-flex justify-content-between align-items-center p-3 bg-secondary bg-opacity-25 rounded" 
                                      role="button" 
                                      (click)="toggleSeason(season.season_number)">
@@ -76,7 +76,7 @@
                                     </div>
                                 </div>
                                 <div class="episodes-list" [ngClass]="{'show': isSeasonExpanded(season.season_number)}" *ngIf="season.episodes && season.episodes.length > 0">
-                                    <div class="episode-item p-2 mt-2 bg-secondary bg-opacity-10 rounded" *ngFor="let episode of season.episodes">
+                                    <div class="episode-item p-2 mt-2 bg-secondary bg-opacity-10 rounded" *ngFor="let episode of getVisibleEpisodes(season)">
                                         <div style="display: flex; justify-content: space-between; align-items: center;">
                                             <div style="display: flex; align-items: center; gap: 12px;">
                                                 <span class="episode-number text-white fs-5" style="min-width: 35px">{{ episode.episode_number }}</span>
@@ -94,7 +94,20 @@
                                             </button>
                                         </div>
                                     </div>
+                                    
+                                    <!-- Load More Episodes Button -->
+                                    <div class="text-center mt-3" *ngIf="hasMoreEpisodes(season)">
+                                        <button class="btn btn-primary load-more-btn" (click)="loadMoreEpisodes(season.season_number)">
+                                            <i class="fas fa-plus me-2"></i>Load More Episodes
+                                        </button>
+                                    </div>
                                 </div>
+                            </div>
+                            <!-- Load More Seasons Button -->
+                            <div class="text-center mt-4" *ngIf="hasMoreSeasons()">
+                                <button class="btn btn-primary load-more-btn" (click)="loadMoreSeasons()">
+                                    <i class="fas fa-plus me-2"></i>Load More Seasons
+                                </button>
                             </div>
                         </div>
                     </div>

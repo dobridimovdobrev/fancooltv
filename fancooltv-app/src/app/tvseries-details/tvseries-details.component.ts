@@ -21,6 +21,14 @@ export class TvseriesDetailsComponent implements OnInit, OnDestroy {
   expandedSeasons: Set<number> = new Set<number>();
   modalRef?: BsModalRef;
   private subscriptions: Subscription = new Subscription();
+  
+  // Episodes pagination
+  episodesPerPage = 10;
+  visibleEpisodes: Map<number, number> = new Map<number, number>();
+  
+  // Seasons pagination
+  seasonsPerPage = 10;
+  visibleSeasonsCount = 10;
 
   constructor(
     private route: ActivatedRoute,
@@ -80,6 +88,10 @@ export class TvseriesDetailsComponent implements OnInit, OnDestroy {
       this.expandedSeasons.delete(seasonNumber);
     } else {
       this.expandedSeasons.add(seasonNumber);
+      // Initialize visible episodes count for this season
+      if (!this.visibleEpisodes.has(seasonNumber)) {
+        this.visibleEpisodes.set(seasonNumber, this.episodesPerPage);
+      }
     }
   }
 
@@ -88,6 +100,55 @@ export class TvseriesDetailsComponent implements OnInit, OnDestroy {
    */
   isSeasonExpanded(seasonNumber: number): boolean {
     return this.expandedSeasons.has(seasonNumber);
+  }
+
+  /**
+   * Get visible episodes for a season
+   */
+  getVisibleEpisodes(season: any): any[] {
+    if (!season.episodes) return [];
+    const visibleCount = this.visibleEpisodes.get(season.season_number) || this.episodesPerPage;
+    return season.episodes.slice(0, visibleCount);
+  }
+
+  /**
+   * Check if there are more episodes to load for a season
+   */
+  hasMoreEpisodes(season: any): boolean {
+    if (!season.episodes) return false;
+    const visibleCount = this.visibleEpisodes.get(season.season_number) || this.episodesPerPage;
+    return season.episodes.length > visibleCount;
+  }
+
+  /**
+   * Load more episodes for a season
+   */
+  loadMoreEpisodes(seasonNumber: number): void {
+    const currentVisible = this.visibleEpisodes.get(seasonNumber) || this.episodesPerPage;
+    this.visibleEpisodes.set(seasonNumber, currentVisible + this.episodesPerPage);
+  }
+
+  /**
+   * Get visible seasons (first N seasons based on pagination)
+   */
+  getVisibleSeasons(): any[] {
+    if (!this.series?.seasons) return [];
+    return this.series.seasons.slice(0, this.visibleSeasonsCount);
+  }
+
+  /**
+   * Check if there are more seasons to load
+   */
+  hasMoreSeasons(): boolean {
+    if (!this.series?.seasons) return false;
+    return this.series.seasons.length > this.visibleSeasonsCount;
+  }
+
+  /**
+   * Load more seasons
+   */
+  loadMoreSeasons(): void {
+    this.visibleSeasonsCount += this.seasonsPerPage;
   }
 
   /**

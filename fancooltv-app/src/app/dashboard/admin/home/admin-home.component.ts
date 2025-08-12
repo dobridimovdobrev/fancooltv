@@ -10,6 +10,7 @@ export interface DashboardStats {
   totalSeries: number;
   totalPersons: number;
   totalUsers: number;
+  totalCountries: number;
   recentUploads: number;
 }
 
@@ -25,6 +26,7 @@ export class AdminHomeComponent implements OnInit {
     totalSeries: 0,
     totalPersons: 0,
     totalUsers: 0,
+    totalCountries: 0,
     recentUploads: 0
   };
 
@@ -73,6 +75,7 @@ export class AdminHomeComponent implements OnInit {
       totalSeries: 0,
       totalPersons: 0,
       totalUsers: 0,
+      totalCountries: 0,
       recentUploads: 0
     };
   }

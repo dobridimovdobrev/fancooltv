@@ -30,6 +30,10 @@ const routes: Routes = [
   {
     path: 'users',
     loadChildren: () => import('./users/admin-users.module').then(m => m.AdminUsersModule)
+  },
+  {
+    path: 'countries',
+    loadChildren: () => import('./countries/admin-countries.module').then(m => m.AdminCountriesModule)
   }
 ];
 

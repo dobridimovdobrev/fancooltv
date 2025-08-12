@@ -87,13 +87,14 @@
         margin-right: 0.75rem;
         width: 20px;
         text-align: center;
+        color: $primary; // Default primary color for all icons
       }
       
-      &:hover, &.active {
+      &:hover:not(.active) {
         background-color: rgba($white, 0.1);
         color: $primary;
         
-        // Left border effect when active/hover
+        // Left border effect when hover (only if not active)
         &:before {
           content: '';
           position: absolute;
@@ -110,7 +111,22 @@
       }
       
       &.active {
+        background-color: rgba($white, 0.1);
+        color: $primary;
         border-left: 3px solid $primary;
+        
+        i {
+          color: $primary;
+        }
+        
+        // Ensure no hover effects on active items
+        &:hover {
+          background-color: rgba($white, 0.1);
+          
+          &:before {
+            display: none; // Hide the hover pseudo-element
+          }
+        }
       }
     }
   }
