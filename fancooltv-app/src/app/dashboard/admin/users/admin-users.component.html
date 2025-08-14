@@ -143,8 +143,11 @@
                   <button class="btn btn-sm btn-outline-info" (click)="editUser(user.user_id)" title="Edit">
                     <i class="fas fa-edit"></i>
                   </button>
-                    <!-- delete button -->
-                  <button class="btn btn-sm btn-outline-danger" (click)="deleteUser(user.user_id)" title="Delete">
+                  <!-- delete button -->
+                  <button 
+                    class="btn btn-sm btn-outline-danger" 
+                    (click)="openDeleteModal(user.user_id)" 
+                    title="Delete User">
                     <i class="fas fa-trash"></i>
                   </button>
                 </div>
@@ -163,3 +166,28 @@
     </button>
   </div>
 </div>
+
+<!-- Delete Confirmation Modal -->
+<ng-template #deleteModal>
+  <div class="modal-header">
+    <h4 class="modal-title">Confirm Message</h4>
+    <button type="button" class="btn-close" aria-label="Close" (click)="cancelDelete()"></button>
+  </div>
+  <div class="modal-body">
+    <div class="text-center">
+      <h5>Are you sure?</h5>
+      <p class="mb-3">
+        Do you want to delete the user <strong>"{{ userToDelete?.username }}"</strong>?
+      </p>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-danger" (click)="confirmDelete()" [disabled]="loading">
+      <span *ngIf="loading" class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+      <i *ngIf="!loading" class="fas fa-trash me-2"></i>Delete
+    </button>
+    <button type="button" class="btn btn-secondary" (click)="cancelDelete()">
+      <i class="fas fa-times me-2"></i>Cancel
+    </button>
+  </div>
+</ng-template>

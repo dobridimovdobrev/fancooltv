@@ -41,6 +41,16 @@ export class AdminCountriesComponent implements OnInit, OnDestroy, AfterViewInit
   ngOnInit(): void {
     // Auto-reset search when navigating from menu
     this.resetSearchAndFilters();
+    
+    // Subscribe to countries changes from service
+    this.subscriptions.add(
+      this.countryService.countries$.subscribe(countries => {
+        this.countries = countries;
+        this.noResults = countries.length === 0;
+      })
+    );
+    
+    // Load initial data
     this.loadCountries();
   }
 
@@ -102,7 +112,7 @@ export class AdminCountriesComponent implements OnInit, OnDestroy, AfterViewInit
           console.log('🔍 Response.data type:', typeof response?.data);
           console.log('🔍 First country sample:', response?.data?.[0]);
           
-          if (response && response.data) {
+          if (response && response.data !== undefined) {
             // Always reset when it's a new search/filter or after delete operation
             if (reset || this.currentPage === 1) {
               this.countries = response.data;
@@ -116,12 +126,17 @@ export class AdminCountriesComponent implements OnInit, OnDestroy, AfterViewInit
             console.log('📊 Countries loaded:', this.countries.length, 'Total:', this.totalItems);
             console.log('🔍 First loaded country:', this.countries[0]);
             
-            // Update the service subject
+            // Always update the service subject (even if empty array)
             this.countryService.updateCountriesSubject(this.countries);
+            
+            // Set noResults based on whether we have data
+            this.noResults = this.countries.length === 0;
           } else {
             console.warn('⚠️ Invalid response format:', response);
             this.loading = false;
             this.noResults = true;
+            // Update service with empty array for invalid responses
+            this.countryService.updateCountriesSubject([]);
           }
         },
         error: (error) => {
@@ -276,9 +291,8 @@ export class AdminCountriesComponent implements OnInit, OnDestroy, AfterViewInit
       this.countryService.deleteCountry(this.countryToDelete.country_id!).subscribe({
         next: (response) => {
           console.log('Country deleted successfully:', response);
-          // Reset to first page and reload countries list
-          this.currentPage = 1;
-          this.loadCountries(true);
+          // The service automatically updates the BehaviorSubject, no need to reload manually
+          this.loading = false;
           this.modalRef?.hide();
           this.countryToDelete = null;
         },

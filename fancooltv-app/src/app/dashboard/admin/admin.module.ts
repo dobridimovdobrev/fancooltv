@@ -25,7 +25,7 @@ const routes: Routes = [
   },
   {
     path: 'tvseries',
-    loadChildren: () => import('./tvseries/admin-tvseries.module').then(m => m.AdminTvseriesModule)
+    loadChildren: () => import('./tvseries/admin-tvseries.module').then(m => m.AdminTVSeriesModule)
   },
   {
     path: 'persons',

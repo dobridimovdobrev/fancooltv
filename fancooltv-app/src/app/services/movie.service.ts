@@ -64,6 +64,14 @@ export class MovieService {
     }
 
     return this.apiService.getMovies(params).pipe(
+      map(response => {
+        // Filter out soft deleted movies
+        const filteredMovies = response.data.filter(movie => !movie.deleted_at);
+        return {
+          ...response,
+          data: filteredMovies
+        } as ApiResponse<Movie[]>;
+      }),
       tap(response => {
         this.isLoading = false;
         this.loadingSubject.next(false);
@@ -78,6 +86,37 @@ export class MovieService {
           const currentMovies = this.moviesSubject.getValue();
           this.moviesSubject.next([...currentMovies, ...response.data]);
         }
+      })
+    );
+  }
+
+  /**
+   * Get all active movies (for dashboard count)
+   */
+  public getAllMovies(): Observable<ApiResponse<Movie[]>> {
+    return this.apiService.getMovies({ page: 1 }).pipe(
+      map(response => {
+        // Filter out soft deleted movies
+        const filteredMovies = response.data.filter(movie => !movie.deleted_at);
+        
+        // Use the total count from meta if available, otherwise use filtered data length
+        const totalCount = response.meta?.total || filteredMovies.length;
+        
+        console.log('Movies API response:', {
+          totalFromAPI: response.data.length,
+          filteredCount: filteredMovies.length,
+          metaTotal: response.meta?.total,
+          usingCount: totalCount
+        });
+        
+        return {
+          ...response,
+          data: filteredMovies,
+          meta: response.meta ? {
+            ...response.meta,
+            total: totalCount
+          } : undefined
+        } as ApiResponse<Movie[]>;
       })
     );
   }

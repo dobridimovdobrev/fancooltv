@@ -1,4 +1,4 @@
-// Stili per la gestione dei film nella dashboard
+// Stili per la gestione delle serie TV nella dashboard
 
 // Variabili di colore personalizzate
 $primary : #F8B445;
@@ -80,7 +80,7 @@ $input-bg: #050a18; // Input leggermente più chiari del body
 }
 
 // Stile per le miniature dei poster
-.movie-thumbnail {
+.series-thumbnail {
   width: 60px;
   height: 80px;
   position: relative;
@@ -112,7 +112,7 @@ $input-bg: #050a18; // Input leggermente più chiari del body
 }
 
 // Stili per la tabella
-.movie-table-card {
+.tvseries-table-card {
   background-color: $bg-custom !important; // Utilizzo della variabile $bg-custom con !important
   border: 1px solid $border-custom;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
@@ -126,7 +126,7 @@ $input-bg: #050a18; // Input leggermente più chiari del body
   }
 }
 
-.movie-table {
+.tvseries-table {
   background-color: transparent !important; // Force transparent background
   color: #fff;
 
@@ -297,4 +297,5 @@ $input-bg: #050a18; // Input leggermente più chiari del body
     }
   }
 }
+
 

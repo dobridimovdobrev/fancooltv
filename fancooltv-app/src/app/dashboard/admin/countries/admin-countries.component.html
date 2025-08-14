@@ -81,8 +81,8 @@
             </tr>
             <tr *ngIf="noResults && !loading">
               <td colspan="7" class="text-center py-4">
-                <p class="mb-0">No results found</p>
-                <p class="text-muted small">Try changing filters or search terms</p>
+                <p class="mb-0">{{ searchTerm || continentFilter ? 'Country not found' : 'No countries available' }}</p>
+                <p class="text-muted small" *ngIf="searchTerm || continentFilter">Try changing filters or search terms</p>
               </td>
             </tr>
             <tr *ngFor="let country of countries">

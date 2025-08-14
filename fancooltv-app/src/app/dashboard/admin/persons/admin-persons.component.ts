@@ -1,5 +1,6 @@
-import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef, TemplateRef } from '@angular/core';
 import { Router } from '@angular/router';
+import { BsModalService, BsModalRef } from 'ngx-bootstrap/modal';
 import { ApiResponse, PaginationParams } from '../../../models/api.models';
 import { Person } from '../../../models/media.models';
 import { ApiService } from '../../../services/api.service';
@@ -11,6 +12,8 @@ import { debounceTime, distinctUntilChanged, fromEvent } from 'rxjs';
   styleUrls: ['./admin-persons.component.scss']
 })
 export class AdminPersonsComponent implements OnInit {
+  @ViewChild('deleteModal') deleteModal!: TemplateRef<any>;
+
   // Person data
   persons: Person[] = [];
   filteredPersons: Person[] = [];
@@ -25,15 +28,22 @@ export class AdminPersonsComponent implements OnInit {
   // UI States
   loading: boolean = false;
   error: string | null = null;
-  noResults = false;
+  noResults: boolean = false;
 
-  // Search
+  // Search and Filters (Movies-like)
   @ViewChild('searchInput', { static: true }) searchInput!: ElementRef;
   searchQuery: string = '';
+  searchTerm: string = '';
+  selectedKnownFor: string = '';
+
+  // Modal properties
+  modalRef?: BsModalRef;
+  personToDelete: Person | null = null;
 
   constructor(
     public apiService: ApiService,
-    private router: Router
+    private router: Router,
+    private modalService: BsModalService
   ) { }
 
   ngOnInit(): void {
@@ -46,17 +56,23 @@ export class AdminPersonsComponent implements OnInit {
    */
   loadPersons(page: number = 1): void {
     this.loading = true;
-    this.error = null;
+    this.error = '';
 
-    const params: Partial<PaginationParams> = {
+    const params: Record<string, any> = {
       page: page,
-      per_page: this.itemsPerPage // Usa il valore di itemsPerPage (20)
+      per_page: this.itemsPerPage
     };
 
-    // Add search parameter if present
+    // Add search parameter if present (usando 'name' come specificato nella documentazione API)
     if (this.searchQuery && this.searchQuery.trim() !== '') {
-      params.name = this.searchQuery.trim(); // Usa 'name' invece di 'q' come da documentazione API
-      console.log('Searching for name:', this.searchQuery.trim());
+      params['name'] = this.searchQuery.trim();
+      console.log('Searching for person by name:', this.searchQuery.trim());
+    }
+    
+    // Add filter for known_for if selected
+    if (this.selectedKnownFor && this.selectedKnownFor.trim() !== '') {
+      params['known_for'] = this.selectedKnownFor.trim();
+      console.log('Filtering by known_for:', this.selectedKnownFor.trim());
     }
     
     console.log('Requesting persons with params:', params);
@@ -121,21 +137,11 @@ export class AdminPersonsComponent implements OnInit {
   }
 
   /**
-   * Configura il listener per la ricerca con debounce
+   * Configura il listener per la ricerca (solo su Enter key)
    */
   setupSearchListener(): void {
-    if (this.searchInput && this.searchInput.nativeElement) {
-      fromEvent(this.searchInput.nativeElement, 'input')
-        .pipe(
-          debounceTime(400),
-          distinctUntilChanged()
-        )
-        .subscribe(() => {
-          this.searchQuery = this.searchInput.nativeElement.value;
-          this.currentPage = 1; // Torna alla prima pagina
-          this.loadPersons();
-        });
-    }
+    // Non configuriamo più la ricerca in tempo reale
+    // La ricerca avviene solo su click del pulsante Search o Enter key
   }
 
   /**
@@ -165,24 +171,53 @@ export class AdminPersonsComponent implements OnInit {
   }
 
   /**
-   * Delete a person
+   * Show delete confirmation modal
    */
-  deletePerson(personId: number): void {
-    if (confirm('Are you sure you want to delete this person?')) {
+  openDeleteModal(personId: number): void {
+    // Find the person to delete
+    this.personToDelete = this.persons.find(p => p.person_id === personId) || null;
+    
+    if (this.personToDelete) {
+      // Open the delete confirmation modal
+      this.modalRef = this.modalService.show(this.deleteModal, {
+        class: 'modal-md',
+        backdrop: 'static',
+        keyboard: false
+      });
+    }
+  }
+
+  /**
+   * Confirm person deletion
+   */
+  confirmDelete(): void {
+    if (this.personToDelete) {
       this.loading = true;
-      this.apiService.deletePerson(personId.toString()).subscribe({
-        next: () => {
-          this.persons = this.persons.filter(p => p.person_id !== personId);
-          this.filteredPersons = this.filteredPersons.filter(p => p.person_id !== personId);
-          this.loading = false;
+      
+      this.apiService.deletePerson(this.personToDelete.person_id).subscribe({
+        next: (response) => {
+          console.log('Person deleted successfully:', response);
+          // Reload persons list
+          this.loadPersons();
+          this.modalRef?.hide();
+          this.personToDelete = null;
         },
-        error: (error: any) => {
+        error: (error) => {
           console.error('Error deleting person:', error);
-          alert('An error occurred while deleting the person.');
           this.loading = false;
+          this.modalRef?.hide();
+          this.personToDelete = null;
         }
       });
     }
+  }
+
+  /**
+   * Cancel person deletion
+   */
+  cancelDelete(): void {
+    this.modalRef?.hide();
+    this.personToDelete = null;
   }
 
   /**
@@ -249,45 +284,47 @@ export class AdminPersonsComponent implements OnInit {
         active: i === this.currentPage
       });
     }
-    
-    // Aggiungi puntini di sospensione se necessario
-    if (startPage > 1) {
-      // Aggiungi link alla prima pagina
-      this.paginationLinks.unshift({
-        url: 'javascript:void(0)',
-        label: '1',
-        active: false
-      });
-      
-      // Aggiungi puntini se c'è un gap
-      if (startPage > 2) {
-        this.paginationLinks.unshift({
-          url: null,
-          label: '...',
-          active: false
-        });
-      }
+  }
+
+  /**
+   * Handle search input change
+   */
+  onSearchInputChange(): void {
+    // Search functionality will be triggered by the debounced listener
+  }
+
+  /**
+   * Clear search
+   */
+  clearSearch(): void {
+    this.searchTerm = '';
+    this.searchQuery = '';
+    if (this.searchInput) {
+      this.searchInput.nativeElement.value = '';
     }
-    
-    if (endPage < this.totalPages) {
-      // Aggiungi puntini se c'è un gap
-      if (endPage < this.totalPages - 1) {
-        this.paginationLinks.push({
-          url: null,
-          label: '...',
-          active: false
-        });
-      }
-      
-      // Aggiungi link all'ultima pagina
-      this.paginationLinks.push({
-        url: 'javascript:void(0)',
-        label: this.totalPages.toString(),
-        active: false
-      });
+    this.loadPersons(1);
+  }
+
+  /**
+   * Apply filters
+   */
+  applyFilters(): void {
+    this.currentPage = 1;
+    this.loadPersons(1);
+  }
+
+  /**
+   * Reset filters
+   */
+  resetFilters(): void {
+    this.selectedKnownFor = '';
+    this.searchTerm = '';
+    this.searchQuery = '';
+    if (this.searchInput) {
+      this.searchInput.nativeElement.value = '';
     }
-    
-    console.log('Generated pagination links:', this.paginationLinks);
+    this.currentPage = 1;
+    this.loadPersons(1);
   }
 
   /**
@@ -298,6 +335,6 @@ export class AdminPersonsComponent implements OnInit {
     if (!imagePath) {
       return 'assets/images/placeholder-person.jpg'; // Immagine placeholder
     }
-    return this.apiService.getImageUrl(imagePath, 'person');
+    return this.apiService.getImageUrl(imagePath, 'cast');
   }
 }

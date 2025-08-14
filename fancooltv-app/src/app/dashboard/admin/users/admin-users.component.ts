@@ -1,4 +1,5 @@
-import { Component, OnInit, OnDestroy, ViewChild, ElementRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild, ElementRef, TemplateRef } from '@angular/core';
+import { BsModalService, BsModalRef } from 'ngx-bootstrap/modal';
 import { UserService, User } from '../../../services/user.service';
 import { Subscription } from 'rxjs';
 
@@ -9,6 +10,7 @@ import { Subscription } from 'rxjs';
 })
 export class AdminUsersComponent implements OnInit, OnDestroy {
   @ViewChild('searchInput') searchInput!: ElementRef;
+  @ViewChild('deleteModal') deleteModal!: TemplateRef<any>;
 
   users: User[] = [];
   loading = false;
@@ -23,9 +25,16 @@ export class AdminUsersComponent implements OnInit, OnDestroy {
   roleFilter = '';
   genderFilter = '';
   
+  // Modal properties
+  modalRef?: BsModalRef;
+  userToDelete: User | null = null;
+  
   private subscriptions: Subscription = new Subscription();
 
-  constructor(private userService: UserService) {}
+  constructor(
+    private userService: UserService,
+    private modalService: BsModalService
+  ) {}
 
   ngOnInit(): void {
     this.loadUsers();
@@ -244,10 +253,52 @@ export class AdminUsersComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * View user details (placeholder for future implementation)
+   * Show delete confirmation modal
    */
-  viewUser(userId: number): void {
-    // TODO: Implement user details modal/view
-    alert(`View user ${userId} functionality will be implemented soon`);
+  openDeleteModal(userId: number): void {
+    // Find the user to delete
+    this.userToDelete = this.users.find(u => u.user_id === userId) || null;
+    
+    if (this.userToDelete) {
+      // Open the delete confirmation modal
+      this.modalRef = this.modalService.show(this.deleteModal, {
+        class: 'modal-md',
+        backdrop: 'static',
+        keyboard: false
+      });
+    }
+  }
+
+  /**
+   * Confirm user deletion
+   */
+  confirmDelete(): void {
+    if (this.userToDelete) {
+      this.loading = true;
+      
+      this.userService.deleteUser(this.userToDelete.user_id).subscribe({
+        next: (response) => {
+          console.log('User deleted successfully:', response);
+          // Reload users list
+          this.loadUsers(true);
+          this.modalRef?.hide();
+          this.userToDelete = null;
+        },
+        error: (error) => {
+          console.error('Error deleting user:', error);
+          this.loading = false;
+          this.modalRef?.hide();
+          this.userToDelete = null;
+        }
+      });
+    }
+  }
+
+  /**
+   * Cancel user deletion
+   */
+  cancelDelete(): void {
+    this.modalRef?.hide();
+    this.userToDelete = null;
   }
 }

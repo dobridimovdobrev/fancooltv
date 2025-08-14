@@ -109,21 +109,47 @@ export class CountryService {
    * Create new country
    */
   createCountry(countryData: CreateCountryRequest): Observable<{ data: Country }> {
-    return this.http.post<{ data: Country }>(this.apiUrl, countryData);
+    return this.http.post<{ data: Country }>(this.apiUrl, countryData).pipe(
+      map(response => {
+        // Add the new country to the local countries array
+        const currentCountries = this.getCurrentCountries();
+        const updatedCountries = [...currentCountries, response.data];
+        this.updateCountriesSubject(updatedCountries);
+        return response;
+      })
+    );
   }
 
   /**
    * Update country
    */
   updateCountry(id: number, countryData: UpdateCountryRequest): Observable<{ data: Country }> {
-    return this.http.put<{ data: Country }>(`${this.apiUrl}/${id}`, countryData);
+    return this.http.put<{ data: Country }>(`${this.apiUrl}/${id}`, countryData).pipe(
+      map(response => {
+        // Update the local countries array with the updated country
+        const currentCountries = this.getCurrentCountries();
+        const updatedCountries = currentCountries.map(country => 
+          country.country_id === id ? response.data : country
+        );
+        this.updateCountriesSubject(updatedCountries);
+        return response;
+      })
+    );
   }
 
   /**
    * Delete country
    */
   deleteCountry(id: number): Observable<{ message: string }> {
-    return this.http.delete<{ message: string }>(`${this.apiUrl}/${id}`);
+    return this.http.delete<{ message: string }>(`${this.apiUrl}/${id}`).pipe(
+      map(response => {
+        // Remove the deleted country from the local countries array
+        const currentCountries = this.getCurrentCountries();
+        const updatedCountries = currentCountries.filter(country => country.country_id !== id);
+        this.updateCountriesSubject(updatedCountries);
+        return response;
+      })
+    );
   }
 
   /**

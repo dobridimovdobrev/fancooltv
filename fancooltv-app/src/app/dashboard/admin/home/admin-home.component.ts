@@ -11,6 +11,7 @@ export interface DashboardStats {
   totalPersons: number;
   totalUsers: number;
   totalCountries: number;
+  totalCategories: number;
   recentUploads: number;
 }
 
@@ -27,6 +28,7 @@ export class AdminHomeComponent implements OnInit {
     totalPersons: 0,
     totalUsers: 0,
     totalCountries: 0,
+    totalCategories: 0,
     recentUploads: 0
   };
 
@@ -49,19 +51,23 @@ export class AdminHomeComponent implements OnInit {
 
   // Method to load dashboard statistics
   loadDashboardStats(): void {
-    // Caricamento dati dal backend tramite API
+    // Use unified dashboard stats API (backend respects soft delete for all counts)
     this.apiService.getDashboardStats().subscribe({
       next: (response) => {
-        if (response && response.data) {
-          this.stats = response.data;
-          console.log('Statistiche caricate con successo:', this.stats);
-        } else {
-          console.error('Errore: risposta API non valida', response);
-          this.useDefaultStats();
-        }
+        // Update stats with backend counts (all soft delete aware)
+        this.stats = {
+          totalUsers: response.data?.totalUsers || 0,
+          totalCategories: response.data?.totalCategories || 0, // Need to add to backend
+          totalCountries: response.data?.totalCountries || 0,
+          totalMovies: response.data?.totalMovies || 0,
+          totalSeries: response.data?.totalSeries || 0,
+          totalPersons: response.data?.totalPersons || 0,
+          recentUploads: response.data?.recentUploads || 0
+        };
+        console.log('✅ Dashboard stats loaded with unified API:', this.stats);
       },
       error: (error) => {
-        console.error('Errore durante il recupero delle statistiche:', error);
+        console.error('❌ Error loading dashboard statistics:', error);
         this.useDefaultStats();
       }
     });
@@ -76,6 +82,7 @@ export class AdminHomeComponent implements OnInit {
       totalPersons: 0,
       totalUsers: 0,
       totalCountries: 0,
+      totalCategories: 0,
       recentUploads: 0
     };
   }

@@ -5,6 +5,8 @@ $input-bg: #050a18; // Inputs slightly lighter than body
 $text-color: #c3c3c3;
 $text-muted: #8a8a8a;
 $label-color: #ffffff;
+$white: #ffffff; // White color for text and elements
+$primary: #F8B445; // Primary color for thead background
 
 // Style for search filter card
 .search-filter-card {
@@ -17,6 +19,7 @@ $label-color: #ffffff;
     background-color: $input-bg !important;
     border-color: $border-custom !important;
     color: #fff !important;
+    padding-right: 60px !important; // Reserve space for clear button
     
     &:focus {
       box-shadow: 0 0 0 0.2rem rgba(66, 70, 86, 0.25);
@@ -32,6 +35,41 @@ $label-color: #ffffff;
     background-color: $input-bg !important;
     color: $text-color !important;
     border-color: $border-custom !important;
+  }
+  
+  // Clear button (X) like Google
+  .btn-clear {
+    position: absolute;
+    right: 140px; // Position inside input, away from Search button
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 10;
+    background: transparent !important;
+    border: none;
+    color: #8a8d93; // Same as placeholder color
+    padding: 0.375rem;
+    cursor: pointer;
+    transition: color 0.2s ease;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    
+    &:hover {
+      background: transparent !important;
+      color: #fff !important;
+    }
+    
+    &:focus {
+      outline: none;
+      background: transparent !important;
+    }
+    
+    i {
+      font-size: 1.2rem !important; // Bigger icon with !important
+      line-height: 1;
+    }
   }
 }
 
@@ -53,22 +91,36 @@ $label-color: #ffffff;
 }
 
 .person-table {
-  background-color: $bg-custom !important;
+  background-color: transparent !important; // Force transparent background
   color: #fff;
+  
+  thead {
+    background: rgba($primary, 0.4);
+    border-radius: 8px 8px 0 0; // Rounded top corners
+    
+    th {
+      border: none;
+      color: #ffffff;
+      font-weight: 600;
+      padding: 1rem 0.75rem; // Same padding as Movies
+      font-size: 0.875rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      background-color: transparent !important; // Force transparent
+      
+      &:first-child {
+        border-top-left-radius: 8px; // Round first cell top-left
+      }
+      
+      &:last-child {
+        border-top-right-radius: 8px; // Round last cell top-right
+      }
+    }
+  }
   
   th, td {
     vertical-align: middle;
     border-color: #2c3038;
-  }
-  
-  th {
-    border-top: none;
-    font-weight: 600;
-    background-color: $input-bg !important;
-    color: #ffffff !important;
-    text-transform: uppercase;
-    font-size: 0.9rem;
-    letter-spacing: 0.5px;
   }
   
   tbody {
@@ -80,8 +132,8 @@ $label-color: #ffffff;
       td {
         background-color: $bg-custom !important;
         border-color: $border-custom;
-        color: #c3c3c3 !important;
-        font-weight: 500;
+        color: #c3c3c3 !important; // Testo grigio chiaro per le celle
+        font-weight: 500; // Leggermente più in grassetto per migliore leggibilità
       }
       
       &:hover {
@@ -95,13 +147,13 @@ $label-color: #ffffff;
   }
 }
 
-// Person thumbnails
+// Person thumbnails (ora quadrate come in Movies)
 .person-thumbnail {
   width: 60px;
-  height: 60px;
-  border-radius: 50%;
+  height: 80px;
+  border-radius: 4px;
   overflow: hidden;
-  border: 2px solid $border-custom;
+  border: 1px solid $border-custom;
   background-color: $input-bg;
   
   img {
@@ -164,15 +216,25 @@ $label-color: #ffffff;
   }
 }
 
-// Action buttons style
-.btn-group {
-  .btn {
-    margin-right: 0.25rem;
-    padding: 0.25rem 0.5rem;
+// Responsive design
+@media (max-width: 768px) {
+  .container-fluid {
+    padding: 1rem;
+  }
+
+  .person-table {
     font-size: 0.875rem;
-    
-    i {
-      font-size: 0.875rem;
+
+    thead th,
+    tbody td {
+      padding: 0.5rem 0.25rem;
+    }
+  }
+
+  .btn-group {
+    .btn {
+      padding: 0.25rem 0.5rem;
+      font-size: 0.75rem;
     }
   }
 }
@@ -185,6 +247,110 @@ $label-color: #ffffff;
   
   &:hover {
     background-color: #00050d !important;
+  }
+}
+
+// Modern Glass Modal styles - Perfect Centering Standard (FORCED SPECIFICITY)
+::ng-deep .modal-dialog {
+  position: absolute !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  margin: 0 !important;
+  width: 30rem !important;
+  max-width: 30rem !important;
+  z-index: 1055 !important; // Above backdrop
+}
+
+::ng-deep .modal-content {
+  background: rgba(0, 5, 13, 0.9) !important; // Glass effect - semi-transparent
+  backdrop-filter: blur(25px) !important; // Glass blur effect
+  -webkit-backdrop-filter: blur(25px) !important; // Safari support
+  border-radius: 20px !important; // More rounded like in image
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6), 
+              0 0 0 1px rgba(248, 181, 71, 0.08) !important; // Modern shadow with glow
+  color: $text-color;
+  overflow: hidden; // Clean edges
+  
+  .modal-header {
+    padding: 1.25rem 1.5rem !important;
+    
+    .modal-title {
+      color: $white;
+      font-weight: 600;
+      font-size: 1.25rem;
+    }
+  }
+  
+  .modal-body {
+    color: $text-color;
+    padding: 2rem 1.5rem !important;
+    
+    .text-center {
+      h5 {
+        color: $white;
+        font-weight: 600;
+        margin-bottom: 1rem;
+      }
+      
+      p {
+        color: rgba(195, 195, 195, 0.9);
+        font-size: 1rem;
+        line-height: 1.5;
+        
+        strong {
+          color: $white;
+          font-weight: 600;
+        }
+      }
+    }
+  }
+  
+  .modal-footer {
+    padding: 1.25rem 1.5rem !important;
+    display: flex !important; // Flex layout
+    flex-direction: row !important; // Horizontal layout
+    gap: 1rem !important; // Space between buttons
+    
+    .btn {
+      flex: 1 !important; // Equal size buttons that take full space
+      border-radius: 8px !important; // Modern button radius
+      font-weight: 500 !important;
+      padding: 0.75rem 1.5rem !important;
+      transition: all 0.3s ease !important;
+      white-space: nowrap !important; // Prevent text wrapping
+      min-width: 120px !important; // Minimum width to prevent text breaking
+      font-size: 0.9rem !important; // Slightly smaller font to fit better
+      
+      &.btn-secondary {
+        background: rgba(108, 117, 125, 0.8) !important;
+        border: 1px solid rgba(108, 117, 125, 0.6) !important;
+        backdrop-filter: blur(10px) !important;
+        
+        &:hover {
+          background: rgba(108, 117, 125, 1) !important;
+          transform: translateY(-1px) !important;
+          box-shadow: 0 8px 16px rgba(108, 117, 125, 0.3) !important;
+        }
+      }
+      
+      &.btn-danger {
+        background: rgba(220, 53, 69, 0.9) !important;
+        border: 1px solid rgba(220, 53, 69, 0.7) !important;
+        backdrop-filter: blur(10px) !important;
+        
+        &:hover:not(:disabled) {
+          background: rgba(220, 53, 69, 1) !important;
+          transform: translateY(-1px) !important;
+          box-shadow: 0 8px 16px rgba(220, 53, 69, 0.3) !important;
+        }
+        
+        &:disabled {
+          opacity: 0.6 !important;
+          transform: none !important;
+        }
+      }
+    }
   }
 }
 

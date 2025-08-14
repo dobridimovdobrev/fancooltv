@@ -1,8 +1,8 @@
 <div class="container-fluid p-4">
   <div class="d-flex justify-content-between align-items-center mb-4">
-    <h2 class="mb-0">Movies Management</h2>
+    <h2 class="mb-0">TV Series Management</h2>
     <a routerLink="create" class="btn btn-primary">
-      <i class="fas fa-plus me-2"></i>Add Movie
+      <i class="fas fa-plus me-2"></i>Add TV Series
     </a>
   </div>
 
@@ -16,7 +16,7 @@
               #searchInput 
               type="text" 
               class="form-control search-input" 
-              placeholder="Search movies..."
+              placeholder="Search TV series..."
               (keyup.enter)="onSearchClick()"
               (input)="onSearchInputChange()"
               [(ngModel)]="searchTerm"
@@ -37,13 +37,20 @@
         </div>
         <div class="col-md-6">
           <div class="d-flex gap-3 justify-content-md-end">
-            <select class="form-select filter-select" (change)="onCategoryChange($event)">
+            <select class="form-select filter-select" [(ngModel)]="selectedCategory" (change)="applyFilters()">
               <option value="">All Categories</option>
-              <option *ngFor="let category of categories" [value]="category.category_id">{{ category.name }}</option>
+              <option value="drama">Drama</option>
+              <option value="comedy">Comedy</option>
+              <option value="action">Action</option>
+              <option value="thriller">Thriller</option>
+              <option value="sci-fi">Sci-Fi</option>
+              <option value="fantasy">Fantasy</option>
             </select>
-            <select class="form-select filter-select" (change)="onYearChange($event)">
+            <select class="form-select filter-select" [(ngModel)]="selectedStatus" (change)="applyFilters()">
               <option value="">All Years</option>
-              <option *ngFor="let year of years" [value]="year">{{ year }}</option>
+              <option value="ongoing">Ongoing</option>
+              <option value="completed">Completed</option>
+              <option value="cancelled">Cancelled</option>
             </select>
           </div>
         </div>
@@ -51,18 +58,18 @@
     </div>
   </div>
 
-  <!-- Movies Table -->
-  <div class="card movie-table-card">
+  <!-- TV Series Table -->
+  <div class="card tvseries-table-card">
     <div class="card-body p-0">
       <div class="table-responsive">
-        <table class="table movie-table table-hover mb-0">
+        <table class="table tvseries-table table-hover mb-0">
           <thead>
             <tr>
               <th style="width: 80px">Poster</th>
               <th>Title</th>
               <th>Year</th>
               <th>Category</th>
-              <th>Duration</th>
+              <th>Seasons</th>
               <th>Status</th>
               <th>Rating</th>
               <th style="width: 150px">Actions</th>
@@ -70,55 +77,60 @@
           </thead>
           <tbody>
             <tr *ngIf="loading">
-              <td colspan="7" class="text-center py-4">
+              <td colspan="8" class="text-center py-4">
                 <div class="spinner-border text-primary" role="status">
                   <span class="visually-hidden">Loading...</span>
                 </div>
               </td>
             </tr>
             <tr *ngIf="noResults && !loading">
-              <td colspan="7" class="text-center py-4">
+              <td colspan="8" class="text-center py-4">
                 <p class="mb-0">No results found</p>
                 <p class="text-muted small">Try changing filters or search terms</p>
               </td>
             </tr>
-            <tr *ngFor="let movie of movies">
+            <tr *ngFor="let series of tvSeries">
               <td>
-                <div class="movie-thumbnail">
-                  <img [src]="getImageUrl(movie.poster)" [alt]="movie.title + ' Poster'" class="img-fluid rounded"
+                <div class="series-thumbnail">
+                  <img [src]="getImageUrl(series.poster)" [alt]="series.title + ' Poster'" class="img-fluid rounded"
                        (error)="onImageError($event)">
                   <div class="no-image-placeholder d-none">
-                    <i class="fa-solid fa-image"></i>
+                    <i class="fas fa-image"></i>
                   </div>
                 </div>
               </td>
-              <td>{{ movie.title }}</td>
-              <td>{{ movie.year }}</td>
-              <td>{{ movie.category && movie.category.name }}</td>
-              <td>{{ movie.duration }} min</td>
+              <td>
+                <div class="series-title">
+                  <strong>{{ series.title }}</strong>
+                </div>
+              </td>
+              <td>{{ series.year || 'N/A' }}</td>
+              <td>{{ series.category && series.category.name || 'N/A' }}</td>
+              <td>{{ series.total_seasons || 0 }} Season</td>
               <td>
                 <span class="badge" [ngClass]="{
-                  'bg-success': movie.status === 'published',
-                  'bg-warning': movie.status === 'sheduled' || movie.status === 'coming soon',
-                  'bg-secondary': movie.status === 'draft'
+                  'bg-success': series.status === 'published',
+                  'bg-warning': series.status === 'coming soon',
+                  'bg-secondary': series.status === 'draft',
+                  'bg-warning text-dark': !series.status
                 }">
-                  {{ movie.status | titlecase }}
+                  {{ series.status ? (series.status | titlecase) : 'Unknown' }}
                 </span>
               </td>
               <td>
-                <span class="badge">
-                  <i class="fa-solid fa-star me-1"></i>{{ movie.imdb_rating }}
+                <span class="badge" *ngIf="series.imdb_rating">
+                  <i class="fa-solid fa-star me-1"></i>{{ series.imdb_rating }}
                 </span>
               </td>
               <td>
                 <div class="btn-group">
-                  <a [routerLink]="['edit', movie.movie_id]" class="btn btn-sm btn-outline-info" title="Edit">
+                  <a [routerLink]="['edit', series.tv_series_id]" class="btn btn-sm btn-outline-info" title="Edit">
                     <i class="fas fa-edit"></i>
                   </a>
-                  <a [routerLink]="['/movie-details', movie.movie_id]" target="_blank" class="btn btn-sm btn-outline-primary" title="View">
+                  <a [routerLink]="['/tvseries-details', series.tv_series_id]" target="_blank" class="btn btn-sm btn-outline-primary" title="View">
                     <i class="fas fa-eye"></i>
                   </a>
-                  <button class="btn btn-sm btn-outline-danger" (click)="openDeleteModal(movie.movie_id)" title="Delete">
+                  <button class="btn btn-sm btn-outline-danger" (click)="openDeleteModal(series.tv_series_id)" title="Delete">
                     <i class="fas fa-trash"></i>
                   </button>
                 </div>
@@ -131,7 +143,7 @@
   </div>
 
   <!-- Pagination -->
-  <div class="d-flex justify-content-center mt-4" *ngIf="movies.length > 0 && !loading && movies.length < totalItems">
+  <div class="d-flex justify-content-center mt-4" *ngIf="tvSeries.length > 0 && !loading && tvSeries.length < totalItems">
     <button (click)="loadMore()" class="btn btn-outline-primary" [disabled]="loading">
       <i class="fas fa-plus me-2"></i>Load More
     </button>
@@ -148,7 +160,7 @@
     <div class="text-center">
       <h5>Are you sure?</h5>
       <p class="mb-3">
-        Do you want to delete the movie <strong>"{{ movieToDelete?.title }}"</strong>?
+        Do you want to delete the TV series <strong>"{{ tvSeriesToDelete?.title }}"</strong>?
       </p>
     </div>
   </div>

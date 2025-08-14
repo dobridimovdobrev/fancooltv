@@ -1,18 +1,34 @@
-<div class="container-fluid p-4 persons-list-container">
+<div class="container-fluid p-4">
   <div class="d-flex justify-content-between align-items-center mb-4">
-    <h2 class="mb-0 text-white">Persons Management</h2>
-    <button class="btn btn-primary" (click)="createPerson()">
-      <i class="fas fa-plus me-2"></i>New Person
-    </button>
+    <h2 class="mb-0">Persons Management</h2>
+    <a routerLink="create" class="btn btn-primary">
+      <i class="fas fa-plus me-2"></i>Add Person
+    </a>
   </div>
 
-  <!-- Search bar -->
+  <!-- Search and Filter -->
   <div class="card search-filter-card mb-4">
     <div class="card-body">
       <div class="row">
         <div class="col-md-12">
-          <div class="input-group">
-            <input #searchInput type="text" class="form-control search-input" placeholder="Search persons...">
+          <div class="input-group position-relative">
+            <input 
+              #searchInput 
+              type="text" 
+              class="form-control search-input" 
+              placeholder="Search persons..."
+              (keyup.enter)="onSearchClick()"
+              [(ngModel)]="searchTerm"
+            >
+            <!-- Clear button (X) like Google -->
+            <button 
+              *ngIf="searchTerm && searchTerm.length > 0"
+              type="button" 
+              class="btn btn-clear position-absolute" 
+              (click)="clearSearch()"
+              title="Clear search">
+              <i class="fas fa-times"></i>
+            </button>
             <button class="btn btn-primary" type="button" (click)="onSearchClick()">
               <i class="fas fa-search"></i> Search
             </button>
@@ -46,27 +62,30 @@
             </tr>
             <tr *ngIf="noResults && !loading">
               <td colspan="4" class="text-center py-4">
-                <p class="mb-0">No results found</p>
-                <p class="text-muted small">Try changing your search terms</p>
+                <p class="mb-0">Person not found</p>
+                <p class="text-muted small">Try searching with a different name</p>
               </td>
             </tr>
             <tr *ngFor="let person of filteredPersons">
               <td>
                 <div class="person-thumbnail">
-                  <img [src]="apiService.getImageUrl(person.profile_image, 'person')" 
+                  <img [src]="apiService.getImageUrl(person.profile_image, 'cast')" 
                        [alt]="person.name + ' Photo'" 
                        class="img-fluid rounded"
                        (error)="onImageError($event)">
                 </div>
               </td>
-              <td class="align-middle">{{ person.name }}</td>
-              <td class="align-middle">{{ person.person_id }}</td>
-              <td class="align-middle">
+              <td>{{ person.name }}</td>
+              <td>{{ person.person_id }}</td>
+              <td>
                 <div class="btn-group">
-                  <button class="btn btn-sm btn-outline-info" title="Edit" (click)="editPerson(person.person_id)">
+                  <a [routerLink]="['edit', person.person_id]" class="btn btn-sm btn-outline-info" title="Edit">
                     <i class="fas fa-edit"></i>
-                  </button>
-                  <button class="btn btn-sm btn-outline-danger" title="Delete" (click)="deletePerson(person.person_id)">
+                  </a>
+                  <button 
+                    class="btn btn-sm btn-outline-danger" 
+                    (click)="openDeleteModal(person.person_id)" 
+                    title="Delete Person">
                     <i class="fas fa-trash"></i>
                   </button>
                 </div>
@@ -77,6 +96,31 @@
       </div>
     </div>
   </div>
+
+  <!-- Delete Confirmation Modal -->
+<ng-template #deleteModal>
+  <div class="modal-header">
+    <h4 class="modal-title">Confirm Message</h4>
+    <button type="button" class="btn-close" aria-label="Close" (click)="cancelDelete()"></button>
+  </div>
+  <div class="modal-body">
+    <div class="text-center">
+      <h5>Are you sure?</h5>
+      <p class="mb-3">
+        Do you want to delete <strong>"{{ personToDelete?.name }}"</strong>?
+      </p>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-danger" (click)="confirmDelete()" [disabled]="loading">
+      <span *ngIf="loading" class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+      <i *ngIf="!loading" class="fas fa-trash me-2"></i>Delete
+    </button>
+    <button type="button" class="btn btn-secondary" (click)="cancelDelete()">
+      <i class="fas fa-times me-2"></i>Cancel
+    </button>
+  </div>
+</ng-template>
   
   <!-- Error message -->
   <div *ngIf="error" class="alert alert-danger mt-4">

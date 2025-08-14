@@ -1,11 +1,13 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, BehaviorSubject } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 
 export interface Category {
   category_id: number;
   name: string;
+  deleted_at?: string | null;
 }
 
 export interface CategoryResponse {
@@ -51,7 +53,20 @@ export class CategoryService {
       });
     }
 
-    return this.http.get<CategoryResponse>(this.apiUrl, { params });
+    return this.http.get<CategoryResponse>(this.apiUrl, { params }).pipe(
+      map(response => {
+        // Filter out soft deleted categories (deleted_at != null)
+        const filteredCategories = response.data.filter(category => !category.deleted_at);
+        return {
+          ...response,
+          data: filteredCategories,
+          meta: response.meta ? {
+            ...response.meta,
+            total: filteredCategories.length
+          } : undefined
+        };
+      })
+    );
   }
 
   /**

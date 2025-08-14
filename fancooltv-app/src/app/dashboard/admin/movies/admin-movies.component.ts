@@ -1,7 +1,8 @@
-import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef, TemplateRef } from '@angular/core';
 import { ApiService } from '../../../services/api.service';
 import { Movie, Category } from '../../../models/media.models';
 import { debounceTime, distinctUntilChanged, fromEvent } from 'rxjs';
+import { BsModalService, BsModalRef } from 'ngx-bootstrap/modal';
 
 @Component({
   selector: 'app-admin-movies',
@@ -30,8 +31,14 @@ export class AdminMoviesComponent implements OnInit {
   selectedCategory = '';
   selectedYear = '';
   
+  // Modal delete
+  @ViewChild('deleteModal') deleteModal!: TemplateRef<any>;
+  modalRef?: BsModalRef;
+  movieToDelete: Movie | null = null;
+  
   constructor(
-    private apiService: ApiService
+    private apiService: ApiService,
+    private modalService: BsModalService
   ) { }
 
   ngOnInit(): void {
@@ -220,22 +227,55 @@ export class AdminMoviesComponent implements OnInit {
   // Le funzioni per i modali sono state rimosse poiché ora utilizziamo pagine dedicate
   
   /**
-   * Delete movie
+   * Show delete confirmation modal
    */
-  deleteMovie(movieId: number): void {
-    if (confirm('Are you sure you want to delete this movie?')) {
-      this.apiService.deleteMovie(movieId).subscribe({
-        next: () => {
+  openDeleteModal(movieId: number): void {
+    // Find the movie to delete
+    this.movieToDelete = this.movies.find(m => m.movie_id === movieId) || null;
+    
+    if (this.movieToDelete) {
+      // Open the delete confirmation modal
+      this.modalRef = this.modalService.show(this.deleteModal, {
+        class: 'modal-md modal-dialog-centered',
+        backdrop: 'static',
+        keyboard: false
+      });
+    }
+  }
+
+  /**
+   * Confirm movie deletion
+   */
+  confirmDelete(): void {
+    if (this.movieToDelete) {
+      this.loading = true;
+      
+      this.apiService.deleteMovie(this.movieToDelete.movie_id).subscribe({
+        next: (response) => {
+          console.log('Movie deleted successfully:', response);
           // Remove movie from the list
-          this.movies = this.movies.filter(m => m.movie_id !== movieId);
+          this.movies = this.movies.filter(m => m.movie_id !== this.movieToDelete!.movie_id);
           this.noResults = this.movies.length === 0;
+          this.modalRef?.hide();
+          this.movieToDelete = null;
+          this.loading = false;
         },
-        error: (error: any) => {
+        error: (error) => {
           console.error('Error deleting movie:', error);
-          alert('Error deleting movie. Please try again.');
+          this.loading = false;
+          this.modalRef?.hide();
+          this.movieToDelete = null;
         }
       });
     }
+  }
+
+  /**
+   * Cancel movie deletion
+   */
+  cancelDelete(): void {
+    this.modalRef?.hide();
+    this.movieToDelete = null;
   }
 
   // Le funzioni per salvare e aggiornare i film sono state spostate nel componente movie-form-page

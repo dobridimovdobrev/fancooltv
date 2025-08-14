@@ -135,6 +135,24 @@ export class ApiService {
   }
 
   /**
+   * Update an existing person
+   */
+  public updatePerson(personId: number, personData: {name: string, photo: string}): Observable<ApiResponse<Person>> {
+    return this.http.put<ApiResponse<Person>>(`${this.baseUrl}/api/v1/persons/${personId}`, personData, {
+      headers: this.getHeaders()
+    });
+  }
+
+  /**
+   * Delete a person
+   */
+  public deletePerson(personId: number): Observable<any> {
+    return this.http.delete(`${this.baseUrl}/api/v1/persons/${personId}`, {
+      headers: this.getHeaders()
+    });
+  }
+
+  /**
    * Create a new movie
    */
   public createMovie(movieData: Partial<Movie>): Observable<ApiResponse<Movie>> {
@@ -157,6 +175,33 @@ export class ApiService {
    */
   public deleteMovie(id: number): Observable<ApiResponse<any>> {
     return this.http.delete<ApiResponse<any>>(`${this.baseUrl}/api/v1/movies/${id}`, {
+      headers: this.getHeaders()
+    });
+  }
+
+  /**
+   * Create a new TV series
+   */
+  public createTVSeries(tvSeriesData: Partial<TVSeries>): Observable<ApiResponse<TVSeries>> {
+    return this.http.post<ApiResponse<TVSeries>>(`${this.baseUrl}/api/v1/tvseries`, tvSeriesData, {
+      headers: this.getHeaders()
+    });
+  }
+
+  /**
+   * Update an existing TV series
+   */
+  public updateTVSeries(id: number, tvSeriesData: Partial<TVSeries>): Observable<ApiResponse<TVSeries>> {
+    return this.http.put<ApiResponse<TVSeries>>(`${this.baseUrl}/api/v1/tvseries/${id}`, tvSeriesData, {
+      headers: this.getHeaders()
+    });
+  }
+
+  /**
+   * Delete a TV series
+   */
+  public deleteTVSeries(id: number): Observable<ApiResponse<any>> {
+    return this.http.delete<ApiResponse<any>>(`${this.baseUrl}/api/v1/tvseries/${id}`, {
       headers: this.getHeaders()
     });
   }

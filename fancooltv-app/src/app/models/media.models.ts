@@ -31,6 +31,7 @@ export interface Movie {
     trailers: Trailer[];
     video_files?: VideoFile[];
     image_files?: ImageFile[];
+    deleted_at?: string | null;
 }
 
 export interface Person {

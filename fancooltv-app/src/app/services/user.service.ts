@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, BehaviorSubject } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 
 export interface User {
@@ -18,11 +19,12 @@ export interface User {
   last_activity?: string;
   created_at?: string;
   updated_at?: string;
+  deleted_at?: string | null;
 }
 
 export interface UserResponse {
   data: User[];
-  meta: {
+  meta?: {
     current_page: number;
     per_page: number;
     total: number;
@@ -76,7 +78,20 @@ export class UserService {
       params = params.set('search', search.trim());
     }
 
-    return this.http.get<UserResponse>(this.apiUrl, { params });
+    return this.http.get<UserResponse>(this.apiUrl, { params }).pipe(
+      map(response => {
+        // Filter out soft deleted users (deleted_at != null)
+        const filteredUsers = response.data.filter(user => !user.deleted_at);
+        return {
+          ...response,
+          data: filteredUsers,
+          meta: response.meta ? {
+            ...response.meta,
+            total: filteredUsers.length
+          } : undefined
+        };
+      })
+    );
   }
 
   /**

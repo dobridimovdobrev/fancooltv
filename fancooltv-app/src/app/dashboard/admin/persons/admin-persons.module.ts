@@ -2,13 +2,8 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Routes } from '@angular/router';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { Component } from '@angular/core';
-
-// Placeholder per il componente che verrà implementato in futuro
-@Component({
-  template: `<div class="p-4"><h2>Gestione Persone</h2><p>Questa sezione è in fase di sviluppo</p></div>`
-})
-export class AdminPersonsComponent {}
+import { AdminPersonsComponent } from './admin-persons.component';
+import { NgxBootstrapModule } from '../../../shared/ngx-bootstrap/ngx-bootstrap.module';
 
 const routes: Routes = [
   {
@@ -25,6 +20,7 @@ const routes: Routes = [
     CommonModule,
     FormsModule,
     ReactiveFormsModule,
+    NgxBootstrapModule,
     RouterModule.forChild(routes)
   ]
 })
