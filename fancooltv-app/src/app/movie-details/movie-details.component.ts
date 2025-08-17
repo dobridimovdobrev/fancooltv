@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MovieService } from '../services/movie.service';
 import { Movie, Person } from '../models/media.models';
@@ -10,12 +10,13 @@ import { AuthService } from '../services/auth.service';
   templateUrl: './movie-details.component.html',
   styleUrls: ['./movie-details.component.scss']
 })
-export class MovieDetailsComponent implements OnInit {
+export class MovieDetailsComponent implements OnInit, OnDestroy {
   movie: Movie | null = null;
   loading = true;
   error = false;
   errorMessage = '';
   trailerUrl: SafeResourceUrl | null = null;
+  videoFiles: any[] = [];
   cast: Person[] = [];
   
   constructor(
@@ -61,6 +62,43 @@ export class MovieDetailsComponent implements OnInit {
         // Preparare l'URL del trailer se disponibile
         if (movie.trailers && movie.trailers.length > 0) {
           this.trailerUrl = this.sanitizeTrailerUrl(movie.trailers[0].url);
+        }
+        
+        // Debug: Log movie data
+        console.log('=== MOVIE DEBUG ===');
+        console.log('Full movie object:', movie);
+        console.log('movie.video_files:', movie.video_files);
+        console.log('movie.trailers:', movie.trailers);
+        console.log('===================');
+        
+        // Preparare i video files se disponibili
+        if (movie.video_files && movie.video_files.length > 0) {
+          this.videoFiles = movie.video_files.map(video => {
+            // Use public_stream_url if available, otherwise fallback to authenticated URL
+            const videoUrl = video.public_stream_url || video.stream_url || video.url;
+            const streamingUrl = video.public_stream_url ? 
+              this.sanitizer.bypassSecurityTrustUrl(videoUrl) : 
+              this.getVideoStreamingUrl(videoUrl);
+            return {
+              ...video,
+              safeUrl: streamingUrl,
+              loading: false
+            };
+          });
+          console.log('Video files processed:', this.videoFiles);
+          console.log('🎬 VIDEO DEBUG:');
+          this.videoFiles.forEach((video, index) => {
+            console.log(`Video ${index + 1}:`, {
+              title: video.title,
+              url: video.url,
+              stream_url: video.stream_url,
+              safeUrl: video.safeUrl,
+              format: video.format,
+              resolution: video.resolution
+            });
+          });
+        } else {
+          console.log('No video files found in movie data');
         }
         
         // Preparare il cast
@@ -118,6 +156,63 @@ export class MovieDetailsComponent implements OnInit {
    */
   goBack(): void {
     this.router.navigate(['/movies']);
+  }
+  
+  /**
+   * Ottiene l'URL per lo streaming video
+   */
+  getVideoStreamingUrl(streamUrl: string): string {
+    if (!streamUrl) return '';
+    return this.movieService.getVideoUrl(streamUrl);
+  }
+
+  /**
+   * Carica un video come blob per l'autenticazione
+   */
+  loadVideoBlob(videoUrl: string, index: number): void {
+    this.movieService.getVideoBlob(videoUrl).subscribe({
+      next: (blob: Blob) => {
+        const blobUrl = URL.createObjectURL(blob);
+        this.videoFiles[index] = {
+          ...this.videoFiles[index],
+          safeUrl: blobUrl,
+          loading: false
+        };
+      },
+      error: (error: any) => {
+        console.error('Errore nel caricamento del video blob:', error);
+        this.videoFiles[index] = {
+          ...this.videoFiles[index],
+          safeUrl: null,
+          loading: false,
+          error: true
+        };
+      }
+    });
+  }
+  
+  /**
+   * Gestisce gli errori di caricamento dei video
+   */
+  onVideoError(event: any, videoIndex: number): void {
+    console.error('Video loading error:', event);
+    if (this.videoFiles && this.videoFiles[videoIndex]) {
+      this.videoFiles[videoIndex].error = true;
+    }
+  }
+
+  /**
+   * Cleanup quando il componente viene distrutto
+   */
+  ngOnDestroy(): void {
+    // Clean up blob URLs to prevent memory leaks
+    if (this.videoFiles) {
+      this.videoFiles.forEach(video => {
+        if (video.safeUrl && video.safeUrl.startsWith('blob:')) {
+          URL.revokeObjectURL(video.safeUrl);
+        }
+      });
+    }
   }
   
   /**

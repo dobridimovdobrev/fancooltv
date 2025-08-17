@@ -195,6 +195,20 @@ export class MovieService {
   }
 
   /**
+   * Ottiene l'URL per lo streaming video
+   */
+  public getVideoUrl(videoPath: string): string {
+    return this.apiService.getVideoUrl(videoPath);
+  }
+
+  /**
+   * Scarica un video come blob per l'autenticazione
+   */
+  public getVideoBlob(videoPath: string): Observable<Blob> {
+    return this.apiService.getVideoBlob(videoPath);
+  }
+
+  /**
    * Carica i dettagli di un film specifico
    */
   loadMovieDetails(movieId: number): Observable<Movie> {

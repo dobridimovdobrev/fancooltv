@@ -51,10 +51,46 @@
             <p id="plot" class="mb-4">{{ movie.description }}</p>
             
             <!-- Trailer Section -->
-            <div *ngIf="trailerUrl" class="trailer-section">
+            <div *ngIf="trailerUrl" class="trailer-section mb-4">
               <h3>Trailer</h3>
               <div class="ratio ratio-16x9">
                 <iframe [src]="trailerUrl" title="Movie Trailer" allowfullscreen></iframe>
+              </div>
+            </div>
+
+            <!-- Video Files Section -->
+            <div *ngIf="videoFiles && videoFiles.length > 0" class="video-files-section mb-4">
+              <h3>Watch Movie</h3>
+              <div *ngFor="let video of videoFiles; let i = index" class="mb-3">
+                <h5 *ngIf="video.title">{{ video.title }}</h5>
+                <p *ngIf="video.format || video.resolution" class="text-muted small">
+                  <span *ngIf="video.format">{{ video.format | uppercase }}</span>
+                  <span *ngIf="video.format && video.resolution"> • </span>
+                  <span *ngIf="video.resolution">{{ video.resolution }}</span>
+                </p>
+                
+                <!-- Error state -->
+                <div *ngIf="video.error" class="ratio ratio-16x9 d-flex align-items-center justify-content-center bg-dark">
+                  <div class="text-center text-white">
+                    <i class="fas fa-exclamation-triangle text-warning mb-2" style="font-size: 2rem;"></i>
+                    <p>Errore nel caricamento del video</p>
+                    <small class="text-muted">Verifica la connessione o riprova più tardi</small>
+                  </div>
+                </div>
+                
+                <!-- Video player -->
+                <div *ngIf="!video.error" class="ratio ratio-16x9">
+                  <video 
+                    controls 
+                    preload="metadata"
+                    class="w-100 h-100"
+                    [poster]="getImageUrl(movie.poster)"
+                    (error)="onVideoError($event, i)"
+                    style="object-fit: contain; background: #000;">
+                    <source [src]="video.safeUrl" type="video/mp4">
+                    Il tuo browser non supporta il tag video.
+                  </video>
+                </div>
               </div>
             </div>
             

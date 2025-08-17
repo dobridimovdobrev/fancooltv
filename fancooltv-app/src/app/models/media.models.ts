@@ -65,10 +65,15 @@ export interface Episode {
 }
 
 export interface VideoFile {
+    video_file_id?: number;
     id?: number;
     url: string;
     title?: string;
     type?: string;
+    format?: string;
+    resolution?: string;
+    stream_url?: string;
+    public_stream_url?: string;
 }
 
 export interface ImageFile {

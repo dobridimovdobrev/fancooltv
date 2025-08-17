@@ -367,20 +367,36 @@ export class MovieFormComponent implements OnInit {
   prepareFormData(): any {
     const formValue = this.movieForm.value;
     
-    console.log('Raw form value before processing:', JSON.stringify(formValue, null, 2));
-    
-    // Filter out empty trailers and video_files to avoid validation errors
-    if (formValue.trailers) {
-      formValue.trailers = formValue.trailers.filter((trailer: any) => 
-        trailer.url && trailer.url.trim() !== ''
-      );
-    }
-    
+    // Include video_file_ids for backend processing
     if (formValue.video_files) {
       formValue.video_files = formValue.video_files.filter((video: any) => 
         video.url && video.url.trim() !== ''
       );
+      
+      // Extract video_file_ids for backend
+      if (formValue.video_files.length > 0) {
+        formValue.video_file_ids = formValue.video_files
+          .filter((video: any) => video.id)
+          .map((video: any) => video.id);
+      }
     }
+    
+    // Include trailer_ids for backend processing  
+    if (formValue.trailers) {
+      formValue.trailers = formValue.trailers.filter((trailer: any) => 
+        trailer.url && trailer.url.trim() !== ''
+      );
+      
+      // Extract trailer_ids for backend
+      if (formValue.trailers.length > 0) {
+        formValue.trailer_ids = formValue.trailers
+          .filter((trailer: any) => trailer.trailer_id)
+          .map((trailer: any) => trailer.trailer_id);
+      }
+    }
+    
+    
+    console.log('Raw form value after filtering:', JSON.stringify(formValue, null, 2));
     
     // Convert empty strings to null and add missing required fields
     Object.keys(formValue).forEach(key => {
@@ -421,6 +437,7 @@ export class MovieFormComponent implements OnInit {
     console.log('Country:', formValue.country);
     console.log('Trailers:', formValue.trailers);
     console.log('Video Files:', formValue.video_files);
+    console.log('Video Files DETAILED:', JSON.stringify(formValue.video_files, null, 2));
     console.log('Persons:', formValue.persons);
     console.log('Slug:', formValue.slug);
     console.log('=== END ANALYSIS ===');
@@ -437,11 +454,15 @@ export class MovieFormComponent implements OnInit {
     if (!title) return '';
     
     // Converti in minuscolo e rimuovi caratteri speciali
-    return title
+    const baseSlug = title
       .toLowerCase()
       .replace(/[^\w\s-]/g, '') // Rimuovi caratteri speciali
       .replace(/[\s_-]+/g, '-') // Sostituisci spazi e underscore con trattini
       .replace(/^-+|-+$/g, ''); // Rimuovi trattini iniziali e finali
+    
+    // Aggiungi timestamp per garantire unicità
+    const timestamp = Date.now().toString().slice(-6);
+    return `${baseSlug}-${timestamp}`;
   }
   
   /**
@@ -626,7 +647,15 @@ export class MovieFormComponent implements OnInit {
             this.trailerUploadProgress[index] = event.progress;
           } else if (event.type === 'response') {
             console.log('Trailer upload response:', event.response);
-            if (event.response && event.response.message && event.response.message.streaming_url) {
+            if (event.response && event.response.stream_url) {
+              // Use the stream_url from the upload response for trailers
+              this.trailersArray.at(index).patchValue({
+                url: event.response.stream_url,
+                trailer_id: event.response.video?.video_file_id || null
+              });
+              console.log('Trailer URL updated in form:', event.response.stream_url);
+            } else if (event.response && event.response.message && event.response.message.streaming_url) {
+              // Fallback to old format
               this.trailersArray.at(index).patchValue({
                 url: event.response.message.streaming_url
               });
@@ -666,10 +695,32 @@ export class MovieFormComponent implements OnInit {
             this.videoFileUploadProgress[index] = event.progress;
           } else if (event.type === 'response') {
             console.log('Video file upload response:', event.response);
-            if (event.response && event.response.message && event.response.message.streaming_url) {
+            console.log('DEBUG: Checking response structure...');
+            console.log('DEBUG: event.response.stream_url =', event.response.stream_url);
+            console.log('DEBUG: event.response.message =', event.response.message);
+            
+            if (event.response && event.response.message && event.response.message.stream_url) {
+              // Use the stream_url from the upload response
+              const videoFileId = event.response.message.video.video_file_id;
+              console.log('DEBUG: videoFileId extracted =', videoFileId);
+              
+              this.videoFilesArray.at(index).patchValue({
+                url: event.response.message.stream_url,
+                id: videoFileId,
+                video_file_id: videoFileId,
+                format: event.response.message.video.format || 'mp4',
+                resolution: event.response.message.video.resolution || '720p',
+                title: event.response.message.video.title || ''
+              });
+              console.log('✅ Video URL updated in form:', event.response.message.stream_url);
+              console.log('✅ Video file ID added to form:', videoFileId);
+            } else if (event.response && event.response.message && event.response.message.streaming_url) {
+              // Fallback to old format
               this.videoFilesArray.at(index).patchValue({
                 url: event.response.message.streaming_url
               });
+            } else {
+              console.log('❌ No stream_url found in response');
             }
             this.uploadingVideoFile[index] = false;
             this.videoFileUploadProgress[index] = 100;

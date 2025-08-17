@@ -157,16 +157,34 @@ export class ApiService {
   }
 
   /**
-   * Get video streaming URL
+   * Get video streaming URL using existing backend endpoints
    */
   public getVideoUrl(videoPath: string): string {
-    const token = localStorage.getItem('auth_token') || '';
-    // Fix malformed URL - videoPath already contains full URL
-    if (videoPath.startsWith('http')) {
-      return videoPath;
-    }
-    // If it's a relative path, prepend baseUrl
-    return `${this.baseUrl}${videoPath}?token=${token}`;
+    // Extract filename from path (e.g., "videos/abc123.mp4" -> "abc123.mp4")
+    const filename = videoPath.includes('/') ? videoPath.split('/').pop() : videoPath;
+    
+    // Use the existing stream-video endpoint with Bearer token
+    return `${this.baseUrl}/api/v1/stream-video/${filename}`;
+  }
+
+  /**
+   * Get public video URL (no authentication required)
+   */
+  public getPublicVideoUrl(videoPath: string): string {
+    const filename = videoPath.includes('/') ? videoPath.split('/').pop() : videoPath;
+    return `${this.baseUrl}/api/v1/public-video/${filename}`;
+  }
+
+  /**
+   * Download video as blob for authenticated streaming
+   */
+  public getVideoBlob(videoPath: string): Observable<Blob> {
+    const fullUrl = videoPath.startsWith('http') ? videoPath : `${this.baseUrl}${videoPath}`;
+    
+    return this.http.get(fullUrl, {
+      headers: this.getHeaders(),
+      responseType: 'blob'
+    });
   }
   
   /**
