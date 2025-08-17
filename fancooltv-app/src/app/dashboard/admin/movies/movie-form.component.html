@@ -123,8 +123,8 @@
                   <input type="text" class="form-control" formControlName="title">
                 </div>
                 <div class="col-md-8 mb-2">
-                  <label class="form-label">URL</label>
-                  <input type="url" class="form-control" formControlName="url">
+                  <label class="form-label">Upload Trailer</label>
+                  <input type="file" class="form-control" (change)="onTrailerUpload($event, i)" accept="video/*">
                 </div>
               </div>
             </div>
@@ -162,8 +162,8 @@
                   <input type="text" class="form-control" formControlName="type">
                 </div>
                 <div class="col-md-4 mb-2">
-                  <label class="form-label">URL</label>
-                  <input type="url" class="form-control" formControlName="url">
+                  <label class="form-label">Upload Video</label>
+                  <input type="file" class="form-control" (change)="onVideoFileUpload($event, i)" accept="video/*">
                 </div>
               </div>
             </div>
@@ -223,10 +223,6 @@
             </div>
           </div>
           <div class="mb-3">
-            <label for="poster" class="form-label">Poster URL</label>
-            <input type="text" class="form-control" id="poster" formControlName="poster">
-          </div>
-          <div class="mb-3">
             <label for="posterFile" class="form-label">Upload Poster</label>
             <input type="file" class="form-control" id="posterFile" (change)="onPosterUpload($event)" accept="image/*">
             <div *ngIf="uploadingPoster" class="mt-2">
@@ -251,10 +247,6 @@
               <i class="fa-solid fa-image fa-3x"></i>
               <p>No backdrop uploaded</p>
             </div>
-          </div>
-          <div class="mb-3">
-            <label for="backdrop" class="form-label">Backdrop URL</label>
-            <input type="text" class="form-control" id="backdrop" formControlName="backdrop">
           </div>
           <div class="mb-3">
             <label for="backdropFile" class="form-label">Upload Backdrop</label>
@@ -326,21 +318,6 @@
       No person found. You can add a new person using the form below.
     </div>
 
-    <!-- Form to add a new person -->
-    <div class="mt-4">
-      <h6>Add New Person</h6>
-      <div class="mb-3">
-        <label class="form-label">Name</label>
-        <input type="text" class="form-control" #newPersonName>
-      </div>
-      <div class="mb-3">
-        <label class="form-label">Photo</label>
-        <input type="file" class="form-control" #newPersonPhoto accept="image/*">
-      </div>
-      <button type="button" class="btn btn-primary" (click)="addNewPersonFromModal(newPersonName.value, newPersonPhoto)">
-        <i class="fa-solid fa-plus"></i> Add Person
-      </button>
-    </div>
   </div>
   <div class="modal-footer">
     <button type="button" class="btn btn-secondary" (click)="modalRef?.hide()">Close</button>

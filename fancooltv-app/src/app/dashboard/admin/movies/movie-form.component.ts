@@ -501,14 +501,14 @@ export class MovieFormComponent implements OnInit {
     return this.fb.group({
       trailer_id: [trailer?.trailer_id || null],
       title: [trailer?.title || '', Validators.required],
-      url: [trailer?.url || '', [Validators.required, Validators.pattern('https?://.*')]]
+      url: [trailer?.url || '']
     });
   }
 
   createVideoFileForm(videoFile?: VideoFile): FormGroup {
     return this.fb.group({
       id: [videoFile?.id || null],
-      url: [videoFile?.url || '', [Validators.required, Validators.pattern('https?://.*')]],
+      url: [videoFile?.url || ''],
       title: [videoFile?.title || ''],
       type: [videoFile?.type || '']
     });
@@ -599,6 +599,58 @@ export class MovieFormComponent implements OnInit {
           this.uploadingBackdrop = false;
         }
       });
+    }
+  }
+
+  // Handle trailer file upload
+  onTrailerUpload(event: any, index: number): void {
+    const file = event.target.files[0];
+    if (file) {
+      const formData = new FormData();
+      formData.append('file', file);
+      
+      // For now, we'll use a generic upload approach
+      // This will need to be updated when video upload API is implemented
+      console.log('Trailer file selected:', file.name);
+      
+      // Temporarily store the file name as URL until proper upload is implemented
+      this.trailersArray.at(index).patchValue({ url: file.name });
+      
+      // TODO: Implement proper video upload when API endpoint is available
+      // this.apiService.uploadVideo(formData, 'trailer').subscribe({
+      //   next: (response: {url: string}) => {
+      //     this.trailersArray.at(index).patchValue({ url: response.url });
+      //   },
+      //   error: (error: any) => {
+      //     console.error('Error uploading trailer', error);
+      //   }
+      // });
+    }
+  }
+
+  // Handle video file upload
+  onVideoFileUpload(event: any, index: number): void {
+    const file = event.target.files[0];
+    if (file) {
+      const formData = new FormData();
+      formData.append('file', file);
+      
+      // For now, we'll use a generic upload approach
+      // This will need to be updated when video upload API is implemented
+      console.log('Video file selected:', file.name);
+      
+      // Temporarily store the file name as URL until proper upload is implemented
+      this.videoFilesArray.at(index).patchValue({ url: file.name });
+      
+      // TODO: Implement proper video upload when API endpoint is available
+      // this.apiService.uploadVideo(formData, 'movie').subscribe({
+      //   next: (response: {url: string}) => {
+      //     this.videoFilesArray.at(index).patchValue({ url: response.url });
+      //   },
+      //   error: (error: any) => {
+      //     console.error('Error uploading video file', error);
+      //   }
+      // });
     }
   }
 
