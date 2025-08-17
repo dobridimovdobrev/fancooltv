@@ -70,36 +70,56 @@ export class MovieFormPageComponent implements OnInit {
     });
   }
 
-  saveMovie(): void {
-    if (!this.movieForm.isValid()) {
-      return;
-    }
-
-    const formData = this.movieForm.getFormData();
+  saveMovie(formData: any): void {
+    console.log('saveMovie called with data:', formData);
     this.loading = true;
 
     if (this.isEditMode && this.movie) {
       // Update existing movie
+      console.log('Updating existing movie:', this.movie.movie_id);
       this.apiService.updateMovie(this.movie.movie_id, formData).subscribe({
-        next: () => {
+        next: (response) => {
+          console.log('Movie updated successfully:', response);
+          this.loading = false;
           this.router.navigate(['/dashboard/admin/movies']);
         },
         error: (err) => {
           this.error = 'Failed to update movie. Please try again.';
           console.error('Error updating movie:', err);
           this.loading = false;
+          // Reset loading state in child component
+          if (this.movieForm) {
+            this.movieForm.loading = false;
+          }
         }
       });
     } else {
       // Create new movie
+      console.log('Creating new movie with data:', formData);
       this.apiService.createMovie(formData).subscribe({
-        next: () => {
+        next: (response) => {
+          console.log('Movie created successfully:', response);
+          // Only reset form after successful creation
+          if (this.movieForm && this.movieForm.movieForm) {
+            this.movieForm.movieForm.reset();
+          }
+          this.loading = false;
           this.router.navigate(['/dashboard/admin/movies']);
         },
         error: (err) => {
           this.error = 'Failed to create movie. Please try again.';
           console.error('Error creating movie:', err);
+          console.error('Error status:', err.status);
+          console.error('Error message:', err.message);
+          console.error('Error details:', err.error);
+          if (err.error && err.error.errors) {
+            console.error('Validation errors:', err.error.errors);
+          }
           this.loading = false;
+          // Reset loading state in child component
+          if (this.movieForm) {
+            this.movieForm.loading = false;
+          }
         }
       });
     }

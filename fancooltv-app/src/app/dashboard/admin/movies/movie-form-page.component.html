@@ -5,7 +5,7 @@
       <button class="btn btn-secondary me-2" (click)="cancel()">
         <i class="fas fa-times me-2"></i>Cancel
       </button>
-      <button class="btn btn-primary" (click)="saveMovie()" [disabled]="loading">
+      <button class="btn btn-primary" (click)="movieForm.onSubmit()" [disabled]="loading">
         <i class="fas fa-save me-2"></i>{{ isEditMode ? 'Save Changes' : 'Save Movie' }}
       </button>
     </div>
@@ -26,6 +26,6 @@
 
   <!-- Movie form component -->
   <div *ngIf="!loading">
-    <app-movie-form #movieForm [movie]="movie"></app-movie-form>
+    <app-movie-form #movieForm [movie]="movie" (formSubmit)="saveMovie($event)"></app-movie-form>
   </div>
 </div>

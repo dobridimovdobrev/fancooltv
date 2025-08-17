@@ -4,6 +4,8 @@ import { Category, ImageFile, Movie, Person, Trailer, VideoFile } from '../../..
 import { ApiService } from '../../../services/api.service';
 import { ApiResponse } from '../../../models/api.models';
 import { BsModalRef, BsModalService } from 'ngx-bootstrap/modal';
+import { HttpEventType } from '@angular/common/http';
+import { DomSanitizer, SafeResourceUrl, SafeUrl } from '@angular/platform-browser';
 
 @Component({
   selector: 'app-movie-form',
@@ -22,7 +24,11 @@ export class MovieFormComponent implements OnInit {
   loading = false;
   uploadingPoster = false;
   uploadingBackdrop = false;
-  
+  uploadingTrailer: boolean[] = [];
+  uploadingVideoFile: boolean[] = [];
+  trailerUploadProgress: number[] = [];
+  videoFileUploadProgress: number[] = [];
+
   // Status options for dropdown
   statusOptions = [
     { value: 'published', label: 'Published' },
@@ -34,7 +40,8 @@ export class MovieFormComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     public apiService: ApiService,
-    private modalService: BsModalService
+    private modalService: BsModalService,
+    private sanitizer: DomSanitizer
   ) {
     this.movieForm = this.createForm();
   }
@@ -98,6 +105,7 @@ export class MovieFormComponent implements OnInit {
   // Create the form with all required fields and validations
   createForm(): FormGroup {
     return this.fb.group({
+      // Basic movie data - required fields
       title: ['', [Validators.required, Validators.maxLength(128)]],
       slug: ['', [Validators.maxLength(128)]],
       description: ['', [Validators.required]],
@@ -106,9 +114,13 @@ export class MovieFormComponent implements OnInit {
       imdb_rating: ['', [Validators.min(0), Validators.max(10)]],
       premiere_date: [''],
       status: ['published', [Validators.required]],
-      category_id: [null, [Validators.required]], // Cambiato da stringa vuota a null
-      poster: [''],
-      backdrop: [''],
+      category_id: [null, [Validators.required]],
+      
+      // Image URLs - required fields
+      poster: ['', [Validators.required]],
+      backdrop: ['', [Validators.required]],
+      
+      // Optional arrays
       persons: this.fb.array([]),
       trailers: this.fb.array([]),
       video_files: this.fb.array([]),
@@ -157,34 +169,52 @@ export class MovieFormComponent implements OnInit {
     console.log('Valore categoria impostato nel form:', this.movieForm.get('category_id')?.value);
     
     // Clear and populate persons array
-    this.personsArray.clear();
+    const personsArray = this.movieForm.get('persons') as FormArray;
+    personsArray.clear();
     if (movie.persons && movie.persons.length) {
       movie.persons.forEach(person => {
-        this.personsArray.push(this.createPersonForm(person));
+        personsArray.push(this.fb.group({
+          person_id: [person.person_id || '']
+        }));
       });
     }
 
     // Clear and populate trailers array
-    this.trailersArray.clear();
+    const trailersArray = this.movieForm.get('trailers') as FormArray;
+    trailersArray.clear();
     if (movie.trailers && movie.trailers.length) {
       movie.trailers.forEach(trailer => {
-        this.trailersArray.push(this.createTrailerForm(trailer));
+        trailersArray.push(this.fb.group({
+          trailer_id: [trailer.trailer_id || null],
+          title: [trailer.title || ''],
+          url: [trailer.url || '']
+        }));
       });
     }
 
     // Clear and populate video files array
-    this.videoFilesArray.clear();
+    const videoFilesArray = this.movieForm.get('video_files') as FormArray;
+    videoFilesArray.clear();
     if (movie.video_files && movie.video_files.length) {
       movie.video_files.forEach(videoFile => {
-        this.videoFilesArray.push(this.createVideoFileForm(videoFile));
+        videoFilesArray.push(this.fb.group({
+          id: [videoFile.id || null],
+          url: [videoFile.url || ''],
+          title: [videoFile.title || '']
+        }));
       });
     }
 
     // Clear and populate image files array
-    this.imageFilesArray.clear();
+    const imageFilesArray = this.movieForm.get('image_files') as FormArray;
+    imageFilesArray.clear();
     if (movie.image_files && movie.image_files.length) {
       movie.image_files.forEach(imageFile => {
-        this.imageFilesArray.push(this.createImageFileForm(imageFile));
+        imageFilesArray.push(this.fb.group({
+          id: [imageFile.id || null],
+          url: [imageFile.url || ''],
+          type: [imageFile.type || '']
+        }));
       });
     }
   }
@@ -222,24 +252,7 @@ export class MovieFormComponent implements OnInit {
   // Riferimenti agli elementi del DOM
   @ViewChild('personModal') personModal!: TemplateRef<any>;
   @ViewChild('searchPersonInput') searchPersonInput!: ElementRef;
-  @ViewChild('newPersonName') newPersonName!: ElementRef;
-  @ViewChild('newPersonPhoto') newPersonPhoto!: ElementRef;
 
-  // Carica tutte le persone disponibili
-  loadPersons(): void {
-    this.isLoadingPersons = true;
-    this.apiService.getPersons({ per_page: 100 }).subscribe({
-      next: (response) => {
-        this.persons = response.data;
-        console.log(`Caricate ${this.persons.length} persone`);
-        this.isLoadingPersons = false;
-      },
-      error: (error: any) => {
-        console.error('Error loading persons', error);
-        this.isLoadingPersons = false;
-      }
-    });
-  }
   
   // Ottieni il nome di una persona dal suo ID
   getPersonName(personId: string): string {
@@ -287,70 +300,6 @@ export class MovieFormComponent implements OnInit {
     return `ID: ${personId}`;
   }
   
-  // Search for a person by name
-  searchPerson(name: string): void {
-    // If the field is empty, don't show anything
-    if (!name || name.trim() === '') {
-      this.persons = [];
-      return;
-    }
-    
-    this.isLoadingPersons = true;
-    
-    // From the API documentation, we know we can use the 'name' parameter
-    // to filter people by name
-    const searchParams: Record<string, any> = {
-      name: name.trim(),
-      per_page: 50 // Increase to get more results
-    };
-    
-    console.log('Search parameters:', searchParams);
-    
-    this.apiService.getPersons(searchParams).subscribe({
-      next: (response: ApiResponse<Person[]>) => {
-        console.log('API response people:', response);
-        
-        if (response && response.data) {
-          // Create a Map to track people by name (to catch duplicates with different IDs)
-          const uniquePersonsMap = new Map<string, Person>();
-          
-          // First pass: identify duplicates by name (case insensitive)
-          response.data.forEach(person => {
-            const normalizedName = person.name.toLowerCase().trim();
-            
-            // If we already have this name, keep the one with the lowest ID (assuming it's the original)
-            if (uniquePersonsMap.has(normalizedName)) {
-              const existing = uniquePersonsMap.get(normalizedName)!;
-              if (parseInt(person.person_id.toString()) < parseInt(existing.person_id.toString())) {
-                uniquePersonsMap.set(normalizedName, person);
-              }
-            } else {
-              uniquePersonsMap.set(normalizedName, person);
-            }
-          });
-          
-          // Convert the Map to an array
-          const uniquePersons = Array.from(uniquePersonsMap.values());
-          
-          // Sort people by name
-          uniquePersons.sort((a, b) => a.name.localeCompare(b.name));
-          
-          this.persons = uniquePersons;
-          console.log(`Found ${this.persons.length} unique people for search "${name}"`);
-        } else {
-          this.persons = [];
-        }
-        
-        this.isLoadingPersons = false;
-      },
-      error: (err: any) => {
-        console.error('Error searching for people:', err);
-        this.isLoadingPersons = false;
-        this.persons = []; // Reset in case of error
-      }
-    });
-  }
-  
   // Metodo rimosso perché la logica di rimozione dei duplicati è stata integrata direttamente nel metodo searchPerson
 
   // Funzione trackBy per ottimizzare il rendering delle liste e prevenire duplicati visivi
@@ -362,23 +311,15 @@ export class MovieFormComponent implements OnInit {
   openPersonModal(index: number): void {
     this.currentPersonIndex = index;
     
+    // Reset della lista delle persone per la ricerca
+    this.persons = [];
+    
     // Apre il modal usando ngx-bootstrap
     this.modalRef = this.modalService.show(this.personModal, {
       class: 'modal-lg',
       backdrop: 'static',
       keyboard: false
     });
-    
-    // Salviamo le persone associate al film in una variabile temporanea
-    // per non perdere i riferimenti ai nomi quando resettiamo l'array persons
-    const currentPersons = [...this.persons];
-    
-    // Reset della lista delle persone per non mostrare nulla di default nel modal
-    // ma manteniamo una copia delle persone associate al film
-    this.personsForDisplay = currentPersons;
-    this.persons = [];
-    
-    console.log('Persone salvate per visualizzazione:', this.personsForDisplay.length);
     
     // Focus sul campo di ricerca
     setTimeout(() => {
@@ -388,311 +329,101 @@ export class MovieFormComponent implements OnInit {
     }, 300);
   }
 
+  // Cerca persone nel modal
+  searchPersonInModal(query: string): void {
+    if (!query || query.length < 2) {
+      this.persons = [];
+      return;
+    }
+    
+    this.isLoadingPersons = true;
+    this.apiService.searchPersons(query).subscribe({
+      next: (response: any) => {
+        this.persons = response.data || [];
+        this.isLoadingPersons = false;
+      },
+      error: (error: any) => {
+        console.error('Error searching persons:', error);
+        this.persons = [];
+        this.isLoadingPersons = false;
+      }
+    });
+  }
+
   // Seleziona una persona dal modal
   selectPersonFromModal(personId: string): void {
     if (this.currentPersonIndex >= 0) {
-      this.personsArray.at(this.currentPersonIndex).get('person_id')?.setValue(personId);
+      const personsArray = this.movieForm.get('persons') as FormArray;
+      personsArray.at(this.currentPersonIndex).get('person_id')?.setValue(personId);
       
-      // Chiudi il modal
-      if (this.modalRef) {
-        this.modalRef.hide();
-      }
+      this.modalRef?.hide();
       
       // Reset dell'indice corrente
       this.currentPersonIndex = -1;
     }
   }
 
-  // Aggiunge una nuova persona dal modal
-  addNewPersonFromModal(name: string, photoInput: HTMLInputElement): void {
-    if (!name) {
-      alert('Inserisci un nome per la persona');
-      return;
-    }
-    
-    const file = photoInput.files?.[0];
-    if (!file) {
-      alert('Seleziona una foto per la persona');
-      return;
-    }
-    
-    // Prima carica l'immagine
-    this.isLoadingPersons = true;
-    const formData = new FormData();
-    formData.append('image', file);
-    
-    this.apiService.uploadImage(formData, 'person').subscribe({
-      next: (response: {url: string}) => {
-        // Ora crea la persona con l'URL dell'immagine
-        const personData = {
-          name: name,
-          photo: response.url
-        };
-        
-        // Chiamata API per creare la persona
-        this.apiService.createPerson(personData).subscribe({
-          next: (personResponse: ApiResponse<Person>) => {
-            // Aggiungi la persona appena creata alla lista e selezionala
-            const newPerson = personResponse.data;
-            this.persons = [newPerson, ...this.persons];
-            
-            // Seleziona la persona appena creata
-            this.selectPersonFromModal(newPerson.person_id.toString());
-            
-            this.isLoadingPersons = false;
-            
-            // Resetta i campi del form
-            if (this.newPersonName) {
-              this.newPersonName.nativeElement.value = '';
-            }
-            if (this.newPersonPhoto) {
-              this.newPersonPhoto.nativeElement.value = '';  
-            }
-          },
-          error: (error: any) => {
-            console.error('Error creating person', error);
-            this.isLoadingPersons = false;
-            alert('Errore durante la creazione della persona');
-          }
-        });
-      },
-      error: (error: any) => {
-        console.error('Error uploading person photo', error);
-        this.isLoadingPersons = false;
-        alert('Errore durante il caricamento della foto');
-      }
-    });
-  }
-  
-  // Aggiungi una nuova persona (redirect alla pagina di creazione persona)
-  addNewPerson(): void {
-    // Salva lo stato attuale del form in localStorage
-    localStorage.setItem('movieFormData', JSON.stringify(this.movieForm.value));
-    // Redirect alla pagina di creazione persona
-    window.location.href = '/dashboard/admin/persons/create';
-  }
-
-  // Form getters for easy access in template
-  get personsArray(): FormArray {
-    return this.movieForm.get('persons') as FormArray;
-  }
-
-  get trailersArray(): FormArray {
-    return this.movieForm.get('trailers') as FormArray;
-  }
-
-  get videoFilesArray(): FormArray {
-    return this.movieForm.get('video_files') as FormArray;
-  }
-
-  get imageFilesArray(): FormArray {
-    return this.movieForm.get('image_files') as FormArray;
-  }
-
-  // Create form groups for nested objects
-  createPersonForm(person?: Person): FormGroup {
-    return this.fb.group({
-      person_id: [person?.person_id || '', Validators.required]
-      // Il campo character è stato rimosso come richiesto
-    });
-  }
-
-  createTrailerForm(trailer?: Trailer): FormGroup {
-    return this.fb.group({
-      trailer_id: [trailer?.trailer_id || null],
-      title: [trailer?.title || '', Validators.required],
-      url: [trailer?.url || '']
-    });
-  }
-
-  createVideoFileForm(videoFile?: VideoFile): FormGroup {
-    return this.fb.group({
-      id: [videoFile?.id || null],
-      url: [videoFile?.url || ''],
-      title: [videoFile?.title || ''],
-      type: [videoFile?.type || '']
-    });
-  }
-
-  createImageFileForm(imageFile?: ImageFile): FormGroup {
-    return this.fb.group({
-      id: [imageFile?.id || null],
-      url: [imageFile?.url || '', [Validators.required, Validators.pattern('https?://.*')]],
-      type: [imageFile?.type || '']
-    });
-  }
-
-  // Add new items to form arrays
-  addPerson(): void {
-    // Crea un nuovo indice per la persona che stiamo per aggiungere
-    const newIndex = this.personsArray.length;
-    // Aggiungiamo un form vuoto all'array
-    this.personsArray.push(this.createPersonForm());
-    // Apriamo direttamente il modal di ricerca
-    this.openPersonModal(newIndex);
-  }
-
-  addTrailer(): void {
-    this.trailersArray.push(this.createTrailerForm());
-  }
-
-  addVideoFile(): void {
-    this.videoFilesArray.push(this.createVideoFileForm());
-  }
-
-  addImageFile(): void {
-    this.imageFilesArray.push(this.createImageFileForm());
-  }
-
-  // Remove items from form arrays
-  removePerson(index: number): void {
-    this.personsArray.removeAt(index);
-  }
-
-  removeTrailer(index: number): void {
-    this.trailersArray.removeAt(index);
-  }
-
-  removeVideoFile(index: number): void {
-    this.videoFilesArray.removeAt(index);
-  }
-
-  removeImageFile(index: number): void {
-    this.imageFilesArray.removeAt(index);
-  }
-
-  // Handle file uploads
-  onPosterUpload(event: any): void {
-    const file = event.target.files[0];
-    if (file) {
-      this.uploadingPoster = true;
-      const formData = new FormData();
-      formData.append('image', file);
-      
-      this.apiService.uploadImage(formData, 'poster').subscribe({
-        next: (response: {url: string}) => {
-          this.movieForm.patchValue({ poster: response.url });
-          this.uploadingPoster = false;
-        },
-        error: (error: any) => {
-          console.error('Error uploading poster', error);
-          this.uploadingPoster = false;
-        }
-      });
-    }
-  }
-
-  onBackdropUpload(event: any): void {
-    const file = event.target.files[0];
-    if (file) {
-      this.uploadingBackdrop = true;
-      const formData = new FormData();
-      formData.append('image', file);
-      
-      this.apiService.uploadImage(formData, 'backdrop').subscribe({
-        next: (response: {url: string}) => {
-          this.movieForm.patchValue({ backdrop: response.url });
-          this.uploadingBackdrop = false;
-        },
-        error: (error: any) => {
-          console.error('Error uploading backdrop', error);
-          this.uploadingBackdrop = false;
-        }
-      });
-    }
-  }
-
-  // Handle trailer file upload
-  onTrailerUpload(event: any, index: number): void {
-    const file = event.target.files[0];
-    if (file) {
-      const formData = new FormData();
-      formData.append('file', file);
-      
-      // For now, we'll use a generic upload approach
-      // This will need to be updated when video upload API is implemented
-      console.log('Trailer file selected:', file.name);
-      
-      // Temporarily store the file name as URL until proper upload is implemented
-      this.trailersArray.at(index).patchValue({ url: file.name });
-      
-      // TODO: Implement proper video upload when API endpoint is available
-      // this.apiService.uploadVideo(formData, 'trailer').subscribe({
-      //   next: (response: {url: string}) => {
-      //     this.trailersArray.at(index).patchValue({ url: response.url });
-      //   },
-      //   error: (error: any) => {
-      //     console.error('Error uploading trailer', error);
-      //   }
-      // });
-    }
-  }
-
-  // Handle video file upload
-  onVideoFileUpload(event: any, index: number): void {
-    const file = event.target.files[0];
-    if (file) {
-      const formData = new FormData();
-      formData.append('file', file);
-      
-      // For now, we'll use a generic upload approach
-      // This will need to be updated when video upload API is implemented
-      console.log('Video file selected:', file.name);
-      
-      // Temporarily store the file name as URL until proper upload is implemented
-      this.videoFilesArray.at(index).patchValue({ url: file.name });
-      
-      // TODO: Implement proper video upload when API endpoint is available
-      // this.apiService.uploadVideo(formData, 'movie').subscribe({
-      //   next: (response: {url: string}) => {
-      //     this.videoFilesArray.at(index).patchValue({ url: response.url });
-      //   },
-      //   error: (error: any) => {
-      //     console.error('Error uploading video file', error);
-      //   }
-      // });
-    }
-  }
-
-  // Form submission
-  onSubmit(): void {
-    if (this.movieForm.invalid) {
-      // Mark all fields as touched to show validation errors
-      this.markFormGroupTouched(this.movieForm);
-      return;
-    }
-
-    this.loading = true;
-    const formData = this.prepareFormData();
-    this.formSubmit.emit(formData);
-  }
-
-  // Helper to mark all form controls as touched
-  markFormGroupTouched(formGroup: FormGroup): void {
-    Object.values(formGroup.controls).forEach(control => {
-      control.markAsTouched();
-
-      if (control instanceof FormGroup) {
-        this.markFormGroupTouched(control);
-      }
-    });
-  }
-
   // Prepare form data for API submission
   prepareFormData(): any {
     const formValue = this.movieForm.value;
     
-    // Clean up empty values
+    console.log('Raw form value before processing:', JSON.stringify(formValue, null, 2));
+    
+    // Filter out empty trailers and video_files to avoid validation errors
+    if (formValue.trailers) {
+      formValue.trailers = formValue.trailers.filter((trailer: any) => 
+        trailer.url && trailer.url.trim() !== ''
+      );
+    }
+    
+    if (formValue.video_files) {
+      formValue.video_files = formValue.video_files.filter((video: any) => 
+        video.url && video.url.trim() !== ''
+      );
+    }
+    
+    // Convert empty strings to null and add missing required fields
     Object.keys(formValue).forEach(key => {
       if (formValue[key] === '') {
         formValue[key] = null;
       }
     });
     
+    // Add missing database fields with default values
+    if (!formValue.format) {
+      formValue.format = 'HD'; // Default format
+    }
+    if (!formValue.language) {
+      formValue.language = 'en'; // Default language
+    }
+    if (!formValue.country) {
+      formValue.country = 'US'; // Default country
+    }
+    
     // Genera lo slug se non è stato specificato
     if (!formValue.slug && formValue.title) {
       formValue.slug = this.generateSlug(formValue.title);
     }
+
+    // ... (rest of the code remains the same)
+    // No field name changes needed
+
+    // Log each field for debugging
+    console.log('=== FORM DATA ANALYSIS ===');
+    console.log('Title:', formValue.title);
+    console.log('Description:', formValue.description);
+    console.log('Year:', formValue.year);
+    console.log('Category ID:', formValue.category_id);
+    console.log('Poster:', formValue.poster);
+    console.log('Backdrop:', formValue.backdrop);
+    console.log('Format:', formValue.format);
+    console.log('Language:', formValue.language);
+    console.log('Country:', formValue.country);
+    console.log('Trailers:', formValue.trailers);
+    console.log('Video Files:', formValue.video_files);
+    console.log('Persons:', formValue.persons);
+    console.log('Slug:', formValue.slug);
+    console.log('=== END ANALYSIS ===');
 
     return formValue;
   }
@@ -720,10 +451,27 @@ export class MovieFormComponent implements OnInit {
   isValid(): boolean {
     if (this.movieForm.invalid) {
       // Mark all fields as touched to show validation errors
-      this.markFormGroupTouched(this.movieForm);
+      this.movieForm.markAllAsTouched();
       return false;
     }
     return true;
+  }
+
+  // Helper methods for FormArray access
+  get personsArray(): FormArray {
+    return this.movieForm.get('persons') as FormArray;
+  }
+
+  get trailersArray(): FormArray {
+    return this.movieForm.get('trailers') as FormArray;
+  }
+
+  get videoFilesArray(): FormArray {
+    return this.movieForm.get('video_files') as FormArray;
+  }
+
+  get imageFilesArray(): FormArray {
+    return this.movieForm.get('image_files') as FormArray;
   }
   
   /**
@@ -734,11 +482,236 @@ export class MovieFormComponent implements OnInit {
     return this.prepareFormData();
   }
 
+  // Form submission
+  onSubmit(): void {
+    if (this.isValid()) {
+      const formData = this.prepareFormData();
+      this.formSubmit.emit(formData);
+    }
+  }
+
   // Cancel form
   onCancel(): void {
     this.cancel.emit();
   }
+
+  // Add trailer
+  addTrailer(): void {
+    this.trailersArray.push(this.fb.group({
+      trailer_id: [null],
+      title: [''],
+      url: ['']
+    }));
+  }
+
+  // Remove trailer
+  removeTrailer(index: number): void {
+    this.trailersArray.removeAt(index);
+  }
+
+  // Add video file
+  addVideoFile(): void {
+    this.videoFilesArray.push(this.fb.group({
+      id: [null],
+      url: [''],
+      title: ['']
+    }));
+  }
+
+  // Remove video file
+  removeVideoFile(index: number): void {
+    this.videoFilesArray.removeAt(index);
+  }
+
+  // Add person (max 5)
+  addPerson(): void {
+    if (this.personsArray.length >= 5) {
+      alert('Massimo 5 persone nel cast');
+      return;
+    }
+    this.personsArray.push(this.fb.group({
+      person_id: ['']
+    }));
+  }
+
+  // Remove person
+  removePerson(index: number): void {
+    this.personsArray.removeAt(index);
+  }
+
+
+
+  // Handle file uploads
+  onPosterUpload(event: any): void {
+    const file = event.target.files[0];
+    if (file) {
+      this.uploadingPoster = true;
+      const formData = new FormData();
+      formData.append('image', file);
+      formData.append('type', 'poster');
+      
+      this.apiService.uploadImage(formData).subscribe({
+        next: (response: any) => {
+          console.log('Poster upload response:', response);
+          if (response && response.message) {
+            const imageUrl = response.message.full_url || response.message.url || response.message.path;
+            if (imageUrl) {
+              this.movieForm.patchValue({ poster: imageUrl });
+            } else {
+              console.error('No image URL found in response:', response.message);
+            }
+          } else {
+            console.error('Invalid response structure:', response);
+          }
+          this.uploadingPoster = false;
+        },
+        error: (error: any) => {
+          console.error('Error uploading poster', error);
+          this.uploadingPoster = false;
+        }
+      });
+    }
+  }
+
+  onBackdropUpload(event: any): void {
+    const file = event.target.files[0];
+    if (file) {
+      this.uploadingBackdrop = true;
+      const formData = new FormData();
+      formData.append('image', file);
+      formData.append('type', 'backdrop');
+      
+      this.apiService.uploadImage(formData).subscribe({
+        next: (response: any) => {
+          console.log('Backdrop upload response:', response);
+          if (response && response.message) {
+            const imageUrl = response.message.full_url || response.message.url || response.message.path;
+            if (imageUrl) {
+              this.movieForm.patchValue({ backdrop: imageUrl });
+            } else {
+              console.error('No image URL found in response:', response.message);
+            }
+          } else {
+            console.error('Invalid response structure:', response);
+          }
+          this.uploadingBackdrop = false;
+        },
+        error: (error: any) => {
+          console.error('Error uploading backdrop', error);
+          this.uploadingBackdrop = false;
+        }
+      });
+    }
+  }
+
+  // Handle trailer file upload
+  onTrailerUpload(event: any, index: number): void {
+    const file = event.target.files[0];
+    if (file) {
+      if (!this.canUploadFiles()) {
+        alert('Please fill in Title, Description, Year, Category, and upload Poster & Backdrop before uploading videos.');
+        event.target.value = '';
+        return;
+      }
+
+      this.uploadingTrailer[index] = true;
+      this.trailerUploadProgress[index] = 0;
+      const formData = new FormData();
+      formData.append('video', file);
+      formData.append('type', 'trailer');
+      
+      this.apiService.uploadVideoWithProgress(formData).subscribe({
+        next: (event: any) => {
+          if (event.type === 'progress') {
+            this.trailerUploadProgress[index] = event.progress;
+          } else if (event.type === 'response') {
+            console.log('Trailer upload response:', event.response);
+            if (event.response && event.response.message && event.response.message.streaming_url) {
+              this.trailersArray.at(index).patchValue({
+                url: event.response.message.streaming_url
+              });
+            }
+            this.uploadingTrailer[index] = false;
+            this.trailerUploadProgress[index] = 100;
+          }
+        },
+        error: (error: any) => {
+          console.error('Error uploading trailer', error);
+          this.uploadingTrailer[index] = false;
+          this.trailerUploadProgress[index] = 0;
+        }
+      });
+    }
+  }
+
+  // Handle video file upload
+  onVideoFileUpload(event: any, index: number): void {
+    const file = event.target.files[0];
+    if (file) {
+      if (!this.canUploadFiles()) {
+        alert('Please fill in Title, Description, Year, Category, and upload Poster & Backdrop before uploading videos.');
+        event.target.value = '';
+        return;
+      }
+
+      this.uploadingVideoFile[index] = true;
+      this.videoFileUploadProgress[index] = 0;
+      const formData = new FormData();
+      formData.append('video', file);
+      formData.append('type', 'movie');
+      
+      this.apiService.uploadVideoWithProgress(formData).subscribe({
+        next: (event: any) => {
+          if (event.type === 'progress') {
+            this.videoFileUploadProgress[index] = event.progress;
+          } else if (event.type === 'response') {
+            console.log('Video file upload response:', event.response);
+            if (event.response && event.response.message && event.response.message.streaming_url) {
+              this.videoFilesArray.at(index).patchValue({
+                url: event.response.message.streaming_url
+              });
+            }
+            this.uploadingVideoFile[index] = false;
+            this.videoFileUploadProgress[index] = 100;
+          }
+        },
+        error: (error: any) => {
+          console.error('Error uploading video file', error);
+          this.uploadingVideoFile[index] = false;
+          this.videoFileUploadProgress[index] = 0;
+        }
+      });
+    }
+  }
   
+  // Get video streaming URL
+  getVideoStreamingUrl(streamUrl: string): SafeUrl {
+    if (!streamUrl) return '';
+    const fullUrl = this.apiService.getVideoUrl(streamUrl);
+    // console.log('Video streaming URL generated:', fullUrl); // Removed excessive logging
+    return this.sanitizer.bypassSecurityTrustUrl(fullUrl);
+  }
+
+  // Check if video is uploaded
+  hasVideoUrl(url: string): boolean {
+    return !!(url && url.trim() !== '');
+  }
+
+  // Check if basic required fields are filled to allow video uploads
+  canUploadFiles(): boolean {
+    const form = this.movieForm;
+    const title = form.get('title')?.value;
+    const description = form.get('description')?.value;
+    const year = form.get('year')?.value;
+    const categoryId = form.get('category_id')?.value;
+    const poster = form.get('poster')?.value;
+    const backdrop = form.get('backdrop')?.value;
+    
+    const canUpload = !!(title && description && year && categoryId && poster && backdrop);
+    
+    return canUpload;
+  }
+
   // Funzione di confronto per il select della categoria
   compareCategories(item1: any, item2: any): boolean {
     // Converti entrambi i valori in stringhe per un confronto sicuro

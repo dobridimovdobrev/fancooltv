@@ -43,7 +43,8 @@
               <input type="number" class="form-control" id="year" formControlName="year">
               <div *ngIf="movieForm.get('year')?.invalid && movieForm.get('year')?.touched" class="text-danger">
                 <small *ngIf="movieForm.get('year')?.errors?.['required']">Year is required</small>
-                <small *ngIf="movieForm.get('year')?.errors?.['min'] || movieForm.get('year')?.errors?.['max']">Year must be between 1900 and 2100</small>
+                <small *ngIf="movieForm.get('year')?.errors?.['min']">Year must be at least 1900</small>
+                <small *ngIf="movieForm.get('year')?.errors?.['max']">Year cannot exceed 2100</small>
               </div>
             </div>
 
@@ -125,6 +126,40 @@
                 <div class="col-md-8 mb-2">
                   <label class="form-label">Upload Trailer</label>
                   <input type="file" class="form-control" (change)="onTrailerUpload($event, i)" accept="video/*">
+                  
+                  <!-- Progress bar during upload -->
+                  <div *ngIf="uploadingTrailer[i]" class="mt-2">
+                    <div class="progress mb-2">
+                      <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                           role="progressbar" 
+                           [style.width.%]="trailerUploadProgress[i]" 
+                           [attr.aria-valuenow]="trailerUploadProgress[i]" 
+                           aria-valuemin="0" 
+                           aria-valuemax="100">
+                        {{trailerUploadProgress[i]}}%
+                      </div>
+                    </div>
+                    <small class="text-muted">Uploading trailer...</small>
+                  </div>
+                  
+                  <!-- Upload completed message -->
+                  <div *ngIf="!uploadingTrailer[i] && hasVideoUrl(trailer.get('url')?.value)" class="mt-2">
+                    <div class="alert alert-success py-2">
+                      <i class="fas fa-check-circle me-2"></i>
+                      <small>Trailer uploaded successfully!</small>
+                    </div>
+                  </div>
+                  
+                  <!-- Video preview after upload -->
+                  <div *ngIf="hasVideoUrl(trailer.get('url')?.value)" class="mt-3">
+                    <label class="form-label">Trailer Preview</label>
+                    <div class="ratio ratio-16x9">
+                      <video controls class="w-100 rounded">
+                        <source [src]="getVideoStreamingUrl(trailer.get('url')?.value)" type="video/mp4">
+                        Your browser does not support the video tag.
+                      </video>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -153,17 +188,49 @@
                 </button>
               </div>
               <div class="row">
-                <div class="col-md-4 mb-2">
+                <div class="col-md-6 mb-2">
                   <label class="form-label">Title</label>
                   <input type="text" class="form-control" formControlName="title">
                 </div>
-                <div class="col-md-4 mb-2">
-                  <label class="form-label">Type</label>
-                  <input type="text" class="form-control" formControlName="type">
-                </div>
-                <div class="col-md-4 mb-2">
+                <div class="col-md-6 mb-2">
                   <label class="form-label">Upload Video</label>
                   <input type="file" class="form-control" (change)="onVideoFileUpload($event, i)" accept="video/*">
+                  
+                  <!-- Progress bar during upload -->
+                  <div *ngIf="uploadingVideoFile[i]" class="mt-2">
+                    <div class="progress mb-2">
+                      <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                           role="progressbar" 
+                           [style.width.%]="videoFileUploadProgress[i]" 
+                           [attr.aria-valuenow]="videoFileUploadProgress[i]" 
+                           aria-valuemin="0" 
+                           aria-valuemax="100">
+                        {{videoFileUploadProgress[i]}}%
+                      </div>
+                    </div>
+                    <small class="text-muted">Uploading video...</small>
+                  </div>
+                  
+                  <!-- Upload completed message -->
+                  <div *ngIf="!uploadingVideoFile[i] && hasVideoUrl(videoFile.get('url')?.value)" class="mt-2">
+                    <div class="alert alert-success py-2">
+                      <i class="fas fa-check-circle me-2"></i>
+                      <small>Video uploaded successfully!</small>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Video preview after upload -->
+              <div *ngIf="hasVideoUrl(videoFile.get('url')?.value)" class="row mt-3">
+                <div class="col-12">
+                  <label class="form-label">Video Preview</label>
+                  <div class="ratio ratio-16x9">
+                    <video controls class="w-100 rounded">
+                      <source [src]="getVideoStreamingUrl(videoFile.get('url')?.value)" type="video/mp4">
+                      Your browser does not support the video tag.
+                    </video>
+                  </div>
                 </div>
               </div>
             </div>
@@ -192,11 +259,21 @@
                 </button>
               </div>
               <div class="row">
-                <div class="col-md-12 mb-2">
+                <div class="col-md-10 mb-2">
                   <label class="form-label">Person</label>
-                  <input type="text" class="form-control" [value]="getPersonName(personsArray.at(i).get('person_id')?.value)" readonly>
+                  <input type="text" 
+                         class="form-control" 
+                         readonly
+                         placeholder="Click Select to choose a person"
+                         [value]="getPersonName(personsArray.at(i).get('person_id')?.value)">
                 </div>
-                <!-- Il campo Character è stato rimosso come richiesto -->
+                <div class="col-md-2 mb-2 d-flex align-items-end">
+                  <button type="button" 
+                          class="btn btn-outline-primary btn-sm w-100" 
+                          (click)="openPersonModal(i)">
+                    Select
+                  </button>
+                </div>
               </div>
             </div>
             <div *ngIf="personsArray.length === 0" class="text-center py-3">
@@ -222,14 +299,23 @@
               <p>No poster uploaded</p>
             </div>
           </div>
-          <div class="mb-3">
-            <label for="posterFile" class="form-label">Upload Poster</label>
-            <input type="file" class="form-control" id="posterFile" (change)="onPosterUpload($event)" accept="image/*">
+          <div class="col-md-6 mb-3">
+            <label class="form-label">Upload Poster *</label>
+            <input type="file" class="form-control" (change)="onPosterUpload($event)" accept="image/*">
             <div *ngIf="uploadingPoster" class="mt-2">
               <div class="spinner-border spinner-border-sm text-primary" role="status">
                 <span class="visually-hidden">Loading...</span>
               </div>
-              <span class="ms-2">Uploading...</span>
+              <span class="ms-2">Uploading poster...</span>
+            </div>
+            <div *ngIf="!uploadingPoster && movieForm.get('poster')?.value" class="mt-2">
+              <div class="alert alert-success py-2">
+                <i class="fas fa-check-circle me-2"></i>
+                <small>Poster uploaded successfully!</small>
+              </div>
+            </div>
+            <div *ngIf="movieForm.get('poster')?.invalid && movieForm.get('poster')?.touched" class="text-danger mt-2">
+              <small *ngIf="movieForm.get('poster')?.errors?.['required']">Poster is required</small>
             </div>
           </div>
         </div>
@@ -248,14 +334,23 @@
               <p>No backdrop uploaded</p>
             </div>
           </div>
-          <div class="mb-3">
-            <label for="backdropFile" class="form-label">Upload Backdrop</label>
-            <input type="file" class="form-control" id="backdropFile" (change)="onBackdropUpload($event)" accept="image/*">
+          <div class="col-md-6 mb-3">
+            <label class="form-label">Upload Backdrop *</label>
+            <input type="file" class="form-control" (change)="onBackdropUpload($event)" accept="image/*">
             <div *ngIf="uploadingBackdrop" class="mt-2">
               <div class="spinner-border spinner-border-sm text-primary" role="status">
                 <span class="visually-hidden">Loading...</span>
               </div>
-              <span class="ms-2">Uploading...</span>
+              <span class="ms-2">Uploading backdrop...</span>
+            </div>
+            <div *ngIf="!uploadingBackdrop && movieForm.get('backdrop')?.value" class="mt-2">
+              <div class="alert alert-success py-2">
+                <i class="fas fa-check-circle me-2"></i>
+                <small>Backdrop uploaded successfully!</small>
+              </div>
+            </div>
+            <div *ngIf="movieForm.get('backdrop')?.invalid && movieForm.get('backdrop')?.touched" class="text-danger mt-2">
+              <small *ngIf="movieForm.get('backdrop')?.errors?.['required']">Backdrop is required</small>
             </div>
           </div>
         </div>
@@ -275,10 +370,10 @@
   </div>
 </form>
 
-<!-- Template per il modal di ngx-bootstrap -->
+<!-- Modal per la selezione delle persone -->
 <ng-template #personModal>
   <div class="modal-header">
-    <h4 class="modal-title">Search or Add Person</h4>
+    <h4 class="modal-title">Search Person</h4>
     <button type="button" class="btn-close" aria-label="Close" (click)="modalRef?.hide()"></button>
   </div>
   <div class="modal-body">
@@ -286,8 +381,15 @@
     <div class="mb-3">
       <label class="form-label">Search Person</label>
       <div class="input-group">
-        <input type="text" class="form-control" placeholder="Start typing to search..." #searchPersonInput (keyup.enter)="searchPerson(searchPersonInput.value)">
-        <button class="btn btn-outline-primary" type="button" (click)="searchPerson(searchPersonInput.value)">
+        <input type="text" 
+               class="form-control" 
+               placeholder="Start typing to search..." 
+               #searchPersonInput 
+               (input)="searchPersonInModal(searchPersonInput.value)"
+               (keyup.enter)="searchPersonInModal(searchPersonInput.value)">
+        <button class="btn btn-outline-primary" 
+                type="button" 
+                (click)="searchPersonInModal(searchPersonInput.value)">
           <i class="fa-solid fa-search"></i> Search
         </button>
       </div>
@@ -297,7 +399,8 @@
     <div *ngIf="!isLoadingPersons && persons.length > 0" class="mb-3">
       <h6>Search Results</h6>
       <div class="list-group">
-        <button type="button" class="list-group-item list-group-item-action" 
+        <button type="button" 
+                class="list-group-item list-group-item-action" 
                 *ngFor="let person of persons; trackBy: trackByPersonId" 
                 (click)="selectPersonFromModal(person.person_id.toString())">
           {{ person.name }}
@@ -314,8 +417,13 @@
     </div>
 
     <!-- No results message -->
-    <div *ngIf="!isLoadingPersons && persons.length === 0" class="alert alert-info">
-      No person found. You can add a new person using the form below.
+    <div *ngIf="!isLoadingPersons && persons.length === 0 && searchPersonInput?.value" class="alert alert-info">
+      No person found for "{{ searchPersonInput.value }}".
+    </div>
+
+    <!-- Initial message -->
+    <div *ngIf="!isLoadingPersons && persons.length === 0 && !searchPersonInput?.value" class="alert alert-secondary">
+      Start typing to search for persons.
     </div>
 
   </div>

@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams, HttpEventType } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 import { ApiResponse, PaginationParams } from '../models/api.models';
 import { Movie, Category, Person } from '../models/media.models';
@@ -119,10 +120,53 @@ export class ApiService {
   /**
    * Upload image (poster, backdrop, etc)
    */
-  public uploadImage(formData: FormData, type: string): Observable<{url: string}> {
-    return this.http.post<{url: string}>(`${this.baseUrl}/api/v1/upload/image/${type}`, formData, {
+  public uploadImage(formData: FormData): Observable<any> {
+    return this.http.post<any>(`${this.baseUrl}/api/v1/upload/image`, formData, {
       headers: this.getHeadersForUpload()
     });
+  }
+
+  /**
+   * Upload video file
+   */
+  public uploadVideo(formData: FormData): Observable<any> {
+    return this.http.post(`${this.baseUrl}/api/v1/upload/video`, formData, {
+      headers: this.getHeadersForUpload()
+    });
+  }
+
+  /**
+   * Upload video file with progress tracking
+   */
+  public uploadVideoWithProgress(formData: FormData): Observable<any> {
+    return this.http.post(`${this.baseUrl}/api/v1/upload/video`, formData, {
+      headers: this.getHeadersForUpload(),
+      reportProgress: true,
+      observe: 'events'
+    }).pipe(
+      map((event: any) => {
+        if (event.type === HttpEventType.UploadProgress) {
+          const progress = Math.round(100 * event.loaded / event.total);
+          return { type: 'progress', progress };
+        } else if (event.type === HttpEventType.Response) {
+          return { type: 'response', response: event.body };
+        }
+        return event;
+      })
+    );
+  }
+
+  /**
+   * Get video streaming URL
+   */
+  public getVideoUrl(videoPath: string): string {
+    const token = localStorage.getItem('auth_token') || '';
+    // Fix malformed URL - videoPath already contains full URL
+    if (videoPath.startsWith('http')) {
+      return videoPath;
+    }
+    // If it's a relative path, prepend baseUrl
+    return `${this.baseUrl}${videoPath}?token=${token}`;
   }
   
   /**
@@ -158,6 +202,21 @@ export class ApiService {
   public createMovie(movieData: Partial<Movie>): Observable<ApiResponse<Movie>> {
     return this.http.post<ApiResponse<Movie>>(`${this.baseUrl}/api/v1/movies`, movieData, {
       headers: this.getHeaders()
+    });
+  }
+
+  /**
+   * Create a new movie with files (FormData)
+   */
+  public createMovieWithFiles(formData: FormData): Observable<ApiResponse<Movie>> {
+    const token = localStorage.getItem('authToken');
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`
+      // Don't set Content-Type for FormData - browser will set it automatically with boundary
+    });
+    
+    return this.http.post<ApiResponse<Movie>>(`${this.baseUrl}/api/v1/movies`, formData, {
+      headers: headers
     });
   }
 
@@ -203,6 +262,20 @@ export class ApiService {
   public deleteTVSeries(id: number): Observable<ApiResponse<any>> {
     return this.http.delete<ApiResponse<any>>(`${this.baseUrl}/api/v1/tvseries/${id}`, {
       headers: this.getHeaders()
+    });
+  }
+
+  /**
+   * Search persons by name
+   */
+  public searchPersons(query: string): Observable<any> {
+    const params = new HttpParams()
+      .set('name', query)
+      .set('per_page', '50');
+    
+    return this.http.get<any>(`${this.baseUrl}/api/v1/persons`, {
+      headers: this.getHeaders(),
+      params: params
     });
   }
 
