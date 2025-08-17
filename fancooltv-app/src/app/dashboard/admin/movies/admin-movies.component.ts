@@ -44,7 +44,7 @@ export class AdminMoviesComponent implements OnInit {
   ngOnInit(): void {
     this.loadMovies();
     this.loadCategories();
-    this.setupSearchListener();
+    // this.setupSearchListener(); // Disabled instant search
   }
   
   /**
@@ -55,7 +55,9 @@ export class AdminMoviesComponent implements OnInit {
     
     const params: any = {
       page: page,
-      limit: this.itemsPerPage
+      limit: this.itemsPerPage,
+      sort_by: 'created_at',  // Ordina per data di creazione
+      sort_direction: 'desc'  // Ordine discendente (più recenti prima)
     };
     
     // Add filters if selected

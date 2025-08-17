@@ -1,8 +1,9 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild, TemplateRef } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Movie } from 'src/app/models/media.models';
 import { ApiService } from 'src/app/services/api.service';
 import { MovieFormComponent } from './movie-form.component';
+import { BsModalService, BsModalRef } from 'ngx-bootstrap/modal';
 
 @Component({
   selector: 'app-movie-form-page',
@@ -17,11 +18,17 @@ export class MovieFormPageComponent implements OnInit {
   pageTitle = 'Add New Movie';
   loading = false;
   error = '';
+  success = '';
+
+  // Modal delete
+  @ViewChild('deleteModal') deleteModal!: TemplateRef<any>;
+  modalRef?: BsModalRef;
 
   constructor(
     private apiService: ApiService,
     private route: ActivatedRoute,
-    private router: Router
+    private router: Router,
+    private modalService: BsModalService
   ) { }
 
   ngOnInit(): void {
@@ -81,11 +88,33 @@ export class MovieFormPageComponent implements OnInit {
         next: (response) => {
           console.log('Movie updated successfully:', response);
           this.loading = false;
-          this.router.navigate(['/dashboard/admin/movies']);
+          this.error = '';
+          this.success = 'Movie updated successfully!';
+          
+          // Clear success message after 5 seconds
+          setTimeout(() => {
+            this.success = '';
+          }, 5000);
         },
         error: (err) => {
-          this.error = 'Failed to update movie. Please try again.';
           console.error('Error updating movie:', err);
+          console.error('Error status:', err.status);
+          console.error('Error message:', err.message);
+          console.error('Error details:', err.error);
+          console.error('FULL ERROR RESPONSE:', JSON.stringify(err.error, null, 2));
+          
+          // Mostra messaggi di errore più dettagliati
+          if (err.error && err.error.message) {
+            this.error = `Errore: ${err.error.message}`;
+          } else if (err.error && err.error.errors) {
+            // Raccoglie tutti gli errori di validazione in un unico messaggio
+            const errorMessages = Object.values(err.error.errors).flat();
+            this.error = `Errori di validazione: ${errorMessages.join(', ')}`;
+            console.error('Validation errors:', err.error.errors);
+          } else {
+            this.error = 'Impossibile aggiornare il film. Riprova più tardi.';
+          }
+          
           this.loading = false;
           // Reset loading state in child component
           if (this.movieForm) {
@@ -107,14 +136,23 @@ export class MovieFormPageComponent implements OnInit {
           this.router.navigate(['/dashboard/admin/movies']);
         },
         error: (err) => {
-          this.error = 'Failed to create movie. Please try again.';
           console.error('Error creating movie:', err);
           console.error('Error status:', err.status);
           console.error('Error message:', err.message);
           console.error('Error details:', err.error);
-          if (err.error && err.error.errors) {
+          
+          // Mostra messaggi di errore più dettagliati
+          if (err.error && err.error.message) {
+            this.error = `Errore: ${err.error.message}`;
+          } else if (err.error && err.error.errors) {
+            // Raccoglie tutti gli errori di validazione in un unico messaggio
+            const errorMessages = Object.values(err.error.errors).flat();
+            this.error = `Errori di validazione: ${errorMessages.join(', ')}`;
             console.error('Validation errors:', err.error.errors);
+          } else {
+            this.error = 'Impossibile creare il film. Riprova più tardi.';
           }
+          
           this.loading = false;
           // Reset loading state in child component
           if (this.movieForm) {
@@ -127,5 +165,66 @@ export class MovieFormPageComponent implements OnInit {
 
   cancel(): void {
     this.router.navigate(['/dashboard/admin/movies']);
+  }
+
+  /**
+   * View movie details in new tab
+   */
+  viewMovie(): void {
+    if (this.movie && this.movie.movie_id) {
+      const url = this.router.serializeUrl(
+        this.router.createUrlTree(['/movie-details', this.movie.movie_id])
+      );
+      window.open(url, '_blank');
+    } else {
+      this.error = 'Impossibile visualizzare il film. ID non disponibile.';
+    }
+  }
+
+  /**
+   * Delete movie - open modal
+   */
+  deleteMovie(): void {
+    if (!this.movie || !this.movie.movie_id) {
+      this.error = 'Impossibile eliminare il film. ID non disponibile.';
+      return;
+    }
+
+    // Open the delete confirmation modal
+    this.modalRef = this.modalService.show(this.deleteModal, {
+      class: 'modal-md modal-dialog-centered',
+      backdrop: 'static',
+      keyboard: false
+    });
+  }
+
+  /**
+   * Confirm movie deletion
+   */
+  confirmDelete(): void {
+    if (this.movie) {
+      this.loading = true;
+      
+      this.apiService.deleteMovie(this.movie.movie_id).subscribe({
+        next: () => {
+          this.modalRef?.hide();
+          this.loading = false;
+          this.router.navigate(['/dashboard/admin/movies']);
+        },
+        error: (err: any) => {
+          console.error('Errore durante l\'eliminazione del film:', err);
+          this.error = 'Impossibile eliminare il film. Riprova più tardi.';
+          this.loading = false;
+          this.modalRef?.hide();
+        }
+      });
+    }
+  }
+
+  /**
+   * Cancel movie deletion
+   */
+  cancelDelete(): void {
+    this.modalRef?.hide();
   }
 }

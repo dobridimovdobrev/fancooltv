@@ -36,20 +36,21 @@ export class SearchFilterComponent implements AfterViewInit, OnDestroy {
   }
 
   /**
-   * Setup search input with debounce
+   * Setup search input with debounce - DISABLED for manual search only
    */
   private setupSearchDebounce(): void {
-    if (this.searchInput) {
-      this.searchSubscription = fromEvent(this.searchInput.nativeElement, 'input')
-        .pipe(
-          debounceTime(this.debounceTime),
-          distinctUntilChanged()
-        )
-        .subscribe(() => {
-          const query = this.searchInput.nativeElement.value;
-          this.searchQuery.emit(query);
-        });
-    }
+    // Disabled instant search - only search on click/enter
+    // if (this.searchInput) {
+    //   this.searchSubscription = fromEvent(this.searchInput.nativeElement, 'input')
+    //     .pipe(
+    //       debounceTime(this.debounceTime),
+    //       distinctUntilChanged()
+    //     )
+    //     .subscribe(() => {
+    //       const query = this.searchInput.nativeElement.value;
+    //       this.searchQuery.emit(query);
+    //     });
+    // }
   }
 
   /**
@@ -58,6 +59,7 @@ export class SearchFilterComponent implements AfterViewInit, OnDestroy {
   onSearchClick(): void {
     if (this.searchInput) {
       const query = this.searchInput.nativeElement.value;
+      console.log('Search button clicked with query:', query); // Debug log
       this.searchClick.emit(query);
     }
   }
@@ -93,7 +95,7 @@ export class SearchFilterComponent implements AfterViewInit, OnDestroy {
   clearSearch(): void {
     if (this.searchInput) {
       this.searchInput.nativeElement.value = '';
-      this.searchQuery.emit('');
+      this.searchClick.emit(''); // Use searchClick instead of searchQuery for manual search
     }
   }
 

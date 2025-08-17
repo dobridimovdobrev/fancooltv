@@ -16,12 +16,18 @@ export class MovieFormComponent implements OnInit {
   @Input() movie: Movie | null = null;
   @Output() formSubmit = new EventEmitter<any>();
   @Output() cancel = new EventEmitter<void>();
+  @Output() view = new EventEmitter<Movie>();
+  @Output() delete = new EventEmitter<Movie>();
 
   movieForm: FormGroup;
   categories: Category[] = [];
   persons: Person[] = [];
   personsForDisplay: Person[] = []; // Array per mantenere le persone associate al film per la visualizzazione
   loading = false;
+  
+  // Modal delete
+  @ViewChild('deleteModal') deleteModal!: TemplateRef<any>;
+  modalRef?: BsModalRef;
   uploadingPoster = false;
   uploadingBackdrop = false;
   uploadingTrailer: boolean[] = [];
@@ -122,7 +128,6 @@ export class MovieFormComponent implements OnInit {
       
       // Optional arrays
       persons: this.fb.array([]),
-      trailers: this.fb.array([]),
       video_files: this.fb.array([]),
       image_files: this.fb.array([])
     });
@@ -179,18 +184,6 @@ export class MovieFormComponent implements OnInit {
       });
     }
 
-    // Clear and populate trailers array
-    const trailersArray = this.movieForm.get('trailers') as FormArray;
-    trailersArray.clear();
-    if (movie.trailers && movie.trailers.length) {
-      movie.trailers.forEach(trailer => {
-        trailersArray.push(this.fb.group({
-          trailer_id: [trailer.trailer_id || null],
-          title: [trailer.title || ''],
-          url: [trailer.url || '']
-        }));
-      });
-    }
 
     // Clear and populate video files array
     const videoFilesArray = this.movieForm.get('video_files') as FormArray;
@@ -247,7 +240,7 @@ export class MovieFormComponent implements OnInit {
   // Variabili per la gestione delle persone e del modal
   isLoadingPersons: boolean = false;
   currentPersonIndex: number = -1;
-  modalRef?: BsModalRef;
+  personModalRef?: BsModalRef;
 
   // Riferimenti agli elementi del DOM
   @ViewChild('personModal') personModal!: TemplateRef<any>;
@@ -308,15 +301,15 @@ export class MovieFormComponent implements OnInit {
   }
 
   // Apre il modal per la selezione della persona
-  openPersonModal(index: number): void {
+  openPersonModal(index: number = -1): void {
     this.currentPersonIndex = index;
     
     // Reset della lista delle persone per la ricerca
     this.persons = [];
     
     // Apre il modal usando ngx-bootstrap
-    this.modalRef = this.modalService.show(this.personModal, {
-      class: 'modal-lg',
+    this.personModalRef = this.modalService.show(this.personModal, {
+      class: 'modal-lg modal-dialog-centered',
       backdrop: 'static',
       keyboard: false
     });
@@ -353,57 +346,54 @@ export class MovieFormComponent implements OnInit {
   // Seleziona una persona dal modal
   selectPersonFromModal(personId: string): void {
     if (this.currentPersonIndex >= 0) {
+      // Modifica persona esistente
       const personsArray = this.movieForm.get('persons') as FormArray;
       personsArray.at(this.currentPersonIndex).get('person_id')?.setValue(personId);
-      
-      this.modalRef?.hide();
-      
-      // Reset dell'indice corrente
-      this.currentPersonIndex = -1;
+    } else {
+      // Aggiungi nuova persona
+      this.personsArray.push(this.fb.group({
+        person_id: [personId],
+        role: ['']
+      }));
     }
+    
+    this.personModalRef?.hide();
+    
+    // Reset dell'indice corrente
+    this.currentPersonIndex = -1;
   }
 
   // Prepare form data for API submission
   prepareFormData(): any {
     const formValue = this.movieForm.value;
     
-    // Include video_file_ids for backend processing
-    if (formValue.video_files) {
-      formValue.video_files = formValue.video_files.filter((video: any) => 
-        video.url && video.url.trim() !== ''
-      );
-      
-      // Extract video_file_ids for backend
-      if (formValue.video_files.length > 0) {
-        formValue.video_file_ids = formValue.video_files
-          .filter((video: any) => video.id)
-          .map((video: any) => video.id);
-      }
+    // Convert persons array from objects to array of IDs only
+    if (formValue.persons && Array.isArray(formValue.persons)) {
+      formValue.persons = formValue.persons
+        .filter((person: any) => person.person_id && person.person_id.toString().trim() !== '')
+        .map((person: any) => parseInt(person.person_id, 10));
     }
     
-    // Include trailer_ids for backend processing  
-    if (formValue.trailers) {
-      formValue.trailers = formValue.trailers.filter((trailer: any) => 
-        trailer.url && trailer.url.trim() !== ''
-      );
-      
-      // Extract trailer_ids for backend
-      if (formValue.trailers.length > 0) {
-        formValue.trailer_ids = formValue.trailers
-          .filter((trailer: any) => trailer.trailer_id)
-          .map((trailer: any) => trailer.trailer_id);
+    // Handle poster and backdrop - extract URL from object or use string directly
+    if (formValue.poster) {
+      if (typeof formValue.poster === 'object' && formValue.poster.url) {
+        formValue.poster = formValue.poster.url; // Extract URL from object
+      } else if (typeof formValue.poster === 'string' && formValue.poster.trim() === '') {
+        delete formValue.poster; // Remove empty string
       }
+    } else {
+      delete formValue.poster; // Remove if null/undefined
     }
     
-    
-    console.log('Raw form value after filtering:', JSON.stringify(formValue, null, 2));
-    
-    // Convert empty strings to null and add missing required fields
-    Object.keys(formValue).forEach(key => {
-      if (formValue[key] === '') {
-        formValue[key] = null;
+    if (formValue.backdrop) {
+      if (typeof formValue.backdrop === 'object' && formValue.backdrop.url) {
+        formValue.backdrop = formValue.backdrop.url; // Extract URL from object
+      } else if (typeof formValue.backdrop === 'string' && formValue.backdrop.trim() === '') {
+        delete formValue.backdrop; // Remove empty string
       }
-    });
+    } else {
+      delete formValue.backdrop; // Remove if null/undefined
+    }
     
     // Add missing database fields with default values
     if (!formValue.format) {
@@ -435,10 +425,10 @@ export class MovieFormComponent implements OnInit {
     console.log('Format:', formValue.format);
     console.log('Language:', formValue.language);
     console.log('Country:', formValue.country);
-    console.log('Trailers:', formValue.trailers);
     console.log('Video Files:', formValue.video_files);
     console.log('Video Files DETAILED:', JSON.stringify(formValue.video_files, null, 2));
     console.log('Persons:', formValue.persons);
+    console.log('Persons DETAILED:', JSON.stringify(formValue.persons, null, 2));
     console.log('Slug:', formValue.slug);
     console.log('=== END ANALYSIS ===');
 
@@ -483,9 +473,6 @@ export class MovieFormComponent implements OnInit {
     return this.movieForm.get('persons') as FormArray;
   }
 
-  get trailersArray(): FormArray {
-    return this.movieForm.get('trailers') as FormArray;
-  }
 
   get videoFilesArray(): FormArray {
     return this.movieForm.get('video_files') as FormArray;
@@ -505,6 +492,9 @@ export class MovieFormComponent implements OnInit {
 
   // Form submission
   onSubmit(): void {
+    // Mark all fields as touched to show validation errors
+    this.movieForm.markAllAsTouched();
+    
     if (this.isValid()) {
       const formData = this.prepareFormData();
       this.formSubmit.emit(formData);
@@ -515,20 +505,56 @@ export class MovieFormComponent implements OnInit {
   onCancel(): void {
     this.cancel.emit();
   }
-
-  // Add trailer
-  addTrailer(): void {
-    this.trailersArray.push(this.fb.group({
-      trailer_id: [null],
-      title: [''],
-      url: ['']
-    }));
+  
+  // View movie details
+  onView(): void {
+    if (this.movie) {
+      this.view.emit(this.movie);
+    }
+  }
+  
+  // Delete movie
+  onDelete(): void {
+    if (this.movie) {
+      // Open the delete confirmation modal
+      this.modalRef = this.modalService.show(this.deleteModal, {
+        class: 'modal-md modal-dialog-centered',
+        backdrop: 'static',
+        keyboard: false
+      });
+    }
   }
 
-  // Remove trailer
-  removeTrailer(index: number): void {
-    this.trailersArray.removeAt(index);
+  /**
+   * Confirm movie deletion
+   */
+  confirmDelete(): void {
+    if (this.movie) {
+      this.loading = true;
+      
+      this.apiService.deleteMovie(this.movie.movie_id).subscribe({
+        next: (response: any) => {
+          console.log('Movie deleted successfully:', response);
+          this.modalRef?.hide();
+          this.loading = false;
+          this.delete.emit(this.movie!);
+        },
+        error: (error: any) => {
+          console.error('Error deleting movie:', error);
+          this.loading = false;
+          this.modalRef?.hide();
+        }
+      });
+    }
   }
+
+  /**
+   * Cancel movie deletion
+   */
+  cancelDelete(): void {
+    this.modalRef?.hide();
+  }
+
 
   // Add video file
   addVideoFile(): void {
@@ -544,15 +570,17 @@ export class MovieFormComponent implements OnInit {
     this.videoFilesArray.removeAt(index);
   }
 
-  // Add person (max 5)
+  // Add person - open modal
   addPerson(): void {
     if (this.personsArray.length >= 5) {
-      alert('Massimo 5 persone nel cast');
-      return;
+      return; // Don't open modal if limit reached
     }
-    this.personsArray.push(this.fb.group({
-      person_id: ['']
-    }));
+    this.openPersonModal(-1);
+  }
+
+  // Check if can add more persons
+  canAddPerson(): boolean {
+    return this.personsArray.length < 5;
   }
 
   // Remove person
@@ -625,53 +653,6 @@ export class MovieFormComponent implements OnInit {
     }
   }
 
-  // Handle trailer file upload
-  onTrailerUpload(event: any, index: number): void {
-    const file = event.target.files[0];
-    if (file) {
-      if (!this.canUploadFiles()) {
-        alert('Please fill in Title, Description, Year, Category, and upload Poster & Backdrop before uploading videos.');
-        event.target.value = '';
-        return;
-      }
-
-      this.uploadingTrailer[index] = true;
-      this.trailerUploadProgress[index] = 0;
-      const formData = new FormData();
-      formData.append('video', file);
-      formData.append('type', 'trailer');
-      
-      this.apiService.uploadVideoWithProgress(formData).subscribe({
-        next: (event: any) => {
-          if (event.type === 'progress') {
-            this.trailerUploadProgress[index] = event.progress;
-          } else if (event.type === 'response') {
-            console.log('Trailer upload response:', event.response);
-            if (event.response && event.response.stream_url) {
-              // Use the stream_url from the upload response for trailers
-              this.trailersArray.at(index).patchValue({
-                url: event.response.stream_url,
-                trailer_id: event.response.video?.video_file_id || null
-              });
-              console.log('Trailer URL updated in form:', event.response.stream_url);
-            } else if (event.response && event.response.message && event.response.message.streaming_url) {
-              // Fallback to old format
-              this.trailersArray.at(index).patchValue({
-                url: event.response.message.streaming_url
-              });
-            }
-            this.uploadingTrailer[index] = false;
-            this.trailerUploadProgress[index] = 100;
-          }
-        },
-        error: (error: any) => {
-          console.error('Error uploading trailer', error);
-          this.uploadingTrailer[index] = false;
-          this.trailerUploadProgress[index] = 0;
-        }
-      });
-    }
-  }
 
   // Handle video file upload
   onVideoFileUpload(event: any, index: number): void {
@@ -735,17 +716,50 @@ export class MovieFormComponent implements OnInit {
     }
   }
   
-  // Get video streaming URL
-  getVideoStreamingUrl(streamUrl: string): SafeUrl {
-    if (!streamUrl) return '';
+  // Get safe video streaming URL
+  getSafeVideoStreamingUrl(streamUrl: string): SafeUrl {
+    if (!streamUrl) return this.sanitizer.bypassSecurityTrustUrl('');
     const fullUrl = this.apiService.getVideoUrl(streamUrl);
-    // console.log('Video streaming URL generated:', fullUrl); // Removed excessive logging
     return this.sanitizer.bypassSecurityTrustUrl(fullUrl);
   }
 
   // Check if video is uploaded
-  hasVideoUrl(url: string): boolean {
-    return !!(url && url.trim() !== '');
+  hasVideoUrl(url: string | null | undefined): boolean {
+    return Boolean(url && url.trim && url.trim() !== '');
+  }
+
+  // Video player progress tracking
+  videoPlayers: {[key: string]: HTMLVideoElement} = {};
+  videoProgress: {[key: string]: number} = {};
+  
+  /**
+   * Register a video element for progress tracking
+   * @param video The video element
+   * @param id Unique identifier for the video
+   */
+  registerVideoPlayer(video: HTMLVideoElement, id: string): void {
+    this.videoPlayers[id] = video;
+    this.videoProgress[id] = 0;
+    
+    // Add event listeners for progress tracking
+    video.addEventListener('timeupdate', () => {
+      if (video.duration) {
+        this.videoProgress[id] = (video.currentTime / video.duration) * 100;
+      }
+    });
+    
+    video.addEventListener('ended', () => {
+      this.videoProgress[id] = 100;
+    });
+  }
+  
+  /**
+   * Get the current progress for a video
+   * @param id Unique identifier for the video
+   * @returns Progress percentage (0-100)
+   */
+  getVideoProgress(id: string): number {
+    return this.videoProgress[id] || 0;
   }
 
   // Check if basic required fields are filled to allow video uploads

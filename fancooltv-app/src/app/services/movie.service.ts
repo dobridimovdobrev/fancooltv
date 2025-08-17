@@ -73,6 +73,12 @@ export class MovieService {
         } as ApiResponse<Movie[]>;
       }),
       tap(response => {
+        console.log('API Response received:', {
+          params,
+          totalResults: response.data.length,
+          firstFewResults: response.data.slice(0, 3).map(m => ({ title: m.title, category: m.category?.name, category_id: m.category_id }))
+        }); // Debug log
+        
         this.isLoading = false;
         this.loadingSubject.next(false);
 
@@ -145,6 +151,7 @@ export class MovieService {
    * Imposta il filtro di ricerca e ricarica i film
    */
   public search(query: string): void {
+    console.log('MovieService search called with query:', query); // Debug log
     this.currentSearch = query;
     this.loadMovies(true).subscribe();
   }
@@ -153,6 +160,7 @@ export class MovieService {
    * Imposta il filtro di categoria e ricarica i film
    */
   public filterByCategory(categoryId: string): void {
+    console.log('MovieService filterByCategory called with:', categoryId); // Debug log
     this.currentCategory = categoryId;
     this.loadMovies(true).subscribe();
   }
@@ -173,6 +181,16 @@ export class MovieService {
       this.currentPage++;
       this.loadMovies().subscribe();
     }
+  }
+
+  /**
+   * Reset all filters and reload movies
+   */
+  public resetFilters(): void {
+    this.currentSearch = '';
+    this.currentCategory = '';
+    this.currentYear = '';
+    this.loadMovies(true).subscribe();
   }
 
   /**

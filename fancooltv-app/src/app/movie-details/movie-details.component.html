@@ -12,7 +12,7 @@
   <!-- Error Message -->
   <div *ngIf="error && !loading" class="alert alert-danger container mt-5">
     <p>{{ errorMessage }}</p>
-    <button class="btn btn-primary" (click)="goBack()">Torna ai film</button>
+    <button class="btn btn-primary" (click)="navigateToMovies()">Back to Movies</button>
   </div>
   
   <!-- Movie Details Content -->
@@ -31,10 +31,13 @@
                  (error)="$any($event.target).style.display='none'">
           </div>
           
-          <!-- Back Button -->
-          <div class="mt-4 text-center">
-            <button class="btn btn-primary" (click)="goBack()">
-              <i class="fas fa-arrow-left me-2"></i>Torna ai film
+          <!-- Action Buttons -->
+          <div class="mt-4 d-flex flex-column gap-2">
+            <button class="btn btn-warning w-100" (click)="editMovie()">
+              <i class="fas fa-edit me-2"></i>Edit Movie
+            </button>
+            <button class="btn btn-danger w-100 mb-2" (click)="deleteMovie()">
+              <i class="fas fa-trash me-2"></i>Delete Movie
             </button>
           </div>
         </div>
@@ -61,14 +64,9 @@
             <!-- Video Files Section -->
             <div *ngIf="videoFiles && videoFiles.length > 0" class="video-files-section mb-4">
               <h3>Watch Movie</h3>
+              
+              <!-- HTML5 Video Player -->
               <div *ngFor="let video of videoFiles; let i = index" class="mb-3">
-                <h5 *ngIf="video.title">{{ video.title }}</h5>
-                <p *ngIf="video.format || video.resolution" class="text-muted small">
-                  <span *ngIf="video.format">{{ video.format | uppercase }}</span>
-                  <span *ngIf="video.format && video.resolution"> • </span>
-                  <span *ngIf="video.resolution">{{ video.resolution }}</span>
-                </p>
-                
                 <!-- Error state -->
                 <div *ngIf="video.error" class="ratio ratio-16x9 d-flex align-items-center justify-content-center bg-dark">
                   <div class="text-center text-white">
@@ -115,5 +113,30 @@
     </div>
   </div>
 </div>
+
+<!-- Delete Confirmation Modal -->
+<ng-template #deleteModal>
+  <div class="modal-header">
+    <h4 class="modal-title">Confirm Message</h4>
+    <button type="button" class="btn-close" aria-label="Close" (click)="cancelDelete()"></button>
+  </div>
+  <div class="modal-body">
+    <div class="text-center">
+      <h5>Are you sure?</h5>
+      <p class="mb-3">
+        Do you want to delete the movie <strong>"{{ movie?.title }}"</strong>?
+      </p>
+    </div>
+  </div>
+  <div class="modal-footer d-flex justify-content-between">
+    <button type="button" class="btn btn-danger flex-fill me-2" (click)="confirmDelete()" [disabled]="loading">
+      <span *ngIf="loading" class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+      <i *ngIf="!loading" class="fas fa-trash me-2"></i>Delete
+    </button>
+    <button type="button" class="btn btn-secondary flex-fill" (click)="cancelDelete()">
+      <i class="fas fa-times me-2"></i>Cancel
+    </button>
+  </div>
+</ng-template>
 <!-- footer -->
 <app-footer></app-footer>

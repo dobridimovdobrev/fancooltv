@@ -1,9 +1,11 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild, TemplateRef } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MovieService } from '../services/movie.service';
+import { ApiService } from '../services/api.service';
 import { Movie, Person } from '../models/media.models';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { AuthService } from '../services/auth.service';
+import { BsModalService, BsModalRef } from 'ngx-bootstrap/modal';
 
 @Component({
   selector: 'app-movie-details',
@@ -19,12 +21,18 @@ export class MovieDetailsComponent implements OnInit, OnDestroy {
   videoFiles: any[] = [];
   cast: Person[] = [];
   
+  // Modal delete
+  @ViewChild('deleteModal') deleteModal!: TemplateRef<any>;
+  modalRef?: BsModalRef;
+  
   constructor(
     private route: ActivatedRoute,
     private router: Router,
     private movieService: MovieService,
     private authService: AuthService,
-    private sanitizer: DomSanitizer
+    private sanitizer: DomSanitizer,
+    private modalService: BsModalService,
+    private apiService: ApiService
   ) { }
 
   ngOnInit(): void {
@@ -59,46 +67,58 @@ export class MovieDetailsComponent implements OnInit, OnDestroy {
         this.movie = movie;
         this.loading = false;
         
-        // Preparare l'URL del trailer se disponibile
-        if (movie.trailers && movie.trailers.length > 0) {
-          this.trailerUrl = this.sanitizeTrailerUrl(movie.trailers[0].url);
-        }
-        
         // Debug: Log movie data
         console.log('=== MOVIE DEBUG ===');
-        console.log('Full movie object:', movie);
-        console.log('movie.video_files:', movie.video_files);
-        console.log('movie.trailers:', movie.trailers);
-        console.log('===================');
         
-        // Preparare i video files se disponibili
-        if (movie.video_files && movie.video_files.length > 0) {
-          this.videoFiles = movie.video_files.map(video => {
+        // Filter actual uploaded video files (exclude YouTube trailers)
+        const actualVideoFiles = movie.video_files ? movie.video_files.filter(video => {
+          const videoUrl = video.public_stream_url || video.stream_url || video.url;
+          return videoUrl && 
+                 !videoUrl.includes('youtube.com') && 
+                 !videoUrl.includes('youtu.be') &&
+                 !videoUrl.includes('watch?v=');
+        }) : [];
+
+        // Check for uploaded video files first (prioritize uploaded videos over YouTube trailers)
+        if (actualVideoFiles.length > 0) {
+          // Show HTML5 video player - uploaded videos have priority
+          this.videoFiles = actualVideoFiles.map(video => {
             // Use public_stream_url if available, otherwise fallback to authenticated URL
             const videoUrl = video.public_stream_url || video.stream_url || video.url;
-            const streamingUrl = video.public_stream_url ? 
-              this.sanitizer.bypassSecurityTrustUrl(videoUrl) : 
-              this.getVideoStreamingUrl(videoUrl);
+            console.log('Processing uploaded video file:', video.title, 'URL:', videoUrl);
+            
             return {
-              ...video,
-              safeUrl: streamingUrl,
+              title: video.title,
+              url: videoUrl,
+              safeUrl: this.sanitizer.bypassSecurityTrustUrl(videoUrl),
               loading: false
             };
           });
+          this.trailerUrl = null; // Clear trailer to hide YouTube iframe
+          console.log('🎬 Showing HTML5 video player (uploaded videos have priority)');
           console.log('Video files processed:', this.videoFiles);
-          console.log('🎬 VIDEO DEBUG:');
-          this.videoFiles.forEach((video, index) => {
-            console.log(`Video ${index + 1}:`, {
-              title: video.title,
-              url: video.url,
-              stream_url: video.stream_url,
-              safeUrl: video.safeUrl,
-              format: video.format,
-              resolution: video.resolution
-            });
-          });
         } else {
-          console.log('No video files found in movie data');
+          // Show YouTube trailer if no actual uploaded video files
+          const hasYouTubeTrailer = movie.trailers && movie.trailers.some((trailer: any) => 
+            trailer.type === 'youtube' || 
+            trailer.url.includes('youtube.com') || 
+            trailer.url.includes('youtu.be')
+          );
+          
+          if (hasYouTubeTrailer) {
+            const youtubeTrailer = movie.trailers.find((trailer: any) => 
+              trailer.type === 'youtube' || 
+              trailer.url.includes('youtube.com') || 
+              trailer.url.includes('youtu.be')
+            );
+            if (youtubeTrailer) {
+              this.trailerUrl = this.sanitizeTrailerUrl(youtubeTrailer.url);
+              this.videoFiles = []; // Clear video files to hide HTML5 player
+              console.log('🎬 Showing YouTube trailer (no uploaded videos found)');
+            }
+          } else {
+            console.log('No video content found');
+          }
         }
         
         // Preparare il cast
@@ -152,12 +172,65 @@ export class MovieDetailsComponent implements OnInit, OnDestroy {
   }
   
   /**
-   * Torna alla pagina dei film
+   * Navigate to edit movie form in admin dashboard
    */
-  goBack(): void {
+  editMovie(): void {
+    if (this.movie) {
+      this.router.navigate(['/dashboard/admin/movies/edit', this.movie.movie_id]);
+    }
+  }
+
+  /**
+   * Show delete confirmation modal
+   */
+  deleteMovie(): void {
+    if (this.movie) {
+      // Open the delete confirmation modal
+      this.modalRef = this.modalService.show(this.deleteModal, {
+        class: 'modal-md modal-dialog-centered',
+        backdrop: 'static',
+        keyboard: false
+      });
+    }
+  }
+
+  /**
+   * Confirm movie deletion
+   */
+  confirmDelete(): void {
+    if (this.movie) {
+      this.loading = true;
+      
+      this.apiService.deleteMovie(this.movie.movie_id).subscribe({
+        next: (response: any) => {
+          console.log('Movie deleted successfully:', response);
+          this.modalRef?.hide();
+          this.loading = false;
+          this.navigateToMovies();
+        },
+        error: (error: any) => {
+          console.error('Error deleting movie:', error);
+          this.loading = false;
+          this.modalRef?.hide();
+        }
+      });
+    }
+  }
+
+  /**
+   * Cancel movie deletion
+   */
+  cancelDelete(): void {
+    this.modalRef?.hide();
+  }
+
+  /**
+   * Navigate to movies page
+   */
+  navigateToMovies(): void {
     this.router.navigate(['/movies']);
   }
-  
+
   /**
    * Ottiene l'URL per lo streaming video
    */
@@ -208,7 +281,7 @@ export class MovieDetailsComponent implements OnInit, OnDestroy {
     // Clean up blob URLs to prevent memory leaks
     if (this.videoFiles) {
       this.videoFiles.forEach(video => {
-        if (video.safeUrl && video.safeUrl.startsWith('blob:')) {
+        if (video.safeUrl && typeof video.safeUrl === 'string' && video.safeUrl.startsWith('blob:')) {
           URL.revokeObjectURL(video.safeUrl);
         }
       });

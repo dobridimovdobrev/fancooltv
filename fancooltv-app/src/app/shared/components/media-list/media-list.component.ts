@@ -20,20 +20,21 @@ export class MediaListComponent implements OnInit, OnDestroy {
   @Input() mediaService!: BaseMediaService<any>;
 
   // Component state
-  items: BaseMediaItem[] = [];
+  items: any[] = [];
   categories: Category[] = [];
   years: number[] = [];
   loading = false;
   error = false;
   errorMessage = '';
   noResults = false;
-  
+  currentPage = 1;
+  itemsPerPage = 20;
+  totalItems = 0;
+
   // Filter and pagination state
   searchQuery = '';
   selectedCategory = '';
   selectedYear = '';
-  currentPage = 1;
-  itemsPerPage = 20;
 
   private subscriptions = new Subscription();
 
@@ -129,7 +130,7 @@ export class MediaListComponent implements OnInit, OnDestroy {
       });
 
       // Load initial items
-      this.loadItems(true);
+      this.loadItems(1);
     } catch (error) {
       console.error('Error during initial data loading:', error);
       this.error = true;
@@ -138,40 +139,63 @@ export class MediaListComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Load items from service
+   * Load items from service - using same logic as admin dashboard
    */
-  private loadItems(reset: boolean = false): void {
+  private loadItems(page: number = 1): void {
     this.loading = true;
     this.error = false;
     this.errorMessage = '';
 
-    try {
-      if (reset) {
-        // Reset filters and load fresh data
-        this.mediaService.resetFilters();
-      } else {
-        // Load more items (pagination)
-        this.mediaService.loadMore();
+    const params: any = {
+      page: page,
+      limit: this.itemsPerPage,
+      sort_by: 'created_at',
+      sort_direction: 'desc'
+    };
+
+    // Add filters if selected - same as admin
+    if (this.searchQuery) params.q = this.searchQuery;
+    if (this.selectedCategory) params.category = this.selectedCategory;
+    if (this.selectedYear) params.year = this.selectedYear;
+
+    // Use ApiService directly like admin dashboard - call correct API based on mediaType
+    const apiCall = this.mediaType === 'movie' 
+      ? (this.mediaService as any).apiService.getMovies(params)
+      : (this.mediaService as any).apiService.getTVSeries(params);
+    
+    apiCall.subscribe({
+      next: (response: any) => {
+        if (page === 1) {
+          this.items = response.data.map((item: any) => this.transformToMediaItem(item));
+        } else {
+          this.items = [...this.items, ...response.data.map((item: any) => this.transformToMediaItem(item))];
+        }
+        
+        // Update pagination info from response - same as admin components
+        this.totalItems = response.meta?.total || 0;
+        
+        this.noResults = this.items.length === 0;
+        this.loading = false;
+      },
+      error: (error: any) => {
+        console.error('Error loading items:', error);
+        this.error = true;
+        this.errorMessage = `Failed to load ${this.mediaType === 'movie' ? 'movies' : 'TV series'}. Please try again.`;
+        this.loading = false;
       }
-    } catch (error) {
-      console.error('Error loading items:', error);
-      this.error = true;
-      this.errorMessage = `Failed to load ${this.mediaType === 'movie' ? 'movies' : 'TV series'}. Please try again.`;
-      this.loading = false;
-    }
+    });
   }
 
   /**
-   * Handle search query changes
+   * Handle search query changes - DISABLED for manual search only
    */
   onSearchQuery(query: string): void {
+    // Disabled instant search - only search on click/enter
     this.searchQuery = query;
-    this.resetPagination();
-    this.loadItems();
   }
 
   /**
-   * Handle search click
+   * Handle search button click
    */
   onSearchClick(query: string): void {
     this.searchQuery = query;
@@ -198,10 +222,13 @@ export class MediaListComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Handle load more button click
+   * Handle load more button click - same logic as admin components
    */
   onLoadMore(): void {
-    this.mediaService.loadMore();
+    if (this.loading || this.items.length >= this.totalItems) return;
+    
+    this.currentPage++;
+    this.loadItems(this.currentPage);
   }
 
   /**
@@ -236,7 +263,7 @@ export class MediaListComponent implements OnInit, OnDestroy {
    * Retry loading data
    */
   retryLoading(): void {
-    this.loadItems(true);
+    this.loadItems(1);
   }
 
   /**
@@ -259,17 +286,17 @@ export class MediaListComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Check if has more pages for load more button
+   * Check if has more pages - same logic as admin components
    */
   get hasMorePages(): boolean {
-    return this.mediaService.getHasMorePages();
+    return this.items.length < this.totalItems;
   }
 
   /**
    * Check if currently loading for load more button state
    */
   get isLoadingMore(): boolean {
-    return this.mediaService.getIsLoading();
+    return this.loading;
   }
 
   /**

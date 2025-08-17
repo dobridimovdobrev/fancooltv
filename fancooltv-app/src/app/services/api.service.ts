@@ -157,6 +157,32 @@ export class ApiService {
   }
 
   /**
+   * Upload trailer file with progress tracking
+   */
+  public uploadTrailerWithProgress(file: File, title?: string, description?: string): Observable<any> {
+    const formData = new FormData();
+    formData.append('video', file);
+    if (title) formData.append('title', title);
+    if (description) formData.append('description', description);
+
+    return this.http.post(`${this.baseUrl}/api/v1/upload/trailer`, formData, {
+      headers: this.getHeadersForUpload(),
+      reportProgress: true,
+      observe: 'events'
+    }).pipe(
+      map((event: any) => {
+        if (event.type === HttpEventType.UploadProgress) {
+          const progress = Math.round(100 * event.loaded / event.total);
+          return { type: 'progress', progress };
+        } else if (event.type === HttpEventType.Response) {
+          return { type: 'response', response: event.body };
+        }
+        return event;
+      })
+    );
+  }
+
+  /**
    * Get video streaming URL using existing backend endpoints
    */
   public getVideoUrl(videoPath: string): string {

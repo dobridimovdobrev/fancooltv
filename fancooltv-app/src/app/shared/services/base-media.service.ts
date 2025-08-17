@@ -77,6 +77,7 @@ export abstract class BaseMediaService<T extends BaseMediaItem> {
    * Search items by query
    */
   public search(query: string): void {
+    console.log('BaseMediaService search called with query:', query); // Debug log
     this.currentSearch = query;
     this.resetPagination();
     this.loadItems(true).subscribe();

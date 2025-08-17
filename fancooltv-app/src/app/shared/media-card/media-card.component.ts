@@ -58,6 +58,12 @@ export class MediaCardComponent {
       ? this.mediaItem.movie_id || this.mediaItem.id
       : this.mediaItem.tv_series_id || this.mediaItem.id;
     
+    // Safety check to prevent emitting undefined ID
+    if (!id && id !== 0) {
+      console.warn('MediaCardComponent: Cannot emit undefined ID for media item:', this.mediaItem);
+      return;
+    }
+    
     this.cardClick.emit(id);
   }
 
@@ -68,6 +74,12 @@ export class MediaCardComponent {
     const id = this.mediaType === 'movie' 
       ? this.mediaItem.movie_id || this.mediaItem.id
       : this.mediaItem.tv_series_id || this.mediaItem.id;
+    
+    // Safety check to prevent toString() error on undefined
+    if (!id && id !== 0) {
+      console.warn('MediaCardComponent: ID is undefined for media item:', this.mediaItem);
+      return this.mediaType === 'movie' ? ['/movie-details', '0'] : ['/tvseries-details', '0'];
+    }
     
     return this.mediaType === 'movie' 
       ? ['/movie-details', id.toString()]

@@ -58,14 +58,24 @@ $label-color: #ffffff;
     }
   }
   
-  // Testo di aiuto e messaggi
-  .form-text, small {
+  // error mesages
+  .form-text, small:not(.text-danger small) {
     color: $text-muted !important;
   }
   
   // Messaggi di errore
   .text-danger {
-    color: #ff6b6b !important;
+    color: #ff3333 !important;
+    font-size: .9rem; 
+    margin-top: 0.25rem;
+    font-weight: 600;
+    text-shadow: 0 0 1px rgba(255, 0, 0, 0.3); 
+    
+    small {
+      color: #ff3333 !important;
+      font-size: .9rem;
+      font-weight: 600;
+    }
   }
   
   // Image placeholders
@@ -135,12 +145,6 @@ $label-color: #ffffff;
     &:hover {
       background-color: rgba(0, 0, 0, 0.3);
     }
-  }
-  
-  // Form validation
-  .text-danger {
-    font-size: 0.8rem;
-    margin-top: 0.25rem;
   }
   
   // Required field indicator

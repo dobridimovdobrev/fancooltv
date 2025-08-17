@@ -1,20 +1,30 @@
 <div class="container-fluid p-4 movie-form-container">
   <div class="d-flex justify-content-between align-items-center mb-4">
     <h2 class="mb-0">{{ pageTitle }}</h2>
-    <div>
-      <button class="btn btn-secondary me-2" (click)="cancel()">
-        <i class="fas fa-times me-2"></i>Cancel
+    <div *ngIf="movie && movie.movie_id">
+      <button class="btn btn-info me-2" (click)="viewMovie()">
+        <i class="fas fa-eye me-2"></i>View
       </button>
-      <button class="btn btn-primary" (click)="movieForm.onSubmit()" [disabled]="loading">
-        <i class="fas fa-save me-2"></i>{{ isEditMode ? 'Save Changes' : 'Save Movie' }}
+      <button class="btn btn-danger" (click)="deleteMovie()">
+        <i class="fas fa-trash me-2"></i>Delete
       </button>
     </div>
   </div>
 
   <!-- Alert for errors -->
   <div *ngIf="error" class="alert alert-danger alert-dismissible fade show" role="alert">
-    {{ error }}
-    <button type="button" class="btn-close" (click)="error = ''" aria-label="Close"></button>
+    <div class="d-flex justify-content-between align-items-center">
+      <div>{{ error }}</div>
+      <button type="button" class="btn-close btn-close-sm" (click)="error = ''" aria-label="Close" style="font-size: 0.8rem;"></button>
+    </div>
+  </div>
+
+  <!-- Alert for success -->
+  <div *ngIf="success" class="alert alert-success alert-dismissible fade show" role="alert">
+    <div class="d-flex justify-content-between align-items-center">
+      <div><i class="fas fa-check-circle me-2"></i>{{ success }}</div>
+      <span class="text-muted" (click)="success = ''" style="cursor: pointer;  font-size: 1.8rem;">&times;</span>
+    </div>
   </div>
 
   <!-- Loading indicator -->
@@ -29,3 +39,28 @@
     <app-movie-form #movieForm [movie]="movie" (formSubmit)="saveMovie($event)"></app-movie-form>
   </div>
 </div>
+
+<!-- Delete Confirmation Modal -->
+<ng-template #deleteModal>
+  <div class="modal-header">
+    <h4 class="modal-title">Confirm Message</h4>
+    <button type="button" class="btn-close" aria-label="Close" (click)="cancelDelete()"></button>
+  </div>
+  <div class="modal-body">
+    <div class="text-center">
+      <h5>Are you sure?</h5>
+      <p class="mb-3">
+        Do you want to delete the movie <strong>"{{ movie?.title }}"</strong>?
+      </p>
+    </div>
+  </div>
+  <div class="modal-footer d-flex justify-content-between">
+    <button type="button" class="btn btn-danger flex-fill me-2" (click)="confirmDelete()" [disabled]="loading">
+      <span *ngIf="loading" class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+      <i *ngIf="!loading" class="fas fa-trash me-2"></i>Delete
+    </button>
+    <button type="button" class="btn btn-secondary flex-fill" (click)="cancelDelete()">
+      <i class="fas fa-times me-2"></i>Cancel
+    </button>
+  </div>
+</ng-template>
