@@ -9,8 +9,10 @@ import { LoadingSpinnerComponent } from './loading-spinner/loading-spinner.compo
 import { ErrorMessageComponent } from './error-message/error-message.component';
 import { SearchFilterComponent } from './search-filter/search-filter.component';
 import { MediaListComponent } from './components/media-list/media-list.component';
+import { ProfileEditModalComponent } from './components/profile-edit-modal/profile-edit-modal.component';
 import { AccordionModule } from 'ngx-bootstrap/accordion';
 import { BsDropdownModule } from 'ngx-bootstrap/dropdown';
+import { ModalModule } from 'ngx-bootstrap/modal';
 
 @NgModule({
   declarations: [
@@ -20,7 +22,8 @@ import { BsDropdownModule } from 'ngx-bootstrap/dropdown';
     LoadingSpinnerComponent,
     ErrorMessageComponent,
     SearchFilterComponent,
-    MediaListComponent
+    MediaListComponent,
+    ProfileEditModalComponent
   ],
   imports: [
     CommonModule,
@@ -28,7 +31,8 @@ import { BsDropdownModule } from 'ngx-bootstrap/dropdown';
     FormsModule,
     ReactiveFormsModule,
     AccordionModule.forRoot(),
-    BsDropdownModule.forRoot()
+    BsDropdownModule.forRoot(),
+    ModalModule.forRoot()
   ],
   exports: [
     NavbarComponent,

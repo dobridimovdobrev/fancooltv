@@ -1,4 +1,8 @@
 import { Component, OnInit } from '@angular/core';
+import { BsModalService, BsModalRef } from 'ngx-bootstrap/modal';
+import { AuthService } from '../../../services/auth.service';
+import { User } from '../../../models/auth.models';
+import { ProfileEditModalComponent } from '../../../shared/components/profile-edit-modal/profile-edit-modal.component';
 
 @Component({
   selector: 'app-user-profile',
@@ -6,35 +10,41 @@ import { Component, OnInit } from '@angular/core';
   styleUrls: ['./user-profile.component.scss']
 })
 export class UserProfileComponent implements OnInit {
-  // Dati utente di esempio
-  user = {
-    id: 1,
-    username: 'utente_esempio',
-    email: 'utente@esempio.com',
-    nome: 'Mario',
-    cognome: 'Rossi',
-    avatar: 'assets/images/avatar-placeholder.jpg',
-    iscrittoDal: '01/01/2023',
-    ultimoAccesso: '19/07/2025',
-    preferiti: 12,
-    recensioni: 5
-  };
+  currentUser: User | null = null;
+  modalRef?: BsModalRef;
 
-  constructor() { }
+  constructor(
+    private authService: AuthService,
+    private modalService: BsModalService
+  ) { }
 
   ngOnInit(): void {
-    // In una implementazione reale, qui si caricherebbero i dati dal servizio
+    // Load current user data
+    this.currentUser = this.authService.currentUserValue;
+    
+    // Subscribe to user updates
+    this.authService.currentUser.subscribe(user => {
+      this.currentUser = user;
+    });
   }
 
-  // Metodo per aggiornare il profilo
-  updateProfile(): void {
-    // Implementazione del salvataggio profilo
-    console.log('Profilo aggiornato');
-  }
+  // Open profile edit modal
+  openEditModal(): void {
+    this.modalRef = this.modalService.show(ProfileEditModalComponent, {
+      class: 'modal-lg',
+      backdrop: 'static',
+      keyboard: false
+    });
 
-  // Metodo per cambiare la password
-  changePassword(): void {
-    // Implementazione del cambio password
-    console.log('Password cambiata');
+    // Subscribe to profile update events
+    if (this.modalRef.content) {
+      this.modalRef.content.profileUpdated.subscribe((updatedUser: User) => {
+        console.log('Profile updated:', updatedUser);
+        // Update local user data
+        this.currentUser = updatedUser;
+        // Update auth service user data
+        this.authService.currentUser.subscribe();
+      });
+    }
   }
 }

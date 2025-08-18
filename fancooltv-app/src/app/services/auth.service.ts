@@ -45,6 +45,12 @@ export class AuthService {
     return this.isAuthenticated() && this.currentUserValue?.role === 'admin';
   }
 
+  // Update current user data
+  public updateCurrentUser(user: User): void {
+    this.currentUserSubject.next(user);
+    localStorage.setItem('current_user', JSON.stringify(user));
+  }
+
   // Get stored auth token
   public getToken(): string | null {
     return localStorage.getItem('auth_token');

@@ -1,0 +1,131 @@
+<div class="modal-content bg-custom">
+  <div class="modal-header border-0">
+    <h4 class="modal-title">Edit Profile</h4>
+    <button type="button" class="btn-close" aria-label="Close" (click)="cancel()"></button>
+  </div>
+
+  <div class="modal-body">
+  <div *ngIf="serverErrors['general']" class="alert alert-danger mb-3">
+    {{ serverErrors['general'][0] }}
+  </div>
+
+  <form *ngIf="profileForm" [formGroup]="profileForm" (ngSubmit)="onSubmit()" class="needs-validation" novalidate>
+    <!-- Personal Information -->
+    <div class="mb-4">
+      <h5 class="mb-3">Personal Information</h5>
+      
+      <!-- Username (Read-only) -->
+      <div class="mb-3">
+        <label class="form-label">Username</label>
+        <div class="p-2 bg-dark text-light border rounded" style="background-color: rgba(108, 117, 125, 0.1) !important;">
+          <strong>{{ currentUser?.username }}</strong>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <label for="first_name" class="form-label">First Name</label>
+          <input type="text" class="form-control bg-dark text-light" id="first_name" formControlName="first_name" 
+                 [ngClass]="{'is-invalid': submitted && (f['first_name'].errors || hasServerError('first_name'))}">
+          <div *ngIf="submitted && (f['first_name'].errors || hasServerError('first_name'))" class="invalid-feedback d-block">
+            <span *ngIf="submitted && f['first_name'].errors?.['required']">Nome è obbligatorio</span>
+            <span *ngIf="hasServerError('first_name')">{{ getServerError('first_name') }}</span>
+          </div>
+        </div>
+        <div class="col-md-6 mb-3">
+          <label for="last_name" class="form-label">Last Name</label>
+          <input type="text" class="form-control bg-dark text-light" id="last_name" formControlName="last_name" 
+                 [ngClass]="{'is-invalid': submitted && (f['last_name'].errors || hasServerError('last_name'))}">
+          <div *ngIf="submitted && (f['last_name'].errors || hasServerError('last_name'))" class="invalid-feedback d-block">
+            <span *ngIf="submitted && f['last_name'].errors?.['required']">Cognome è obbligatorio</span>
+            <span *ngIf="hasServerError('last_name')">{{ getServerError('last_name') }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <label for="email" class="form-label">Email</label>
+        <input type="email" class="form-control bg-dark text-light" id="email" formControlName="email" 
+               [ngClass]="{'is-invalid': (submitted && f['email'].errors) || hasServerError('email')}">
+        <div *ngIf="(submitted && f['email'].errors) || hasServerError('email')" class="invalid-feedback d-block">
+          <span *ngIf="submitted && f['email'].errors?.['required']">Email è obbligatoria</span>
+          <span *ngIf="submitted && f['email'].errors?.['email']">Inserisci un indirizzo email valido</span>
+          <span *ngIf="hasServerError('email')">{{ getServerError('email') }}</span>
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <label for="gender" class="form-label">Gender</label>
+        <select class="form-select bg-dark text-light" id="gender" formControlName="gender" 
+                [ngClass]="{'is-invalid': submitted && (f['gender'].errors || hasServerError('gender'))}">
+          <option value="">Scegli...</option>
+          <option value="male">Maschio</option>
+          <option value="female">Femmina</option>
+        </select>
+        <div *ngIf="submitted && (f['gender'].errors || hasServerError('gender'))" class="invalid-feedback d-block">
+          <span *ngIf="submitted && f['gender'].errors?.['required']">Genere è obbligatorio</span>
+          <span *ngIf="hasServerError('gender')">{{ getServerError('gender') }}</span>
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <label for="birthday" class="form-label">Birthday</label>
+        <input type="date" class="form-control bg-dark text-light" id="birthday" formControlName="birthday" 
+               [ngClass]="{'is-invalid': submitted && (f['birthday'].errors || hasServerError('birthday'))}">
+        <div *ngIf="submitted && (f['birthday'].errors || hasServerError('birthday'))" class="invalid-feedback d-block">
+          <span *ngIf="submitted && f['birthday'].errors?.['required']">Data di nascita è obbligatoria</span>
+          <span *ngIf="hasServerError('birthday')">{{ getServerError('birthday') }}</span>
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <label for="country_id" class="form-label">Country</label>
+        <select class="form-select bg-dark text-light" id="country_id" formControlName="country_id" 
+                [ngClass]="{'is-invalid': submitted && (f['country_id'].errors || hasServerError('country_id'))}">
+          <option value="">
+            <span *ngIf="loadingCountries">Caricamento paesi...</span>
+            <span *ngIf="!loadingCountries">Scegli il tuo paese...</span>
+          </option>
+          <option *ngFor="let country of countries" [value]="country.country_id">
+            {{ country.name }}
+          </option>
+        </select>
+        <div *ngIf="submitted && (f['country_id'].errors || hasServerError('country_id'))" class="invalid-feedback d-block">
+          <span *ngIf="submitted && f['country_id'].errors?.['required']">Paese è obbligatorio</span>
+          <span *ngIf="hasServerError('country_id')">{{ getServerError('country_id') }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Password Section (Optional) -->
+    <div class="mb-4">
+      <h5 class="mb-3">Change Password (Optional)</h5>
+      <div class="mb-3">
+        <label for="password" class="form-label">New Password</label>
+        <input type="password" class="form-control bg-dark text-light" id="password" formControlName="password" 
+               [ngClass]="{'is-invalid': submitted && (f['password'].errors || hasServerError('password'))}">
+        <div *ngIf="submitted && (f['password'].errors || hasServerError('password'))" class="invalid-feedback d-block">
+          <span *ngIf="submitted && f['password'].errors?.['required']">Password è obbligatoria</span>
+          <span *ngIf="submitted && f['password'].errors?.['minlength']">La password deve essere di almeno 8 caratteri</span>
+          <span *ngIf="hasServerError('password')">{{ getServerError('password') }}</span>
+        </div>
+      </div>
+      
+      <div class="mb-3">
+        <label for="password_confirmation" class="form-label">Confirm New Password</label>
+        <input type="password" class="form-control bg-dark text-light" id="password_confirmation" formControlName="password_confirmation" 
+               [ngClass]="{'is-invalid': submitted && (f['password_confirmation'].errors || hasServerError('password_confirmation'))}">
+        <div *ngIf="submitted && (f['password_confirmation'].errors || hasServerError('password_confirmation'))" class="invalid-feedback d-block">
+          <span *ngIf="submitted && f['password_confirmation'].errors?.['required']">Conferma password è obbligatoria</span>
+          <span *ngIf="hasServerError('password_confirmation')">{{ getServerError('password_confirmation') }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="d-flex justify-content-end mt-4">
+      <button type="submit" class="btn btn-primary" [disabled]="loading">
+        {{ loading ? 'Updating...' : 'Update' }}
+      </button>
+    </div>
+  </form>
+</div>

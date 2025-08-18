@@ -43,12 +43,26 @@ export interface UpdateCountryRequest {
 })
 export class CountryService {
   private apiUrl = `${environment.apiUrl}/api/v1/countries`;
+  private publicApiUrl = `${environment.apiUrl}/api/countries`;
   
   // BehaviorSubject for reactive state management
   private countriesSubject = new BehaviorSubject<Country[]>([]);
   public countries$ = this.countriesSubject.asObservable();
 
   constructor(private http: HttpClient) {}
+
+  /**
+   * Get all countries for public use (registration) - no authentication required
+   */
+  getPublicCountries(): Observable<Country[]> {
+    // Request all countries using per_page=all as supported by backend
+    const params = new HttpParams()
+      .set('per_page', 'all');
+    
+    return this.http.get<CountryResponse>(this.publicApiUrl, { params }).pipe(
+      map(response => response.data)
+    );
+  }
 
   /**
    * Get all countries with pagination and filters

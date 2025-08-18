@@ -47,6 +47,8 @@ export interface CreateUserRequest {
 export interface UpdateUserRequest {
   username?: string;
   email?: string;
+  password?: string;
+  password_confirmation?: string;
   first_name?: string;
   last_name?: string;
   gender?: 'male' | 'female';
@@ -54,6 +56,18 @@ export interface UpdateUserRequest {
   country_id?: number;
   role_id?: number;
   user_status?: 'active' | 'inactive';
+}
+
+export interface UpdateProfileRequest {
+  username?: string;
+  email?: string;
+  password?: string;
+  password_confirmation?: string;
+  first_name?: string;
+  last_name?: string;
+  gender?: 'male' | 'female';
+  birthday?: string;
+  country_id?: number;
 }
 
 @Injectable({
@@ -127,6 +141,13 @@ export class UserService {
    */
   updateUsersSubject(users: User[]): void {
     this.usersSubject.next(users);
+  }
+
+  /**
+   * Update user profile (for current user)
+   */
+  updateProfile(profileData: UpdateProfileRequest): Observable<{ message: string; data: User }> {
+    return this.http.put<{ message: string; data: User }>(`${environment.apiUrl}/api/v1/update-profile`, profileData);
   }
 
   /**

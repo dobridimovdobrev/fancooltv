@@ -29,7 +29,7 @@ export class MovieDetailsComponent implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private router: Router,
     private movieService: MovieService,
-    private authService: AuthService,
+    public authService: AuthService,
     private sanitizer: DomSanitizer,
     private modalService: BsModalService,
     private apiService: ApiService

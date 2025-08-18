@@ -1,76 +1,46 @@
-<div class="user-profile-container">
-  <div class="profile-header">
-    <div class="profile-avatar">
-      <img [src]="user.avatar" alt="Avatar utente">
-    </div>
-    <div class="profile-info">
-      <h2>{{ user.nome }} {{ user.cognome }}</h2>
-      <p class="username">@{{ user.username }}</p>
-      <p class="member-since">Membro dal {{ user.iscrittoDal }}</p>
-    </div>
-  </div>
+<!-- Navigation -->
+<app-navbar></app-navbar>
 
-  <div class="profile-stats">
-    <div class="stat-item">
-      <span class="stat-value">{{ user.preferiti }}</span>
-      <span class="stat-label">Preferiti</span>
-    </div>
-    <div class="stat-item">
-      <span class="stat-value">{{ user.recensioni }}</span>
-      <span class="stat-label">Recensioni</span>
-    </div>
-    <div class="stat-item">
-      <span class="stat-value">{{ user.ultimoAccesso }}</span>
-      <span class="stat-label">Ultimo accesso</span>
-    </div>
-  </div>
+<!-- User Profile Container -->
+<div class="user-profile-container min-vh-100 d-flex align-items-center">
+  <div class="container py-5">
+    <div class="row justify-content-center">
+      <div class="col-12 col-sm-8 col-md-6 col-lg-5">
+        <div class="bg-custom border border-light border-opacity-10 p-4 fade-in">
+          <div class="card-body text-center">
+            <h2 class="text-center mb-4">User Profile</h2>
+            
+            <!-- Profile Info -->
+            <div class="profile-info mb-4" *ngIf="currentUser">
+              <div class="profile-avatar mb-3">
+                <i class="fas fa-user-circle fa-5x text-primary"></i>
+              </div>
+              <h3 class="text-light">{{ currentUser.first_name }} {{ currentUser.last_name }}</h3>
+              <p class="text-muted">@{{ currentUser.username }}</p>
+              <p class="text-muted">{{ currentUser.email }}</p>
+              <p class="text-muted">Member since {{ currentUser.created_at | date:'shortDate' }}</p>
+            </div>
 
-  <div class="profile-form">
-    <h3>Informazioni Personali</h3>
-    <form (ngSubmit)="updateProfile()">
-      <div class="form-group">
-        <label for="nome">Nome</label>
-        <input type="text" id="nome" name="nome" [(ngModel)]="user.nome" class="form-control">
+            <!-- Edit Profile Button -->
+            <div class="d-grid">
+              <button type="button" class="btn btn-primary btn-lg" (click)="openEditModal()">
+                <i class="fas fa-edit me-2"></i>Edit Profile
+              </button>
+            </div>
+
+            <!-- Loading State -->
+            <div *ngIf="!currentUser" class="text-center">
+              <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+              </div>
+              <p class="text-muted mt-2">Loading profile...</p>
+            </div>
+          </div>
+        </div>
       </div>
-      
-      <div class="form-group">
-        <label for="cognome">Cognome</label>
-        <input type="text" id="cognome" name="cognome" [(ngModel)]="user.cognome" class="form-control">
-      </div>
-      
-      <div class="form-group">
-        <label for="email">Email</label>
-        <input type="email" id="email" name="email" [(ngModel)]="user.email" class="form-control">
-      </div>
-      
-      <div class="form-group">
-        <label for="username">Username</label>
-        <input type="text" id="username" name="username" [(ngModel)]="user.username" class="form-control">
-      </div>
-      
-      <button type="submit" class="btn btn-primary">Salva Modifiche</button>
-    </form>
-  </div>
-  
-  <div class="password-section">
-    <h3>Cambia Password</h3>
-    <form (ngSubmit)="changePassword()">
-      <div class="form-group">
-        <label for="currentPassword">Password Attuale</label>
-        <input type="password" id="currentPassword" name="currentPassword" class="form-control">
-      </div>
-      
-      <div class="form-group">
-        <label for="newPassword">Nuova Password</label>
-        <input type="password" id="newPassword" name="newPassword" class="form-control">
-      </div>
-      
-      <div class="form-group">
-        <label for="confirmPassword">Conferma Password</label>
-        <input type="password" id="confirmPassword" name="confirmPassword" class="form-control">
-      </div>
-      
-      <button type="submit" class="btn btn-primary">Cambia Password</button>
-    </form>
+    </div>
   </div>
 </div>
+
+<!-- Footer -->
+<app-footer></app-footer>

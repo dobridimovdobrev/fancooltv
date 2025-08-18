@@ -42,7 +42,7 @@
             </a>
             
             <!-- Regular user menu items -->
-            <a *ngIf="!authService.isAdmin()" class="dropdown-item" routerLink="/dashboard/user/profile">
+            <a *ngIf="!authService.isAdmin()" href="javascript:void(0)" (click)="openProfileModal()" class="dropdown-item">
               <i class="fa-solid fa-user"></i> Profile
             </a>
             <a *ngIf="!authService.isAdmin()" class="dropdown-item" routerLink="/dashboard/user/credits">
@@ -106,7 +106,7 @@
         
         <!-- Regular user menu items -->
         <li class="nav-item" *ngIf="!authService.isAdmin()">
-          <a routerLink="/dashboard/user/profile" class="nav-link" aria-label="View your profile" title="View your profile">
+          <a href="javascript:void(0)" (click)="openProfileModal()" class="nav-link" aria-label="View your profile" title="View your profile">
             <i class="fa-solid fa-user"></i> Profile
           </a>
         </li>

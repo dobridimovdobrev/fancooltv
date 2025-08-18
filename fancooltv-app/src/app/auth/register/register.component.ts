@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
+import { CountryService, Country } from '../../services/country.service';
 import { RegistrationData } from '../../models/auth.models';
 
 @Component({
@@ -15,6 +16,8 @@ export class RegisterComponent implements OnInit {
   submitted = false;
   error = '';
   passwordMismatch = false;
+  countries: Country[] = [];
+  loadingCountries = false;
   
   // Oggetto per memorizzare gli errori di validazione specifici per campo dal backend
   serverErrors: { [key: string]: string[] } = {};
@@ -22,6 +25,7 @@ export class RegisterComponent implements OnInit {
   constructor(
     private formBuilder: FormBuilder,
     private authService: AuthService,
+    private countryService: CountryService,
     private router: Router
   ) {}
 
@@ -33,9 +37,30 @@ export class RegisterComponent implements OnInit {
       email: ['', [Validators.required, Validators.email]],
       gender: ['', Validators.required],
       birthday: ['', Validators.required],
+      country_id: ['', Validators.required],
       password: ['', [Validators.required, Validators.minLength(8)]],
       password_confirmation: ['', Validators.required],
       termsAccepted: [false, Validators.requiredTrue]
+    });
+
+    // Load countries for registration
+    this.loadCountries();
+  }
+
+  // Load countries for the registration form
+  loadCountries(): void {
+    this.loadingCountries = true;
+    this.countryService.getPublicCountries().subscribe({
+      next: (countries) => {
+        this.countries = countries;
+        this.loadingCountries = false;
+      },
+      error: (error) => {
+        console.error('Error loading countries:', error);
+        this.loadingCountries = false;
+        // Set empty array if countries fail to load
+        this.countries = [];
+      }
     });
   }
 
@@ -101,6 +126,7 @@ export class RegisterComponent implements OnInit {
       email: this.f['email'].value,
       gender: this.f['gender'].value,
       birthday: birthday,
+      country_id: parseInt(this.f['country_id'].value, 10),
       password: this.f['password'].value,
       password_confirmation: this.f['password_confirmation'].value
     };

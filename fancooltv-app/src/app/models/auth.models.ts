@@ -44,6 +44,7 @@ export interface RegistrationData {
     last_name: string;
     gender: 'male' | 'female';
     birthday: string;
+    country_id: number;
 }
 
 export interface User {
@@ -54,6 +55,7 @@ export interface User {
     last_name: string;
     gender: string;
     birthday: string;
+    country_id?: number;
     role: 'user' | 'admin';
     created_at: string;
     updated_at: string;

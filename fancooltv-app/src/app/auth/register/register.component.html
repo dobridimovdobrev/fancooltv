@@ -65,6 +65,22 @@
                       <span *ngIf="submitted && f['birthday'].errors?.['required']">Data di nascita è obbligatoria</span>
                     </div>
                   </div>
+                  <div class="mb-3">
+                    <label for="country_id" class="form-label">Country</label>
+                    <select class="form-select bg-dark text-light" id="country_id" formControlName="country_id" [ngClass]="{'is-invalid': submitted && (f['country_id'].errors || hasServerError('country_id'))}">
+                      <option value="">
+                        <span *ngIf="loadingCountries">Caricamento paesi...</span>
+                        <span *ngIf="!loadingCountries">Scegli il tuo paese...</span>
+                      </option>
+                      <option *ngFor="let country of countries" [value]="country.country_id">
+                        {{ country.name }}
+                      </option>
+                    </select>
+                    <div *ngIf="submitted && (f['country_id'].errors || hasServerError('country_id'))" class="invalid-feedback d-block">
+                      <span *ngIf="submitted && f['country_id'].errors?.['required']">Paese è obbligatorio</span>
+                      <span *ngIf="hasServerError('country_id')">{{ getServerError('country_id') }}</span>
+                    </div>
+                  </div>
                 </div>
 
                 <!-- Account Security -->
