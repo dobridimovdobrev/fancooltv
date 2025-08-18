@@ -216,8 +216,12 @@ export class ApiService {
   /**
    * Create a new person
    */
-  public createPerson(personData: {name: string, photo: string}): Observable<ApiResponse<Person>> {
-    return this.http.post<ApiResponse<Person>>(`${this.baseUrl}/api/v1/persons`, personData, {
+  public createPerson(name: string, imageFileId?: number): Observable<any> {
+    const payload: any = { name };
+    if (imageFileId) {
+      payload.image_file_id = imageFileId;
+    }
+    return this.http.post<any>(`${this.baseUrl}/api/v1/persons`, payload, {
       headers: this.getHeaders()
     });
   }
@@ -225,8 +229,35 @@ export class ApiService {
   /**
    * Update an existing person
    */
-  public updatePerson(personId: number, personData: {name: string, photo: string}): Observable<ApiResponse<Person>> {
-    return this.http.put<ApiResponse<Person>>(`${this.baseUrl}/api/v1/persons/${personId}`, personData, {
+  public updatePerson(personId: number, updates: { name?: string, image_file_id?: number | null }): Observable<any> {
+    return this.http.put<any>(`${this.baseUrl}/api/v1/persons/${personId}`, updates, {
+      headers: this.getHeaders()
+    });
+  }
+
+  /**
+   * Associate image to person
+   */
+  public associateImageToPerson(personId: number, imageFileIds: number[]): Observable<any> {
+    return this.http.post<any>(`${this.baseUrl}/api/v1/persons/${personId}/images`, { image_file_ids: imageFileIds }, {
+      headers: this.getHeaders()
+    });
+  }
+
+  /**
+   * Remove image from person
+   */
+  public removeImageFromPerson(personId: number, imageId: number): Observable<any> {
+    return this.http.delete<any>(`${this.baseUrl}/api/v1/persons/${personId}/images/${imageId}`, {
+      headers: this.getHeaders()
+    });
+  }
+
+  /**
+   * Get person images
+   */
+  public getPersonImages(personId: number): Observable<any> {
+    return this.http.get<any>(`${this.baseUrl}/api/v1/persons/${personId}/images`, {
       headers: this.getHeaders()
     });
   }

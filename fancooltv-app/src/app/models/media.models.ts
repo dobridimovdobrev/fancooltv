@@ -38,6 +38,8 @@ export interface Person {
     person_id: number;
     name: string;
     profile_image: string;
+    profile_image_full?: string;
+    image_id?: number;
     character?: string;
 }
 

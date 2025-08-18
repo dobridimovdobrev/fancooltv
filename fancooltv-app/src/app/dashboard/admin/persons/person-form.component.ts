@@ -53,14 +53,20 @@ export class PersonFormComponent implements OnInit {
     console.log('Popolo il form con i dati della persona:', person);
     this.personForm.patchValue({
       name: person.name,
-      profile_image: person.profile_image
-      // Non è più necessario salvare base_path e size_path poiché l'API restituisce l'URL completo
+      profile_image: person.profile_image_full || person.profile_image
+      // Use profile_image_full if available, fallback to profile_image
     });
+    
+    // If person has an image, store the image ID for potential updates
+    if (person.image_id) {
+      this.uploadedImageId = person.image_id;
+      console.log('Person has existing image ID:', person.image_id);
+    }
   }
 
   /**
    * Handle photo upload
-   * Passo 1: Carica l'immagine e ottiene l'ID dell'immagine
+   * Step 1: Upload image and get image_id
    */
   onPhotoUpload(event: any): void {
     const file = event.target.files[0];
@@ -68,45 +74,40 @@ export class PersonFormComponent implements OnInit {
       this.uploadingPhoto = true;
       this.uploadedImageFile = file;
       
-      const personName = this.personForm.get('name')?.value || 'Nuova persona';
+      // Create FormData for upload
+      const formData = new FormData();
+      formData.append('image', file);
+      formData.append('type', 'persons');
       
-      this.apiService.uploadPersonImage(file, personName).subscribe({
+      this.apiService.uploadImage(formData).subscribe({
         next: (response: any) => {
-          console.log('Risposta API caricamento immagine:', response);
+          console.log('Image upload response:', response);
           
-          // Corretto accesso alla struttura della risposta API
-          if (response && response.status === 'success' && response.message && response.message.imageFile) {
-            // Salviamo l'ID dell'immagine caricata
-            this.uploadedImageId = response.message.imageFile.id;
+          if (response && response.status === 'success' && response.message && response.message.image) {
+            // Save the uploaded image ID
+            this.uploadedImageId = response.message.image.image_id;
             
-            // Aggiorniamo il form con tutti i campi dell'immagine
-            if (response.message.imageFile) {
-              const imageFile = response.message.imageFile;
-              
-              // Usiamo direttamente l'URL completo
-              this.personForm.patchValue({ 
-                profile_image: imageFile.url
-              });
-              
-              console.log('URL immagine salvato nel form:', imageFile.url);
-            }
+            // Update form with image URL
+            this.personForm.patchValue({ 
+              profile_image: response.message.full_url
+            });
             
-            this.uploadingPhoto = false;
-            console.log('Immagine caricata con successo, ID:', this.uploadedImageId);
+            console.log('✅ Image uploaded successfully, ID:', this.uploadedImageId);
+            console.log('✅ Image URL:', response.message.full_url);
           } else {
-            console.error('Risposta API non valida:', response);
-            this.uploadingPhoto = false;
-            alert('Risposta non valida dal server durante il caricamento della foto.');
+            console.error('❌ Invalid API response:', response);
+            alert('Invalid response from server during photo upload.');
           }
+          
+          this.uploadingPhoto = false;
         },
         error: (error: any) => {
-          console.error('Errore durante il caricamento della foto:', error);
+          console.error('Error uploading photo:', error);
           this.uploadingPhoto = false;
           
-          // Mostriamo un messaggio di errore più dettagliato
-          let errorMsg = 'Si è verificato un errore durante il caricamento della foto.';
+          let errorMsg = 'Error uploading photo.';
           if (error.error && error.error.message) {
-            errorMsg += ' Dettaglio: ' + error.error.message;
+            errorMsg += ' Details: ' + error.error.message;
           }
           alert(errorMsg);
         }
@@ -125,45 +126,44 @@ export class PersonFormComponent implements OnInit {
       return;
     }
 
+    // Prevent multiple submissions
+    if (this.loading) {
+      return;
+    }
+
     this.loading = true;
     const personName = this.personForm.get('name')?.value;
     
     // Se stiamo modificando una persona esistente
     if (this.person) {
-      // Emetti i dati del form per l'aggiornamento
-      const formData = this.personForm.value;
-      this.formSubmit.emit(formData);
+      // Prepare update data
+      const updates: any = {};
+      if (personName) updates.name = personName;
+      
+      // Handle image update - use new uploaded image or keep existing
+      if (this.uploadedImageId && this.uploadedImageId !== this.person.image_id) {
+        updates.image_file_id = this.uploadedImageId;
+        console.log('🔄 Updating person with new image ID:', this.uploadedImageId);
+      }
+      
+      this.formSubmit.emit({ updates, hasImageUpdate: !!updates.image_file_id });
+      this.loading = false; // Reset loading state after emitting
       return;
     }
     
-    // Se stiamo creando una nuova persona
-    // Passo 2: Creare la persona
-    this.apiService.createPerson(personName).pipe(
+    // Create person with image_file_id in single request
+    this.apiService.createPerson(personName, this.uploadedImageId || undefined).pipe(
       switchMap((personResponse: any) => {
-        console.log('Risposta API creazione persona:', personResponse);
+        console.log('Person creation API response:', personResponse);
         
-        // Corretto accesso alla struttura della risposta API
+        // Access correct response structure according to documentation
         if (personResponse && personResponse.status === 'success' && personResponse.message && personResponse.message.person) {
-          const personId = personResponse.message.person.id;
-          console.log('Persona creata con successo, ID:', personId);
-          
-          // Se abbiamo un'immagine caricata, procediamo con il passo 3
-          if (this.uploadedImageId) {
-            // Passo 3: Associare l'immagine alla persona
-            return this.apiService.associateImageToPerson(personId, this.uploadedImageId).pipe(
-              catchError(error => {
-                console.error('Errore durante l\'associazione dell\'immagine alla persona:', error);
-                // Anche se l'associazione fallisce, restituiamo comunque i dati della persona
-                return of({ success: true, personId: personId });
-              })
-            );
-          } else {
-            // Se non c'è un'immagine da associare, restituiamo i dati della persona
-            return of({ success: true, personId: personId });
-          }
+          const personId = personResponse.message.person.person_id;
+          console.log('✅ Person created successfully, ID:', personId);
+          return of({ success: true, personId: personId });
         } else {
-          console.error('Risposta API non valida:', personResponse);
-          return of({ success: false, error: 'Risposta API non valida' });
+          console.error('Invalid API response:', personResponse);
+          return of({ success: false, error: 'Invalid API response' });
         }
       }),
       catchError(error => {

@@ -15,6 +15,7 @@ export class PersonFormPageComponent implements OnInit {
   person: Person | null = null;
   loading = false;
   error: string | null = null;
+  success: string | null = null;
   isEditMode = false;
   personId: string | null = null;
 
@@ -55,35 +56,63 @@ export class PersonFormPageComponent implements OnInit {
 
   /**
    * Handle form submission
-   * Gestisce sia la creazione che l'aggiornamento di una persona
    */
   onFormSubmit(formData: any): void {
-    this.loading = true;
-    
-    if (this.isEditMode && this.personId) {
-      // Update existing person
-      // Nota: in questo caso il componente PersonFormComponent ha già gestito la logica
-      // di caricamento dell'immagine e compilazione del form
-      this.apiService.updatePerson(this.personId, {
-        name: formData.name,
-        profile_image: formData.profile_image
-      }).subscribe({
-        next: () => {
-          this.loading = false;
-          this.router.navigate(['/dashboard/admin/persons']);
-        },
-        error: (error: any) => {
-          console.error('Errore durante l\'aggiornamento della persona:', error);
-          alert('Si è verificato un errore durante l\'aggiornamento della persona.');
-          this.loading = false;
-        }
-      });
+    if (formData.updates) {
+      // Handle update with specific updates object
+      this.savePersonUpdate(formData.updates);
     } else {
-      // Per la creazione, il componente PersonFormComponent gestisce tutto il processo
-      // Qui dobbiamo solo gestire la navigazione dopo il completamento
-      this.loading = false;
-      this.router.navigate(['/dashboard/admin/persons']);
+      // Handle create with full person data
+      this.savePerson(formData);
     }
+  }
+
+  /**
+   * Save person data
+   */
+  savePerson(personData: any): void {
+    // Create new person - handled by person-form component
+    this.success = 'Person created successfully!';
+    this.loading = false;
+    
+    // Navigate back to persons list after a short delay
+    setTimeout(() => {
+      this.router.navigate(['/dashboard/admin/persons']);
+    }, 2000);
+  }
+
+  /**
+   * Save person update data
+   */
+  savePersonUpdate(updates: any): void {
+    if (!this.person) return;
+    
+    this.loading = true;
+    this.error = '';
+    this.success = '';
+
+    console.log('🔄 Updating person with data:', updates);
+    
+    this.apiService.updatePerson(this.person.person_id, updates).subscribe({
+      next: (response) => {
+        console.log('✅ Person updated successfully:', response);
+        
+        // Update local person data with response
+        if (response && response.status === 'success' && response.message && response.message.person) {
+          this.person = response.message.person;
+        }
+        
+        this.success = 'Person updated successfully!';
+        this.loading = false;
+        
+        // DON'T navigate - stay on same page with success message
+      },
+      error: (error) => {
+        console.error('❌ Error updating person:', error);
+        this.error = 'Failed to update person. Please try again.';
+        this.loading = false;
+      }
+    });
   }
 
   /**

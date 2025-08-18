@@ -29,20 +29,13 @@
         <div class="card-body bg-dark">
           <div class="photo-preview mb-3">
             <img *ngIf="personForm.get('profile_image')?.value" 
-                 [src]="apiService.getImageUrl(personForm.get('profile_image')?.value, 'person')" 
+                 [src]="apiService.getImageUrl(personForm.get('profile_image')?.value, 'cast')" 
                  class="img-fluid rounded photo-image" 
                  (error)="onImageError($event)"
                  alt="Person Photo">
             <div *ngIf="!personForm.get('profile_image')?.value" class="photo-placeholder">
               <i class="fa-solid fa-user fa-3x"></i>
               <p>No photo uploaded</p>
-            </div>
-          </div>
-          <div class="mb-3">
-            <label for="profile_image" class="form-label text-white">Photo URL</label>
-            <input type="text" class="form-control bg-dark text-white" id="profile_image" formControlName="profile_image">
-            <div *ngIf="personForm.get('profile_image')?.invalid && personForm.get('profile_image')?.touched" class="text-danger">
-              <small *ngIf="personForm.get('profile_image')?.errors?.['required']">Photo is required</small>
             </div>
           </div>
           <div class="mb-3">
@@ -65,7 +58,7 @@
     <button type="button" class="btn btn-secondary me-2" (click)="onCancel()">
       <i class="fas fa-times me-2"></i>Cancel
     </button>
-    <button type="submit" class="btn btn-primary" [disabled]="loading">
+    <button type="submit" class="btn btn-primary" [disabled]="loading || personForm.invalid">
       <i class="fas fa-save me-2" *ngIf="!loading"></i>
       <span *ngIf="loading" class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
       {{ person ? 'Update Person' : 'Create Person' }}

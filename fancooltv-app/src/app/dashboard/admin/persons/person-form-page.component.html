@@ -23,6 +23,11 @@
     <button *ngIf="!isEditMode" class="btn btn-sm btn-outline-danger ms-2" (click)="onCancel()">Back to List</button>
   </div>
 
+  <!-- Success message -->
+  <div *ngIf="success" class="alert alert-success">
+    <i class="fas fa-check-circle me-2"></i>{{ success }}
+  </div>
+
   <!-- Person form -->
   <div *ngIf="(!isEditMode || person) && !error">
     <app-person-form 
