@@ -1,19 +1,14 @@
-<div [ngClass]="getAlertClasses()" role="alert" *ngIf="message">
-  <div class="error-content">
-    <div class="error-header" *ngIf="showIcon || title">
-      <i *ngIf="showIcon" [ngClass]="getIconClass()" class="error-icon"></i>
-      <strong *ngIf="title || !showIcon" class="error-title">{{ getTitle() }}</strong>
-    </div>
-    
-    <div class="error-message">
-      {{ message }}
-    </div>
+<div [ngClass]="getAlertClasses()" role="alert" *ngIf="message" class="d-flex align-items-center justify-content-between">
+  <div class="d-flex align-items-center">
+    <i *ngIf="showIcon" [ngClass]="getIconClass()" class="me-2"></i>
+    <span>{{ message }}</span>
   </div>
   
   <button *ngIf="dismissible" 
           type="button" 
-          class="btn-close" 
+          class="btn btn-sm btn-outline-light ms-3" 
           [attr.aria-label]="'Close ' + getTitle()"
           (click)="onDismiss()">
+    ×
   </button>
 </div>

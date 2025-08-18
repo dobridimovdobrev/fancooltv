@@ -57,6 +57,7 @@ export interface User {
     birthday: string;
     country_id?: number;
     role: 'user' | 'admin';
+    user_status?: 'active' | 'inactive' | 'banned';
     created_at: string;
     updated_at: string;
 }

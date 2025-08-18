@@ -1,7 +1,10 @@
-import { Component, OnInit, OnDestroy, ViewChild, ElementRef, TemplateRef } from '@angular/core';
-import { BsModalService, BsModalRef } from 'ngx-bootstrap/modal';
-import { UserService, User } from '../../../services/user.service';
+import { Component, OnInit, OnDestroy, ViewChild, TemplateRef, ElementRef } from '@angular/core';
+import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
+import { BsModalService, BsModalRef } from 'ngx-bootstrap/modal';
+
+import { UserService } from '../../../services/user.service';
+import { CountryService } from '../../../services/country.service';
 
 @Component({
   selector: 'app-admin-users',
@@ -12,32 +15,34 @@ export class AdminUsersComponent implements OnInit, OnDestroy {
   @ViewChild('searchInput') searchInput!: ElementRef;
   @ViewChild('deleteModal') deleteModal!: TemplateRef<any>;
 
-  users: User[] = [];
+  users: any[] = [];
+  countries: any[] = [];
   loading = false;
   noResults = false;
-  currentPage = 1;
-  perPage = 10; // Load 10 users at a time
   totalItems = 0;
+  currentPage = 1;
+  perPage = 10;
   searchTerm = '';
-  
-  // Filter options
   statusFilter = '';
   roleFilter = '';
   genderFilter = '';
   
   // Modal properties
   modalRef?: BsModalRef;
-  userToDelete: User | null = null;
+  userToDelete: any = null;
   
   private subscriptions: Subscription = new Subscription();
 
   constructor(
     private userService: UserService,
-    private modalService: BsModalService
+    private router: Router,
+    private modalService: BsModalService,
+    private countryService: CountryService
   ) {}
 
   ngOnInit(): void {
     this.loadUsers();
+    this.loadCountries();
   }
 
   ngOnDestroy(): void {
@@ -58,8 +63,17 @@ export class AdminUsersComponent implements OnInit, OnDestroy {
     this.loading = true;
     this.noResults = false;
 
+    console.log('🌐 API Call with params:', {
+      page: this.currentPage,
+      perPage: this.perPage,
+      search: this.searchTerm,
+      status: this.statusFilter,
+      gender: this.genderFilter,
+      role: this.roleFilter
+    });
+
     this.subscriptions.add(
-      this.userService.getUsers(this.currentPage, this.perPage, this.searchTerm).subscribe({
+      this.userService.getUsers(this.currentPage, this.perPage, this.searchTerm, this.statusFilter, this.genderFilter, this.roleFilter).subscribe({
         next: (response) => {
           console.log('✅ Users API response:', response);
           
@@ -110,10 +124,26 @@ export class AdminUsersComponent implements OnInit, OnDestroy {
   }
 
   /**
+   * Handle search input change (for real-time updates)
+   */
+  onSearchInputChange(): void {
+    // Update searchTerm from input - no automatic search, only on Enter or Search button
+    // This is just to keep the model in sync for the clear button visibility
+  }
+
+  /**
    * Handle search button click
    */
   onSearchClick(): void {
     this.searchTerm = this.searchInput.nativeElement.value.trim();
+    this.currentPage = 1;
+    console.log('🔍 Search clicked with term:', this.searchTerm);
+    console.log('🔍 All filters:', {
+      search: this.searchTerm,
+      status: this.statusFilter,
+      gender: this.genderFilter,
+      role: this.roleFilter
+    });
     this.loadUsers(true);
   }
 
@@ -122,7 +152,9 @@ export class AdminUsersComponent implements OnInit, OnDestroy {
    */
   onStatusChange(event: any): void {
     this.statusFilter = event.target.value;
-    this.applyFilters();
+    this.currentPage = 1;
+    console.log('📊 Status filter changed to:', this.statusFilter);
+    this.loadUsers(true);
   }
 
   /**
@@ -130,7 +162,8 @@ export class AdminUsersComponent implements OnInit, OnDestroy {
    */
   onRoleChange(event: any): void {
     this.roleFilter = event.target.value;
-    this.applyFilters();
+    this.currentPage = 1;
+    this.loadUsers(true);
   }
 
   /**
@@ -138,7 +171,8 @@ export class AdminUsersComponent implements OnInit, OnDestroy {
    */
   onGenderChange(event: any): void {
     this.genderFilter = event.target.value;
-    this.applyFilters();
+    this.currentPage = 1;
+    this.loadUsers(true);
   }
 
   /**
@@ -148,14 +182,6 @@ export class AdminUsersComponent implements OnInit, OnDestroy {
     // For now, we'll implement client-side filtering
     // In a real app, you'd want to send these filters to the API
     this.loadUsers(true);
-  }
-
-  /**
-   * Handle search input change (for real-time updates)
-   */
-  onSearchInputChange(): void {
-    // Update searchTerm from input - no automatic search, only on Enter or Search button
-    // This is just to keep the model in sync for the clear button visibility
   }
 
   /**
@@ -204,7 +230,6 @@ export class AdminUsersComponent implements OnInit, OnDestroy {
     switch (roleId) {
       case 1: return 'Admin';
       case 2: return 'User';
-      case 3: return 'Moderator';
       default: return 'Unknown';
     }
   }
@@ -216,6 +241,7 @@ export class AdminUsersComponent implements OnInit, OnDestroy {
     switch (status) {
       case 'active': return 'bg-success';
       case 'inactive': return 'bg-secondary';
+      case 'banned': return 'bg-danger';
       default: return 'bg-secondary';
     }
   }
@@ -232,41 +258,23 @@ export class AdminUsersComponent implements OnInit, OnDestroy {
   /**
    * Get user full name
    */
-  getUserFullName(user: User): string {
+  getUserFullName(user: any): string {
     return `${user.first_name} ${user.last_name}`.trim();
   }
 
   /**
-   * Create new user (placeholder for future implementation)
+   * Navigate to create user page
    */
   createUser(): void {
-    // TODO: Implement user creation modal/form
-    alert('Create user functionality will be implemented soon');
+    this.router.navigate(['/dashboard/admin/users/create']);
   }
 
   /**
-   * Edit user (placeholder for future implementation)
+   * Edit user - navigate to edit page
    */
   editUser(userId: number): void {
-    // TODO: Implement user editing modal/form
-    alert(`Edit user ${userId} functionality will be implemented soon`);
-  }
-
-  /**
-   * Show delete confirmation modal
-   */
-  openDeleteModal(userId: number): void {
-    // Find the user to delete
-    this.userToDelete = this.users.find(u => u.user_id === userId) || null;
-    
-    if (this.userToDelete) {
-      // Open the delete confirmation modal
-      this.modalRef = this.modalService.show(this.deleteModal, {
-        class: 'modal-md',
-        backdrop: 'static',
-        keyboard: false
-      });
-    }
+    // Navigate to edit page instead of opening modal
+    this.router.navigate(['/dashboard/admin/users/edit', userId]);
   }
 
   /**
@@ -295,10 +303,38 @@ export class AdminUsersComponent implements OnInit, OnDestroy {
   }
 
   /**
+   * Open delete confirmation modal
+   */
+  openDeleteModal(userId: number): void {
+    const user = this.users.find(u => u.user_id === userId);
+    if (user) {
+      this.userToDelete = user;
+      this.modalRef = this.modalService.show(this.deleteModal);
+    }
+  }
+
+  /**
    * Cancel user deletion
    */
   cancelDelete(): void {
     this.modalRef?.hide();
     this.userToDelete = null;
   }
+
+  loadCountries(): void {
+    this.countryService.getPublicCountries().subscribe({
+      next: (countries) => {
+        this.countries = countries;
+      },
+      error: (error) => {
+        console.error('Error loading countries:', error);
+      }
+    });
+  }
+
+  getCountryName(countryId: number): string {
+    const country = this.countries.find((c: any) => c.country_id === countryId);
+    return country ? country.name : 'Unknown';
+  }
+
 }

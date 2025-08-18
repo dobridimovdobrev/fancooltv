@@ -27,8 +27,12 @@
                   <input type="checkbox" class="form-check-input" id="rememberMe" formControlName="rememberMe">
                   <label class="form-check-label" for="rememberMe">Remember me</label>
                 </div>
-                <div *ngIf="error" class="alert alert-danger">{{error}}</div>
-                <div *ngIf="success" class="alert alert-success">{{success}}</div>
+                <div *ngIf="error" class="alert alert-danger mb-3" role="alert">
+                  <small><i class="fas fa-exclamation-triangle me-1"></i>{{error}}</small>
+                </div>
+                <div *ngIf="success" class="alert alert-success mb-3" role="alert">
+                  <small><i class="fas fa-check-circle me-1"></i>{{success}}</small>
+                </div>
                 <button type="submit" class="btn btn-primary w-100">Login</button>
                 <p class="text-center mt-3">
                   Don't have an account? <a routerLink="/register" class="text-primary">Register here</a>

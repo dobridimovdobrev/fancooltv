@@ -13,7 +13,7 @@ export interface User {
   gender: 'male' | 'female';
   birthday: string;
   country_id?: number;
-  user_status: 'active' | 'inactive';
+  user_status: 'active' | 'inactive' | 'banned';
   role_id: number;
   ip_address?: string;
   last_activity?: string;
@@ -41,7 +41,8 @@ export interface CreateUserRequest {
   gender: 'male' | 'female';
   birthday: string;
   country_id?: number;
-  role_id?: number;
+  role?: string;
+  user_status?: 'active' | 'inactive' | 'banned';
 }
 
 export interface UpdateUserRequest {
@@ -55,7 +56,7 @@ export interface UpdateUserRequest {
   birthday?: string;
   country_id?: number;
   role_id?: number;
-  user_status?: 'active' | 'inactive';
+  user_status?: 'active' | 'inactive' | 'banned';
 }
 
 export interface UpdateProfileRequest {
@@ -83,13 +84,25 @@ export class UserService {
   /**
    * Get all users with pagination and filters
    */
-  getUsers(page: number = 1, perPage: number = 15, search?: string): Observable<UserResponse> {
+  getUsers(page: number = 1, perPage: number = 15, search?: string, status?: string, gender?: string, roleId?: string): Observable<UserResponse> {
     let params = new HttpParams()
       .set('page', page.toString())
       .set('per_page', perPage.toString());
 
     if (search && search.trim()) {
       params = params.set('search', search.trim());
+    }
+
+    if (status && status.trim()) {
+      params = params.set('status', status.trim());
+    }
+
+    if (gender && gender.trim()) {
+      params = params.set('gender', gender.trim());
+    }
+
+    if (roleId && roleId.trim()) {
+      params = params.set('role_id', roleId.trim());
     }
 
     return this.http.get<UserResponse>(this.apiUrl, { params }).pipe(

@@ -23,6 +23,21 @@ export class AuthGuard implements CanActivate {
   ): boolean {
     // Check if user is authenticated
     if (this.authService.isAuthenticated()) {
+      const currentUser = this.authService.currentUserValue;
+      
+      // Check user status - if inactive or banned, logout and redirect
+      if (currentUser?.user_status && currentUser.user_status !== 'active') {
+        console.log('User status is not active:', currentUser.user_status);
+        this.authService.logout();
+        this.router.navigate(['/login'], { 
+          queryParams: { 
+            returnUrl: state.url,
+            statusError: currentUser.user_status 
+          }
+        });
+        return false;
+      }
+      
       // Check if route requires admin role
       const requiresAdmin = route.data['requiresAdmin'] === true;
       

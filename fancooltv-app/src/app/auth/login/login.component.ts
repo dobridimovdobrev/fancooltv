@@ -33,6 +33,16 @@ export class LoginComponent implements OnInit {
     if (registered) {
       this.success = 'Registrazione completata con successo. Ora puoi accedere.';
     }
+
+    // Check if user was logged out due to status change
+    const statusError = this.route.snapshot.queryParams['statusError'];
+    if (statusError) {
+      if (statusError === 'banned') {
+        this.error = 'Il tuo account è stato bannato. Contatta l\'amministratore per maggiori informazioni.';
+      } else if (statusError === 'inactive') {
+        this.error = 'Il tuo account è stato temporaneamente disattivato. Contatta l\'amministratore per riattivarlo.';
+      }
+    }
   }
 
   ngOnInit(): void {
@@ -72,7 +82,21 @@ export class LoginComponent implements OnInit {
         this.router.navigate([this.returnUrl]);
       },
       error: error => {
-        this.error = error?.message || 'Username o password non validi';
+        // Handle specific account status errors
+        if (error?.status === 401) {
+          const message = error?.error?.message || error?.message || '';
+          if (message.toLowerCase().includes('banned')) {
+            this.error = 'Il tuo account è stato bannato. Contatta l\'amministratore per maggiori informazioni.';
+          } else if (message.toLowerCase().includes('inactive') || message.toLowerCase().includes('disabled')) {
+            this.error = 'Il tuo account è stato temporaneamente disattivato. Contatta l\'amministratore per riattivarlo.';
+          } else if (message.toLowerCase().includes('account')) {
+            this.error = message;
+          } else {
+            this.error = 'Username o password non validi';
+          }
+        } else {
+          this.error = error?.message || 'Errore durante il login. Riprova più tardi.';
+        }
         this.loading = false;
       }
     });

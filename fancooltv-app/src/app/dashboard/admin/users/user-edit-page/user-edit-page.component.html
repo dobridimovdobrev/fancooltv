@@ -1,0 +1,214 @@
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-12">
+      <!-- Header -->
+      <div class="d-flex align-items-center mb-4">
+        <h2 class="mb-0">Edit User</h2>
+      </div>
+
+      <!-- User Edit Form -->
+      <div class="card bg-custom">
+        <div class="card-header">
+          <h5 class="mb-0">User Information</h5>
+        </div>
+        <div class="card-body">
+          <form [formGroup]="userForm" (ngSubmit)="onSubmit()" *ngIf="userForm">
+            <div class="row">
+              <!-- Username (readonly) -->
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Username</label>
+                <input type="text" class="form-control" [value]="user?.username" readonly>
+              </div>
+
+              <!-- Email -->
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Email *</label>
+                <input type="email" class="form-control" formControlName="email"
+                       [class.is-invalid]="f['email'].invalid && (f['email'].dirty || f['email'].touched || submitted)">
+                <div class="invalid-feedback" *ngIf="f['email'].invalid && (f['email'].dirty || f['email'].touched || submitted)">
+                  <div *ngIf="f['email'].errors?.['required']">Email is required</div>
+                  <div *ngIf="f['email'].errors?.['email']">Please enter a valid email</div>
+                </div>
+                <!-- Server validation errors -->
+                <div class="text-danger" *ngIf="serverErrors['email']">
+                  <small *ngFor="let error of serverErrors['email']">{{ error }}</small>
+                </div>
+              </div>
+
+              <!-- First Name -->
+              <div class="col-md-6 mb-3">
+                <label class="form-label">First Name *</label>
+                <input type="text" class="form-control" formControlName="first_name"
+                       [class.is-invalid]="f['first_name'].invalid && (f['first_name'].dirty || f['first_name'].touched || submitted)">
+                <div class="invalid-feedback" *ngIf="f['first_name'].invalid && (f['first_name'].dirty || f['first_name'].touched || submitted)">
+                  <div *ngIf="f['first_name'].errors?.['required']">First name is required</div>
+                </div>
+                <!-- Server validation errors -->
+                <div class="text-danger" *ngIf="serverErrors['first_name']">
+                  <small *ngFor="let error of serverErrors['first_name']">{{ error }}</small>
+                </div>
+              </div>
+
+              <!-- Last Name -->
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Last Name *</label>
+                <input type="text" class="form-control" formControlName="last_name"
+                       [class.is-invalid]="f['last_name'].invalid && (f['last_name'].dirty || f['last_name'].touched || submitted)">
+                <div class="invalid-feedback" *ngIf="f['last_name'].invalid && (f['last_name'].dirty || f['last_name'].touched || submitted)">
+                  <div *ngIf="f['last_name'].errors?.['required']">Last name is required</div>
+                </div>
+                <!-- Server validation errors -->
+                <div class="text-danger" *ngIf="serverErrors['last_name']">
+                  <small *ngFor="let error of serverErrors['last_name']">{{ error }}</small>
+                </div>
+              </div>
+
+              <!-- Gender -->
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Gender *</label>
+                <select class="form-select" formControlName="gender"
+                        [class.is-invalid]="f['gender'].invalid && (f['gender'].dirty || f['gender'].touched || submitted)">
+                  <option value="">Select Gender</option>
+                  <option value="male">Male</option>
+                  <option value="female">Female</option>
+                  <option value="other">Other</option>
+                </select>
+                <div class="invalid-feedback" *ngIf="f['gender'].invalid && (f['gender'].dirty || f['gender'].touched || submitted)">
+                  <div *ngIf="f['gender'].errors?.['required']">Gender is required</div>
+                </div>
+                <!-- Server validation errors -->
+                <div class="text-danger" *ngIf="serverErrors['gender']">
+                  <small *ngFor="let error of serverErrors['gender']">{{ error }}</small>
+                </div>
+              </div>
+
+              <!-- Birthday -->
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Birthday *</label>
+                <input type="date" class="form-control" formControlName="birthday"
+                       [class.is-invalid]="f['birthday'].invalid && (f['birthday'].dirty || f['birthday'].touched || submitted)">
+                <div class="invalid-feedback" *ngIf="f['birthday'].invalid && (f['birthday'].dirty || f['birthday'].touched || submitted)">
+                  <div *ngIf="f['birthday'].errors?.['required']">Birthday is required</div>
+                </div>
+                <!-- Server validation errors -->
+                <div class="text-danger" *ngIf="serverErrors['birthday']">
+                  <small *ngFor="let error of serverErrors['birthday']">{{ error }}</small>
+                </div>
+              </div>
+
+              <!-- Country -->
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Country *</label>
+                <select class="form-select" formControlName="country_id"
+                        [class.is-invalid]="f['country_id'].invalid && (f['country_id'].dirty || f['country_id'].touched || submitted)">
+                  <option value="">
+                    <span *ngIf="loadingCountries">Loading countries...</span>
+                    <span *ngIf="!loadingCountries">Select Country</span>
+                  </option>
+                  <option *ngFor="let country of countries" [value]="country.country_id">{{ country.name }}</option>
+                </select>
+                <div class="invalid-feedback" *ngIf="f['country_id'].invalid && (f['country_id'].dirty || f['country_id'].touched || submitted)">
+                  <div *ngIf="f['country_id'].errors?.['required']">Country is required</div>
+                </div>
+                <!-- Server validation errors -->
+                <div class="text-danger" *ngIf="serverErrors['country_id']">
+                  <small *ngFor="let error of serverErrors['country_id']">{{ error }}</small>
+                </div>
+              </div>
+
+              <!-- User Status -->
+              <div class="col-md-6 mb-3">
+                <label class="form-label">User Status *</label>
+                <select class="form-select" formControlName="user_status">
+                  <option value="active">Active</option>
+                  <option value="inactive">Inactive</option>
+                  <option value="banned">Banned</option>
+                </select>
+                <!-- Server validation errors -->
+                <div class="text-danger" *ngIf="serverErrors['user_status']">
+                  <small *ngFor="let error of serverErrors['user_status']">{{ error }}</small>
+                </div>
+              </div>
+
+              <!-- Role -->
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Role *</label>
+                <select class="form-select" formControlName="role_id">
+                  <option value="2">User</option>
+                  <option value="1">Admin</option>
+                </select>
+                <!-- Server validation errors -->
+                <div class="text-danger" *ngIf="serverErrors['role_id']">
+                  <small *ngFor="let error of serverErrors['role_id']">{{ error }}</small>
+                </div>
+              </div>
+            </div>
+
+            <!-- Password Section -->
+            <div class="row mt-4">
+              <div class="col-12">
+                <h6 class="border-bottom pb-2 mb-3">Change Password (Optional)</h6>
+              </div>
+
+              <div class="col-md-6 mb-3">
+                <label class="form-label">New Password</label>
+                <input type="password" class="form-control" formControlName="password"
+                       [class.is-invalid]="f['password'].invalid && (f['password'].dirty || f['password'].touched || submitted)">
+                <div class="invalid-feedback" *ngIf="f['password'].invalid && (f['password'].dirty || f['password'].touched || submitted)">
+                  <div *ngIf="f['password'].errors?.['minlength']">Password must be at least 8 characters</div>
+                </div>
+                <!-- Server validation errors -->
+                <div class="text-danger" *ngIf="serverErrors['password']">
+                  <small *ngFor="let error of serverErrors['password']">{{ error }}</small>
+                </div>
+              </div>
+
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Confirm Password</label>
+                <input type="password" class="form-control" formControlName="password_confirmation"
+                       [class.is-invalid]="f['password_confirmation'].invalid && (f['password_confirmation'].dirty || f['password_confirmation'].touched || submitted)">
+                <div class="invalid-feedback" *ngIf="f['password_confirmation'].invalid && (f['password_confirmation'].dirty || f['password_confirmation'].touched || submitted)">
+                  <div *ngIf="f['password_confirmation'].errors?.['mismatch']">Passwords do not match</div>
+                </div>
+                <!-- Server validation errors -->
+                <div class="text-danger" *ngIf="serverErrors['password_confirmation']">
+                  <small *ngFor="let error of serverErrors['password_confirmation']">{{ error }}</small>
+                </div>
+              </div>
+            </div>
+
+            <!-- General server errors -->
+            <div class="alert alert-danger" *ngIf="serverErrors['general']">
+              <div *ngFor="let error of serverErrors['general']">{{ error }}</div>
+            </div>
+
+            <!-- Submit Button -->
+            <div class="row mt-4">
+              <div class="col-12">
+                <div class="d-flex justify-content-end">
+                  <button type="submit" class="btn btn-primary" [disabled]="loading">
+                    <span *ngIf="loading" class="spinner-border spinner-border-sm me-2"></span>
+                    Update User
+                  </button>
+                </div>
+              </div>
+            </div>
+          </form>
+
+          <!-- Loading state -->
+          <div *ngIf="!userForm && loading" class="text-center py-5">
+            <div class="spinner-border" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="mt-2">Loading user data...</p>
+          </div>
+
+          <!-- Error state -->
+          <div *ngIf="!userForm && !loading && error" class="alert alert-danger">
+            {{ error }}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

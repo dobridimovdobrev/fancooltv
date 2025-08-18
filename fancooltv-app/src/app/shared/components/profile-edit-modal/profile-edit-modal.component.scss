@@ -1,10 +1,9 @@
-// Center modal in viewport - remove scroll
+// Center modal in viewport with scroll
 :host ::ng-deep .modal {
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
   min-height: 100vh !important;
-  overflow: hidden !important;
 }
 
 :host ::ng-deep .modal-dialog {
@@ -13,8 +12,9 @@
   width: 90% !important;
   position: relative !important;
   transform: none !important;
-  max-height: 90vh !important;
-  overflow-y: auto !important;
+  max-height: 80vh !important;
+  display: flex !important;
+  flex-direction: column !important;
 }
 
 // Remove default modal-content background since we use bg-custom
@@ -22,6 +22,10 @@
   background: transparent !important;
   border: none !important;
   box-shadow: none !important;
+  flex: 1 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  max-height: 100% !important;
 }
 
 .modal-header {
@@ -32,6 +36,9 @@
 
 .modal-body {
   color: #fff;
+  flex: 1 !important;
+  overflow-y: auto !important;
+  padding: 1rem !important;
 }
 
 // Remove background from all form inputs
@@ -53,6 +60,7 @@
 .modal-footer {
   background: transparent;
   border-top: 1px solid rgba(255, 255, 255, 0.1);
+  flex-shrink: 0 !important;
 }
 
 .form-label {

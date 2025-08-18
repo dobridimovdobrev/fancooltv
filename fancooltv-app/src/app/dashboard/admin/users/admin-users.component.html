@@ -41,12 +41,12 @@
               <option value="">All Status</option>
               <option value="active">Active</option>
               <option value="inactive">Inactive</option>
+              <option value="banned">Banned</option>
             </select>
             <select class="form-select filter-select" (change)="onRoleChange($event)">
               <option value="">All Roles</option>
               <option value="1">Admin</option>
               <option value="2">User</option>
-              <option value="3">Moderator</option>
             </select>
             <select class="form-select filter-select" (change)="onGenderChange($event)">
               <option value="">All Genders</option>
@@ -73,20 +73,21 @@
               <th>Role</th>
               <th>Status</th>
               <th>Gender</th>
+              <th>Country</th>
               <th>Birthday</th>
               <th style="width: 150px">Actions</th>
             </tr>
           </thead>
           <tbody>
             <tr *ngIf="loading">
-              <td colspan="9" class="text-center py-4">
+              <td colspan="10" class="text-center py-4">
                 <div class="spinner-border text-primary" role="status">
                   <span class="visually-hidden">Loading...</span>
                 </div>
               </td>
             </tr>
             <tr *ngIf="noResults && !loading">
-              <td colspan="9" class="text-center py-4">
+              <td colspan="10" class="text-center py-4">
                 <p class="mb-0">No results found</p>
                 <p class="text-muted small">Try changing filters or search terms</p>
               </td>
@@ -102,7 +103,6 @@
               <td>
                 <div class="user-name">
                   <strong>{{ getUserFullName(user) }}</strong>
-                  <small class="text-muted d-block">ID: {{ user.user_id }}</small>
                 </div>
               </td>
               <td>
@@ -132,6 +132,12 @@
                     'fa-venus text-danger': user.gender === 'female'
                   }"></i>
                   {{ user.gender | titlecase }}
+                </span>
+              </td>
+              <td>
+                <span class="country">
+                  <i class="fas fa-flag me-1"></i>
+                  {{ getCountryName(user.country_id) }}
                 </span>
               </td>
               <td>

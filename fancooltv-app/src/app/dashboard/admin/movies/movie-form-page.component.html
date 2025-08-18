@@ -12,18 +12,18 @@
   </div>
 
   <!-- Alert for errors -->
-  <div *ngIf="error" class="alert alert-danger alert-dismissible fade show" role="alert">
+  <div *ngIf="error" class="alert alert-danger" role="alert">
     <div class="d-flex justify-content-between align-items-center">
-      <div>{{ error }}</div>
-      <button type="button" class="btn-close btn-close-sm" (click)="error = ''" aria-label="Close" style="font-size: 0.8rem;"></button>
+      <div><small><i class="fas fa-exclamation-triangle me-1"></i>{{ error }}</small></div>
+      <button type="button" class="btn btn-sm btn-outline-light" (click)="error = ''" aria-label="Close">×</button>
     </div>
   </div>
 
   <!-- Alert for success -->
-  <div *ngIf="success" class="alert alert-success alert-dismissible fade show" role="alert">
+  <div *ngIf="success" class="alert alert-success" role="alert">
     <div class="d-flex justify-content-between align-items-center">
-      <div><i class="fas fa-check-circle me-2"></i>{{ success }}</div>
-      <span class="text-muted" (click)="success = ''" style="cursor: pointer;  font-size: 1.8rem;">&times;</span>
+      <div><small><i class="fas fa-check-circle me-1"></i>{{ success }}</small></div>
+      <button type="button" class="btn btn-sm btn-outline-light" (click)="success = ''" aria-label="Close">×</button>
     </div>
   </div>
 

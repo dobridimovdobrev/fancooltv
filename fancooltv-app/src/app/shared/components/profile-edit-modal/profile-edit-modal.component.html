@@ -1,6 +1,6 @@
 <div class="modal-content bg-custom">
   <div class="modal-header border-0">
-    <h4 class="modal-title">Edit Profile</h4>
+    <h4 class="modal-title">{{ isAdminEdit ? 'Edit User' : 'Edit Profile' }}</h4>
     <button type="button" class="btn-close" aria-label="Close" (click)="cancel()"></button>
   </div>
 
@@ -97,7 +97,20 @@
       </div>
     </div>
 
-    <!-- Password Section (Optional) -->
+    <!-- Admin Only: User Status -->
+    <div *ngIf="isAdminEdit" class="mb-4">
+      <h5 class="mb-3">User Status</h5>
+      <div class="mb-3">
+        <label for="user_status" class="form-label">Status</label>
+        <select class="form-select bg-dark text-light" id="user_status" formControlName="user_status">
+          <option value="active">Active</option>
+          <option value="inactive">Inactive</option>
+          <option value="banned">Banned</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Account Settings -->
     <div class="mb-4">
       <h5 class="mb-3">Change Password (Optional)</h5>
       <div class="mb-3">

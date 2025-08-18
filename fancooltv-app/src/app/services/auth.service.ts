@@ -51,6 +51,11 @@ export class AuthService {
     localStorage.setItem('current_user', JSON.stringify(user));
   }
 
+  // Refresh user data from server (useful after admin changes)
+  public refreshUserData(): Observable<User> {
+    return this.getUserProfile();
+  }
+
   // Get stored auth token
   public getToken(): string | null {
     return localStorage.getItem('auth_token');
