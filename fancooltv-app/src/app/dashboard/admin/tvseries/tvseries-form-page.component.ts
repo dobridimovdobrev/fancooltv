@@ -148,4 +148,13 @@ export class TVSeriesFormPageComponent implements OnInit {
   cancelDelete(): void {
     this.modalRef?.hide();
   }
+
+  /**
+   * Navigate to TV series details view
+   */
+  viewTVSeries(): void {
+    if (this.tvSeries) {
+      this.router.navigate(['/tvseries-details', this.tvSeries.tv_series_id]);
+    }
+  }
 }

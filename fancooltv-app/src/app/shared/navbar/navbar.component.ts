@@ -11,6 +11,7 @@ import { User } from '../../models/auth.models';
   styleUrls: ['./navbar.component.scss']
 })
 export class NavbarComponent implements OnInit {
+  isMobileMenuOpen = false;
 
   constructor(
     public authService: AuthService,
@@ -39,6 +40,20 @@ export class NavbarComponent implements OnInit {
         this.authService.updateCurrentUser(updatedUser);
       });
     }
+  }
+
+  /**
+   * Toggle mobile menu visibility
+   */
+  toggleMobileMenu(): void {
+    this.isMobileMenuOpen = !this.isMobileMenuOpen;
+  }
+
+  /**
+   * Close mobile menu
+   */
+  closeMobileMenu(): void {
+    this.isMobileMenuOpen = false;
   }
 
   /**

@@ -13,6 +13,7 @@ import { ProfileEditModalComponent } from './components/profile-edit-modal/profi
 import { AccordionModule } from 'ngx-bootstrap/accordion';
 import { BsDropdownModule } from 'ngx-bootstrap/dropdown';
 import { ModalModule } from 'ngx-bootstrap/modal';
+import { CollapseModule } from 'ngx-bootstrap/collapse';
 
 @NgModule({
   declarations: [
@@ -32,7 +33,8 @@ import { ModalModule } from 'ngx-bootstrap/modal';
     ReactiveFormsModule,
     AccordionModule.forRoot(),
     BsDropdownModule.forRoot(),
-    ModalModule.forRoot()
+    ModalModule.forRoot(),
+    CollapseModule.forRoot()
   ],
   exports: [
     NavbarComponent,
@@ -44,6 +46,7 @@ import { ModalModule } from 'ngx-bootstrap/modal';
     MediaListComponent,
     AccordionModule,
     BsDropdownModule,
+    CollapseModule,
     CommonModule,
     FormsModule,
     ReactiveFormsModule

@@ -1,271 +1,350 @@
-<div class="tvseries-form-container">
-  <form [formGroup]="tvSeriesForm" (ngSubmit)="onSubmit()" novalidate>
-    
+<form [formGroup]="tvSeriesForm" (ngSubmit)="onSubmit()" novalidate class="tvseries-form">
+  <div class="row">
     <!-- Basic Information Section -->
-    <div class="form-section">
-      <h4 class="section-title">Basic Information</h4>
-      
-      <div class="row">
-        <div class="col-md-8">
-          <div class="form-group mb-3">
-            <label for="title" class="form-label required">Title</label>
-            <input 
-              type="text" 
-              id="title" 
-              class="form-control"
-              [class.is-invalid]="hasError('title')"
-              formControlName="title"
-              placeholder="Enter TV series title">
-            <div class="invalid-feedback" *ngIf="hasError('title')">
-              {{ getErrorMessage('title') }}
+    <div class="col-md-8">
+      <div class="card mb-4">
+        <div class="card-header">
+          <h5 class="mb-0">Basic Information</h5>
+        </div>
+        <div class="card-body">
+          <!-- Title -->
+          <div class="mb-3">
+            <label for="title" class="form-label">Title</label>
+            <input type="text" class="form-control" id="title" formControlName="title">
+            <div *ngIf="tvSeriesForm.get('title')?.invalid && tvSeriesForm.get('title')?.touched" class="text-danger">
+              <small *ngIf="tvSeriesForm.get('title')?.errors?.['required']">Title is required</small>
+              <small *ngIf="tvSeriesForm.get('title')?.errors?.['maxlength']">Title cannot exceed 128 characters</small>
             </div>
           </div>
-        </div>
-        
-        <div class="col-md-4">
-          <div class="form-group mb-3">
-            <label for="year" class="form-label required">Year</label>
-            <input 
-              type="number" 
-              id="year" 
-              class="form-control"
-              [class.is-invalid]="hasError('year')"
-              formControlName="year"
-              placeholder="2024">
-            <div class="invalid-feedback" *ngIf="hasError('year')">
-              {{ getErrorMessage('year') }}
+
+          <!-- Description -->
+          <div class="mb-3">
+            <label for="description" class="form-label">Description</label>
+            <textarea class="form-control" id="description" rows="5" formControlName="description"></textarea>
+            <div *ngIf="tvSeriesForm.get('description')?.invalid && tvSeriesForm.get('description')?.touched" class="text-danger">
+              <small *ngIf="tvSeriesForm.get('description')?.errors?.['required']">Description is required</small>
             </div>
           </div>
         </div>
       </div>
 
-      <div class="row">
-        <div class="col-md-4">
-          <div class="form-group mb-3">
-            <label for="imdb_rating" class="form-label">IMDB Rating</label>
-            <input 
-              type="number" 
-              id="imdb_rating" 
-              class="form-control"
-              [class.is-invalid]="hasError('imdb_rating')"
-              formControlName="imdb_rating"
-              step="0.1"
-              min="0"
-              max="10"
-              placeholder="8.5">
-            <div class="invalid-feedback" *ngIf="hasError('imdb_rating')">
-              {{ getErrorMessage('imdb_rating') }}
+      <!-- TV Series Details Section -->
+      <div class="card mb-4">
+        <div class="card-header">
+          <h5 class="mb-0">TV Series Details</h5>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <!-- Year -->
+            <div class="col-md-4 mb-3">
+              <label for="year" class="form-label">Year</label>
+              <input type="number" class="form-control" id="year" formControlName="year">
+              <div *ngIf="tvSeriesForm.get('year')?.invalid && tvSeriesForm.get('year')?.touched" class="text-danger">
+                <small *ngIf="tvSeriesForm.get('year')?.errors?.['required']">Year is required</small>
+                <small *ngIf="tvSeriesForm.get('year')?.errors?.['min']">Year must be at least 1900</small>
+                <small *ngIf="tvSeriesForm.get('year')?.errors?.['max']">Year cannot exceed 2100</small>
+              </div>
+            </div>
+
+            <!-- Total Seasons -->
+            <div class="col-md-4 mb-3">
+              <label for="total_seasons" class="form-label">Total Seasons</label>
+              <input type="number" class="form-control" id="total_seasons" formControlName="total_seasons">
+              <div *ngIf="tvSeriesForm.get('total_seasons')?.invalid && tvSeriesForm.get('total_seasons')?.touched" class="text-danger">
+                <small *ngIf="tvSeriesForm.get('total_seasons')?.errors?.['min']">Total seasons must be positive</small>
+              </div>
+            </div>
+
+            <!-- Total Episodes -->
+            <div class="col-md-4 mb-3">
+              <label for="total_episodes" class="form-label">Total Episodes</label>
+              <input type="number" class="form-control" id="total_episodes" formControlName="total_episodes">
+              <div *ngIf="tvSeriesForm.get('total_episodes')?.invalid && tvSeriesForm.get('total_episodes')?.touched" class="text-danger">
+                <small *ngIf="tvSeriesForm.get('total_episodes')?.errors?.['min']">Total episodes must be positive</small>
+              </div>
             </div>
           </div>
-        </div>
-        
-        <div class="col-md-4">
-          <div class="form-group mb-3">
-            <label for="total_seasons" class="form-label required">Total Seasons</label>
-            <input 
-              type="number" 
-              id="total_seasons" 
-              class="form-control"
-              [class.is-invalid]="hasError('total_seasons')"
-              formControlName="total_seasons"
-              min="1"
-              placeholder="5">
-            <div class="invalid-feedback" *ngIf="hasError('total_seasons')">
-              {{ getErrorMessage('total_seasons') }}
+
+          <div class="row">
+            <!-- IMDb Rating -->
+            <div class="col-md-6 mb-3">
+              <label for="imdb_rating" class="form-label">IMDb Rating</label>
+              <input type="number" step="0.1" class="form-control" id="imdb_rating" formControlName="imdb_rating">
+              <div *ngIf="tvSeriesForm.get('imdb_rating')?.invalid && tvSeriesForm.get('imdb_rating')?.touched" class="text-danger">
+                <small *ngIf="tvSeriesForm.get('imdb_rating')?.errors?.['min'] || tvSeriesForm.get('imdb_rating')?.errors?.['max']">Rating must be between 0 and 10</small>
+              </div>
+            </div>
+
+            <!-- Status -->
+            <div class="col-md-6 mb-3">
+              <label for="status" class="form-label">Status</label>
+              <select class="form-select" id="status" formControlName="status">
+                <option *ngFor="let option of statusOptions" [value]="option.value">{{ option.label }}</option>
+              </select>
+              <div *ngIf="tvSeriesForm.get('status')?.invalid && tvSeriesForm.get('status')?.touched" class="text-danger">
+                <small *ngIf="tvSeriesForm.get('status')?.errors?.['required']">Status is required</small>
+              </div>
             </div>
           </div>
-        </div>
-        
-        <div class="col-md-4">
-          <div class="form-group mb-3">
-            <label for="category_id" class="form-label required">Category</label>
-            <select 
-              id="category_id" 
-              class="form-select"
-              [class.is-invalid]="hasError('category_id')"
-              formControlName="category_id">
-              <option value="">Select a category</option>
-              <option *ngFor="let category of categories" [value]="category.category_id">
-                {{ category.name }}
-              </option>
+
+          <!-- Category -->
+          <div class="mb-3">
+            <label for="category_id" class="form-label">Category</label>
+            <select class="form-select" id="category_id" formControlName="category_id">
+              <option [ngValue]="null">Select a category</option>
+              <option *ngFor="let category of categories" [ngValue]="category.category_id">{{ category.name }}</option>
             </select>
-            <div class="invalid-feedback" *ngIf="hasError('category_id')">
-              {{ getErrorMessage('category_id') }}
+            <div *ngIf="tvSeriesForm.get('category_id')?.invalid && tvSeriesForm.get('category_id')?.touched" class="text-danger">
+              <small *ngIf="tvSeriesForm.get('category_id')?.errors?.['required']">Category is required</small>
             </div>
           </div>
         </div>
       </div>
 
-      <div class="row">
-        <div class="col-md-6">
-          <div class="form-group mb-3">
-            <label for="status" class="form-label required">Status</label>
-            <select 
-              id="status" 
-              class="form-select"
-              [class.is-invalid]="hasError('status')"
-              formControlName="status">
-              <option value="active">Active</option>
-              <option value="inactive">Inactive</option>
-              <option value="draft">Draft</option>
-            </select>
-            <div class="invalid-feedback" *ngIf="hasError('status')">
-              {{ getErrorMessage('status') }}
+      <!-- Trailers Section -->
+      <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h5 class="mb-0">Trailers</h5>
+          <button type="button" class="btn btn-sm btn-primary" (click)="addTrailer()">
+            <i class="fa-solid fa-plus"></i> Add Trailer
+          </button>
+        </div>
+        <div class="card-body">
+          <div formArrayName="trailers">
+            <div *ngFor="let trailer of trailersArray.controls; let i = index" [formGroupName]="i" class="trailer-item mb-3 p-3 border border-secondary rounded">
+              <div class="d-flex justify-content-between mb-2">
+                <h6>Trailer #{{ i + 1 }}</h6>
+                <button type="button" class="btn btn-sm btn-danger" (click)="removeTrailer(i)">
+                  <i class="fa-solid fa-trash"></i>
+                </button>
+              </div>
+              <div class="row">
+                <div class="col-md-6 mb-2">
+                  <label class="form-label">Title</label>
+                  <input type="text" class="form-control" formControlName="title">
+                </div>
+                <div class="col-md-6 mb-2">
+                  <label class="form-label">URL</label>
+                  <input type="url" class="form-control" formControlName="url" placeholder="https://youtube.com/watch?v=...">
+                </div>
+              </div>
+            </div>
+            <div *ngIf="trailersArray.length === 0" class="text-center py-3">
+              <p style="color: #c3c3c3 !important;">No trailers added yet. Click "Add Trailer" to add one.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Cast Section -->
+      <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h5 class="mb-0">Cast</h5>
+          <button type="button" 
+                  class="btn btn-sm btn-primary" 
+                  (click)="addPerson()"
+                  [disabled]="!canAddPerson()"
+                  [title]="!canAddPerson() ? 'Maximum 5 cast members allowed' : ''">
+            <i class="fa-solid fa-plus"></i> Add Person
+          </button>
+        </div>
+        <div class="card-body">
+          <div formArrayName="persons">
+            <div *ngFor="let person of personsArray.controls; let i = index" [formGroupName]="i" class="person-item mb-3 p-3 border border-secondary rounded">
+              <div class="mb-2">
+                <h6>Cast Member #{{ i + 1 }}</h6>
+              </div>
+              <div class="row align-items-end">
+                <div class="col-11">
+                  <label class="form-label">Person</label>
+                  <input type="text" 
+                         class="form-control" 
+                         readonly
+                         placeholder="No person selected"
+                         [value]="getPersonName(personsArray.at(i).get('person_id')?.value)">
+                </div>
+                <div class="col-1 text-end">
+                  <button type="button" 
+                          class="btn btn-outline-danger btn-sm" 
+                          (click)="removePerson(i)"
+                          title="Remove person">
+                    <i class="fas fa-trash"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div *ngIf="personsArray.length === 0" class="text-center py-3">
+              <p style="color: #c3c3c3 !important;">No cast members added yet. Click "Add Person" to add one.</p>
             </div>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Description Section -->
-    <div class="form-section">
-      <h4 class="section-title">Description</h4>
-      
-      <div class="form-group mb-3">
-        <label for="description" class="form-label required">Plot Summary</label>
-        <textarea 
-          id="description" 
-          class="form-control"
-          [class.is-invalid]="hasError('description')"
-          formControlName="description"
-          rows="4"
-          placeholder="Enter TV series description..."></textarea>
-        <div class="invalid-feedback" *ngIf="hasError('description')">
-          {{ getErrorMessage('description') }}
+    <!-- Sidebar (Images) -->
+    <div class="col-md-4">
+      <!-- Poster Section -->
+      <div class="card mb-4">
+        <div class="card-header">
+          <h5 class="mb-0">Poster</h5>
         </div>
-      </div>
-    </div>
-
-    <!-- Images Section -->
-    <div class="form-section">
-      <h4 class="section-title">Images</h4>
-      
-      <div class="row">
-        <div class="col-md-6">
-          <div class="form-group mb-3">
-            <label for="poster" class="form-label">Poster URL</label>
-            <input 
-              type="url" 
-              id="poster" 
-              class="form-control"
-              [class.is-invalid]="hasError('poster')"
-              formControlName="poster"
-              placeholder="https://example.com/poster.jpg">
-            <div class="invalid-feedback" *ngIf="hasError('poster')">
-              {{ getErrorMessage('poster') }}
+        <div class="card-body">
+          <div class="poster-preview mb-3">
+            <img *ngIf="tvSeriesForm.get('poster')?.value" [src]="apiService.getImageUrl(tvSeriesForm.get('poster')?.value, 'poster')" class="img-fluid rounded poster-image" alt="TV Series Poster">
+            <div *ngIf="!tvSeriesForm.get('poster')?.value" class="poster-placeholder">
+              <i class="fa-solid fa-image fa-3x"></i>
+              <p>No poster uploaded</p>
             </div>
           </div>
-        </div>
-        
-        <div class="col-md-6">
-          <div class="form-group mb-3">
-            <label for="backdrop" class="form-label">Backdrop URL</label>
-            <input 
-              type="url" 
-              id="backdrop" 
-              class="form-control"
-              [class.is-invalid]="hasError('backdrop')"
-              formControlName="backdrop"
-              placeholder="https://example.com/backdrop.jpg">
-            <div class="invalid-feedback" *ngIf="hasError('backdrop')">
-              {{ getErrorMessage('backdrop') }}
+          <div class="col-12 mb-3">
+            <label for="posterUpload" class="form-label">Upload Poster</label>
+            <input type="file" class="form-control" id="posterUpload" (change)="onPosterUpload($event)" accept="image/*">
+            <div *ngIf="uploadingPoster" class="mt-2">
+              <div class="spinner-border spinner-border-sm text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+              </div>
+              <span class="ms-2">Uploading poster...</span>
+            </div>
+            <div *ngIf="!uploadingPoster && tvSeriesForm.get('poster')?.value" class="mt-2 w-100">
+              <div class="alert alert-success py-2 w-100">
+                <i class="fas fa-check-circle me-2"></i>
+                <strong>Poster uploaded successfully!</strong>
+              </div>
+            </div>
+            <div *ngIf="tvSeriesForm.get('poster')?.invalid && tvSeriesForm.get('poster')?.touched" class="text-danger mt-2">
+              <small *ngIf="tvSeriesForm.get('poster')?.errors?.['required']">Poster is required</small>
             </div>
           </div>
         </div>
       </div>
-    </div>
 
-    <!-- Cast Section -->
-    <div class="form-section">
-      <div class="d-flex justify-content-between align-items-center mb-3">
-        <h4 class="section-title mb-0">Cast</h4>
-        <button type="button" class="btn btn-outline-primary btn-sm" (click)="addPerson()">
-          <i class="fas fa-plus me-1"></i>Add Person
+      <!-- Backdrop Section -->
+      <div class="card mb-4">
+        <div class="card-header">
+          <h5 class="mb-0">Backdrop</h5>
+        </div>
+        <div class="card-body">
+          <div class="backdrop-preview mb-3">
+            <img *ngIf="tvSeriesForm.get('backdrop')?.value" [src]="apiService.getImageUrl(tvSeriesForm.get('backdrop')?.value, 'backdrop')" class="img-fluid rounded" alt="TV Series Backdrop">
+            <div *ngIf="!tvSeriesForm.get('backdrop')?.value" class="backdrop-placeholder">
+              <i class="fa-solid fa-image fa-3x"></i>
+              <p>No backdrop uploaded</p>
+            </div>
+          </div>
+          <div class="col-12 mb-3">
+            <label for="backdropUpload" class="form-label">Upload Backdrop</label>
+            <input type="file" class="form-control" id="backdropUpload" (change)="onBackdropUpload($event)" accept="image/*">
+            <div *ngIf="uploadingBackdrop" class="mt-2">
+              <div class="spinner-border spinner-border-sm text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+              </div>
+              <span class="ms-2">Uploading backdrop...</span>
+            </div>
+            <div *ngIf="!uploadingBackdrop && tvSeriesForm.get('backdrop')?.value" class="mt-2 w-100">
+              <div class="alert alert-success py-2 w-100">
+                <i class="fas fa-check-circle me-2"></i>
+                <strong>Backdrop uploaded successfully!</strong>
+              </div>
+            </div>
+            <div *ngIf="tvSeriesForm.get('backdrop')?.invalid && tvSeriesForm.get('backdrop')?.touched" class="text-danger mt-2">
+              <small *ngIf="tvSeriesForm.get('backdrop')?.errors?.['required']">Backdrop is required</small>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Form Actions -->
+  <div class="d-flex justify-content-end mt-4 mb-4">
+    <!-- Submit button -->
+    <button type="submit" class="btn btn-primary" [disabled]="loading || tvSeriesForm.invalid">
+      <span *ngIf="loading" class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+      <i class="fas fa-save me-1"></i> {{ tvSeries ? 'Update TV Series' : 'Create TV Series' }}
+    </button>
+  </div>
+</form>
+
+<!-- Modal per la selezione delle persone -->
+<ng-template #personModal>
+  <div class="modal-header">
+    <h4 class="modal-title">Search Person</h4>
+    <button type="button" class="btn-close" aria-label="Close" (click)="personModalRef?.hide()"></button>
+  </div>
+  <div class="modal-body">
+    <!-- Person search -->
+    <div class="mb-3">
+      <label class="form-label">Search Person</label>
+      <div class="input-group">
+        <input type="text" 
+               class="form-control" 
+               placeholder="Start typing to search..." 
+               #searchPersonInput 
+               (input)="searchPersonInModal(searchPersonInput.value)"
+               (keyup.enter)="searchPersonInModal(searchPersonInput.value)">
+        <button class="btn btn-outline-primary" 
+                type="button" 
+                (click)="searchPersonInModal(searchPersonInput.value)">
+          <i class="fa-solid fa-search"></i> Search
         </button>
       </div>
-      
-      <div formArrayName="persons">
-        <div *ngFor="let person of personsArray.controls; let i = index" 
-             [formGroupName]="i" 
-             class="person-item mb-3 p-3 border rounded">
-          <div class="row align-items-end">
-            <div class="col-md-6">
-              <label class="form-label">Person</label>
-              <select class="form-select" formControlName="person_id">
-                <option value="">Select a person</option>
-                <option *ngFor="let person of persons" [value]="person.person_id">
-                  {{ person.name }}
-                </option>
-              </select>
-            </div>
-            <div class="col-md-4">
-              <label class="form-label">Role/Character</label>
-              <input type="text" class="form-control" formControlName="role" placeholder="Character name">
-            </div>
-            <div class="col-md-2">
-              <button type="button" class="btn btn-outline-danger btn-sm w-100" (click)="removePerson(i)">
-                <i class="fas fa-trash"></i>
-              </button>
-            </div>
-          </div>
-        </div>
-        
-        <div *ngIf="personsArray.length === 0" class="text-muted text-center py-3">
-          No cast members added yet. Click "Add Person" to add cast members.
-        </div>
-      </div>
     </div>
 
-    <!-- Trailers Section -->
-    <div class="form-section">
-      <div class="d-flex justify-content-between align-items-center mb-3">
-        <h4 class="section-title mb-0">Trailers</h4>
-        <button type="button" class="btn btn-outline-primary btn-sm" (click)="addTrailer()">
-          <i class="fas fa-plus me-1"></i>Add Trailer
+    <!-- Search results -->
+    <div *ngIf="!isLoadingPersons && persons.length > 0" class="mb-3">
+      <h6>Search Results</h6>
+      <div class="list-group">
+        <button type="button" 
+                class="list-group-item list-group-item-action" 
+                *ngFor="let person of persons; trackBy: trackByPersonId" 
+                (click)="selectPersonFromModal(person.person_id.toString())">
+          {{ person.name }}
         </button>
       </div>
-      
-      <div formArrayName="trailers">
-        <div *ngFor="let trailer of trailersArray.controls; let i = index" 
-             [formGroupName]="i" 
-             class="trailer-item mb-3 p-3 border rounded">
-          <div class="row align-items-end">
-            <div class="col-md-8">
-              <label class="form-label">Trailer URL</label>
-              <input type="url" class="form-control" formControlName="url" placeholder="https://youtube.com/watch?v=...">
-            </div>
-            <div class="col-md-2">
-              <label class="form-label">Type</label>
-              <select class="form-select" formControlName="type">
-                <option value="youtube">YouTube</option>
-                <option value="vimeo">Vimeo</option>
-                <option value="other">Other</option>
-              </select>
-            </div>
-            <div class="col-md-2">
-              <button type="button" class="btn btn-outline-danger btn-sm w-100" (click)="removeTrailer(i)">
-                <i class="fas fa-trash"></i>
-              </button>
-            </div>
-          </div>
-        </div>
-        
-        <div *ngIf="trailersArray.length === 0" class="text-muted text-center py-3">
-          No trailers added yet. Click "Add Trailer" to add trailers.
-        </div>
-      </div>
     </div>
 
-    <!-- Form Actions -->
-    <div class="form-actions d-flex justify-content-end gap-2 mt-4">
-      <button type="button" class="btn btn-secondary" (click)="onCancel()">
-        <i class="fas fa-times me-2"></i>Cancel
-      </button>
-      <button type="submit" class="btn btn-primary" [disabled]="loading || tvSeriesForm.invalid">
-        <span *ngIf="loading" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-        <i *ngIf="!loading" class="fas fa-save me-2"></i>
-        {{ isEditMode ? 'Update TV Series' : 'Create TV Series' }}
-      </button>
+    <!-- Loading message -->
+    <div *ngIf="isLoadingPersons" class="text-center py-3">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+      <p class="mt-2">Loading people...</p>
     </div>
-  </form>
-</div>
+
+    <!-- No results message -->
+    <div *ngIf="!isLoadingPersons && persons.length === 0 && searchPersonInput?.value" class="alert alert-info">
+      No person found for "{{ searchPersonInput.value }}".
+    </div>
+
+    <!-- Initial message -->
+    <div *ngIf="!isLoadingPersons && persons.length === 0 && !searchPersonInput?.value" class="alert alert-secondary">
+      Start typing to search for persons.
+    </div>
+
+  </div>
+</ng-template>
+
+<!-- Delete Confirmation Modal -->
+<ng-template #deleteModal>
+  <div class="modal-header">
+    <h4 class="modal-title">Confirm Message</h4>
+    <button type="button" class="btn-close" aria-label="Close" (click)="cancelDelete()"></button>
+  </div>
+  <div class="modal-body">
+    <div class="text-center">
+      <h5>Are you sure?</h5>
+      <p class="mb-3">
+        Do you want to delete the TV series <strong>"{{ tvSeries?.title }}"</strong>?
+      </p>
+    </div>
+  </div>
+  <div class="modal-footer d-flex justify-content-between">
+    <button type="button" class="btn btn-danger flex-fill me-2" (click)="confirmDelete()" [disabled]="loading">
+      <span *ngIf="loading" class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+      <i *ngIf="!loading" class="fas fa-trash me-2"></i>Delete
+    </button>
+    <button type="button" class="btn btn-secondary flex-fill" (click)="cancelDelete()">
+      <i class="fas fa-times me-2"></i>Cancel
+    </button>
+  </div>
+</ng-template>

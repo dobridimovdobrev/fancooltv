@@ -1,8 +1,10 @@
-import { Component, OnInit, Input, Output, EventEmitter, OnDestroy } from '@angular/core';
+import { Component, OnInit, Input, Output, EventEmitter, OnDestroy, TemplateRef, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, FormArray } from '@angular/forms';
 import { TVSeries, Season, Episode } from '../../../models/tvseries.models';
 import { Category, Person } from '../../../models/media.models';
 import { ApiService } from '../../../services/api.service';
+import { BsModalRef, BsModalService } from 'ngx-bootstrap/modal';
+import { HttpEventType } from '@angular/common/http';
 import { Subscription } from 'rxjs';
 
 @Component({
@@ -19,14 +21,34 @@ export class TVSeriesFormComponent implements OnInit, OnDestroy {
   tvSeriesForm!: FormGroup;
   categories: Category[] = [];
   persons: Person[] = [];
+  personsForDisplay: Person[] = [];
   countries: any[] = [];
   loading = false;
   error = '';
+  
+  // Modal delete
+  @ViewChild('deleteModal') deleteModal!: TemplateRef<any>;
+  @ViewChild('personModal') personModal!: TemplateRef<any>;
+  modalRef?: BsModalRef;
+  personModalRef?: BsModalRef;
+  uploadingPoster = false;
+  uploadingBackdrop = false;
+  isLoadingPersons = false;
+  
+  // Status options for dropdown
+  statusOptions = [
+    { value: 'published', label: 'Published' },
+    { value: 'draft', label: 'Draft' },
+    { value: 'scheduled', label: 'Scheduled' },
+    { value: 'coming soon', label: 'Coming Soon' }
+  ];
+
   private subscriptions = new Subscription();
 
   constructor(
     private fb: FormBuilder,
-    private apiService: ApiService
+    public apiService: ApiService,
+    private modalService: BsModalService
   ) {}
 
   ngOnInit(): void {
@@ -54,8 +76,9 @@ export class TVSeriesFormComponent implements OnInit, OnDestroy {
       poster: [''],
       backdrop: [''],
       description: ['', [Validators.required, Validators.minLength(10)]],
-      total_seasons: ['', [Validators.required, Validators.min(1)]],
-      status: ['active', Validators.required],
+      total_seasons: ['', [Validators.min(1)]],
+      total_episodes: ['', [Validators.min(1)]],
+      status: ['published', Validators.required],
       persons: this.fb.array([]),
       trailers: this.fb.array([])
     });
@@ -122,6 +145,7 @@ export class TVSeriesFormComponent implements OnInit, OnDestroy {
       backdrop: this.tvSeries.backdrop,
       description: this.tvSeries.description,
       total_seasons: this.tvSeries.total_seasons,
+      total_episodes: this.tvSeries.total_episodes,
       status: this.tvSeries.status
     });
 
@@ -141,8 +165,8 @@ export class TVSeriesFormComponent implements OnInit, OnDestroy {
       const trailersArray = this.tvSeriesForm.get('trailers') as FormArray;
       this.tvSeries.trailers.forEach((trailer: any) => {
         trailersArray.push(this.fb.group({
-          url: [trailer.url],
-          type: [trailer.type || 'youtube']
+          title: [trailer.title || ''],
+          url: [trailer.url]
         }));
       });
     }
@@ -162,16 +186,6 @@ export class TVSeriesFormComponent implements OnInit, OnDestroy {
     return this.tvSeriesForm.get('trailers') as FormArray;
   }
 
-  /**
-   * Add person to the form
-   */
-  addPerson(): void {
-    const personGroup = this.fb.group({
-      person_id: ['', Validators.required],
-      role: ['']
-    });
-    this.personsArray.push(personGroup);
-  }
 
   /**
    * Remove person from the form
@@ -185,8 +199,8 @@ export class TVSeriesFormComponent implements OnInit, OnDestroy {
    */
   addTrailer(): void {
     const trailerGroup = this.fb.group({
-      url: ['', Validators.required],
-      type: ['youtube']
+      title: [''],
+      url: ['', Validators.required]
     });
     this.trailersArray.push(trailerGroup);
   }
@@ -286,5 +300,174 @@ export class TVSeriesFormComponent implements OnInit, OnDestroy {
     if (errors['max']) return `${fieldName} must be at most ${errors['max'].max}`;
     
     return 'Invalid value';
+  }
+
+  /**
+   * Check if can add more persons (max 5)
+   */
+  canAddPerson(): boolean {
+    return this.personsArray.length < 5;
+  }
+
+  /**
+   * Get person name by ID
+   */
+  getPersonName(personId: number): string {
+    if (!personId) return '';
+    const person = this.personsForDisplay.find(p => p.person_id === personId);
+    return person ? person.name : '';
+  }
+
+  /**
+   * Handle poster upload
+   */
+  onPosterUpload(event: any): void {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    this.uploadingPoster = true;
+    
+    this.apiService.uploadImage(file).subscribe({
+      next: (response: any) => {
+        if (response.type === HttpEventType.Response) {
+          this.tvSeriesForm.patchValue({ poster: response.body.data.url });
+          this.uploadingPoster = false;
+        }
+      },
+      error: (error: any) => {
+        console.error('Error uploading poster:', error);
+        this.uploadingPoster = false;
+      }
+    });
+  }
+
+  /**
+   * Handle backdrop upload
+   */
+  onBackdropUpload(event: any): void {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    this.uploadingBackdrop = true;
+    
+    this.apiService.uploadImage(file).subscribe({
+      next: (response: any) => {
+        if (response.type === HttpEventType.Response) {
+          this.tvSeriesForm.patchValue({ backdrop: response.body.data.url });
+          this.uploadingBackdrop = false;
+        }
+      },
+      error: (error: any) => {
+        console.error('Error uploading backdrop:', error);
+        this.uploadingBackdrop = false;
+      }
+    });
+  }
+
+  /**
+   * Search person in modal
+   */
+  searchPersonInModal(searchTerm: string): void {
+    if (!searchTerm || searchTerm.trim().length < 2) {
+      this.persons = [];
+      return;
+    }
+
+    this.isLoadingPersons = true;
+    
+    this.apiService.searchPersons(searchTerm).subscribe({
+      next: (response: any) => {
+        this.persons = response.data || [];
+        this.isLoadingPersons = false;
+      },
+      error: (error: any) => {
+        console.error('Error searching persons:', error);
+        this.persons = [];
+        this.isLoadingPersons = false;
+      }
+    });
+  }
+
+  /**
+   * Select person from modal
+   */
+  selectPersonFromModal(personId: string): void {
+    const person = this.persons.find(p => p.person_id.toString() === personId);
+    if (!person) return;
+
+    // Add to display array if not already there
+    if (!this.personsForDisplay.find(p => p.person_id === person.person_id)) {
+      this.personsForDisplay.push(person);
+    }
+
+    // Find the current person index being edited
+    const currentPersonIndex = this.personsArray.length - 1;
+    if (currentPersonIndex >= 0) {
+      this.personsArray.at(currentPersonIndex).patchValue({
+        person_id: person.person_id
+      });
+    }
+
+    this.personModalRef?.hide();
+  }
+
+  /**
+   * Track by person ID for ngFor
+   */
+  trackByPersonId(index: number, person: Person): number {
+    return person.person_id;
+  }
+
+  /**
+   * Open person modal when adding person
+   */
+  addPerson(): void {
+    if (!this.canAddPerson()) return;
+
+    // Add empty person to form array
+    const personGroup = this.fb.group({
+      person_id: ['', Validators.required],
+      role: ['']
+    });
+    this.personsArray.push(personGroup);
+
+    // Open modal
+    this.personModalRef = this.modalService.show(this.personModal, {
+      backdrop: 'static',
+      keyboard: false
+    });
+  }
+
+  /**
+   * Cancel delete operation
+   */
+  cancelDelete(): void {
+    this.modalRef?.hide();
+  }
+
+  /**
+   * Confirm delete operation
+   */
+  confirmDelete(): void {
+    if (this.tvSeries) {
+      // Emit delete event to parent
+      this.loading = true;
+      // The actual delete will be handled by parent component
+      // This is just for the modal functionality
+    }
+    this.modalRef?.hide();
+  }
+
+  /**
+   * Show delete modal
+   */
+  showDeleteModal(): void {
+    if (this.tvSeries) {
+      this.modalRef = this.modalService.show(this.deleteModal, {
+        class: 'modal-lg modal-dialog-centered',
+        backdrop: 'static',
+        keyboard: false
+      });
+    }
   }
 }

@@ -59,70 +59,85 @@
     </div>
 
     <!-- Mobile Menu Toggle -->
-    <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#mainMenu">
+    <button class="navbar-toggler d-lg-none" type="button" (click)="toggleMobileMenu()" [attr.aria-expanded]="isMobileMenuOpen">
       <i class="fa-solid fa-bars"></i>
     </button>
   </div>
-</nav>
 
-<!-- Mobile Offcanvas Menu -->
-<div class="offcanvas offcanvas-end bg-dark text-light" tabindex="-1" id="mainMenu">
-  <div class="offcanvas-header">
-    <h5 class="offcanvas-title">Menu</h5>
-    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas"></button>
-  </div>
-  <div class="offcanvas-body">
-    <ul class="navbar-nav">
-      <li class="nav-item">
-        <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="nav-link" aria-label="Navigate to homepage" title="Navigate to homepage">
-          <i class="fa-solid fa-home"></i> Home
-        </a>
-      </li>
-      <li class="nav-item">
-        <a routerLink="/movies" routerLinkActive="active" class="nav-link" aria-label="Browse movies collection" title="Browse movies collection">
-          <i class="fa-solid fa-film"></i> Movies
-        </a>
-      </li>
-      <li class="nav-item">
-        <a routerLink="/tvseries" routerLinkActive="active" class="nav-link" aria-label="Browse TV series collection" title="Browse TV series collection">
-          <i class="fa-solid fa-tv"></i> TV Series
-        </a>
-      </li>
-      <!-- Login button for non-authenticated users -->
-      <li class="nav-item" *ngIf="!authService.isAuthenticated()">
-        <a routerLink="/login" routerLinkActive="active" class="nav-link login-link" aria-label="Login to your account" title="Login to your account">
-          <i class="fa-solid fa-sign-in-alt"></i> <span>Login</span>
-        </a>
-      </li>
-      
-      <!-- User menu items for authenticated users -->
-      <ng-container *ngIf="authService.isAuthenticated()">
-        <!-- Admin-only menu item -->
-        <li class="nav-item" *ngIf="authService.isAdmin()">
-          <a routerLink="/dashboard/admin" class="nav-link" aria-label="Go to dashboard" title="Go to dashboard">
-            <i class="fa-solid fa-tachometer-alt"></i> Dashboard
+  <!-- Mobile Menu Overlay -->
+  <div class="mobile-menu-overlay d-lg-none" [class.active]="isMobileMenuOpen" (click)="closeMobileMenu()"></div>
+  
+  <!-- Mobile Sidebar Menu -->
+  <div class="mobile-sidebar d-lg-none" [class.active]="isMobileMenuOpen">
+    <div class="mobile-sidebar-header">
+      <h5 class="mobile-sidebar-title">Menu</h5>
+      <button type="button" class="mobile-sidebar-close" (click)="closeMobileMenu()" aria-label="Close menu">
+        <i class="fa-solid fa-times"></i>
+      </button>
+    </div>
+    
+    <div class="mobile-sidebar-content">
+      <ul class="mobile-nav-list">
+        <li class="mobile-nav-item">
+          <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="mobile-nav-link" (click)="closeMobileMenu()" aria-label="Navigate to homepage" title="Navigate to homepage">
+            <i class="fa-solid fa-home"></i>
+            <span>Home</span>
+          </a>
+        </li>
+        <li class="mobile-nav-item">
+          <a routerLink="/movies" routerLinkActive="active" class="mobile-nav-link" (click)="closeMobileMenu()" aria-label="Browse movies collection" title="Browse movies collection">
+            <i class="fa-solid fa-film"></i>
+            <span>Movies</span>
+          </a>
+        </li>
+        <li class="mobile-nav-item">
+          <a routerLink="/tvseries" routerLinkActive="active" class="mobile-nav-link" (click)="closeMobileMenu()" aria-label="Browse TV series collection" title="Browse TV series collection">
+            <i class="fa-solid fa-tv"></i>
+            <span>TV Series</span>
           </a>
         </li>
         
-        <!-- Regular user menu items -->
-        <li class="nav-item" *ngIf="!authService.isAdmin()">
-          <a href="javascript:void(0)" (click)="openProfileModal()" class="nav-link" aria-label="View your profile" title="View your profile">
-            <i class="fa-solid fa-user"></i> Profile
-          </a>
-        </li>
-        <li class="nav-item" *ngIf="!authService.isAdmin()">
-          <a routerLink="/dashboard/user/credits" class="nav-link" aria-label="View your credits" title="View your credits">
-            <i class="fa-solid fa-coins"></i> Credits
+        <!-- Login button for non-authenticated users -->
+        <li class="mobile-nav-item" *ngIf="!authService.isAuthenticated()">
+          <a routerLink="/login" routerLinkActive="active" class="mobile-nav-link login-link" (click)="closeMobileMenu()" aria-label="Login to your account" title="Login to your account">
+            <i class="fa-solid fa-sign-in-alt"></i>
+            <span>Login</span>
           </a>
         </li>
         
-        <!-- Logout for all authenticated users -->
-        <li class="nav-item">
-          <a href="javascript:void(0)" class="nav-link" (click)="logout()" aria-label="Logout from your account" title="Logout from your account">
-            <i class="fa-solid fa-sign-out-alt"></i> Logout
-          </a>
-        </li>
-      </ng-container>
-    </ul>
+        <!-- User menu items for authenticated users -->
+        <ng-container *ngIf="authService.isAuthenticated()">
+          <!-- Admin-only menu item -->
+          <li class="mobile-nav-item" *ngIf="authService.isAdmin()">
+            <a routerLink="/dashboard/admin" class="mobile-nav-link" (click)="closeMobileMenu()" aria-label="Go to dashboard" title="Go to dashboard">
+              <i class="fa-solid fa-tachometer-alt"></i>
+              <span>Dashboard</span>
+            </a>
+          </li>
+          
+          <!-- Regular user menu items -->
+          <li class="mobile-nav-item" *ngIf="!authService.isAdmin()">
+            <a href="javascript:void(0)" (click)="openProfileModal(); closeMobileMenu()" class="mobile-nav-link" aria-label="View your profile" title="View your profile">
+              <i class="fa-solid fa-user"></i>
+              <span>Profile</span>
+            </a>
+          </li>
+          <li class="mobile-nav-item" *ngIf="!authService.isAdmin()">
+            <a routerLink="/dashboard/user/credits" class="mobile-nav-link" (click)="closeMobileMenu()" aria-label="View your credits" title="View your credits">
+              <i class="fa-solid fa-coins"></i>
+              <span>Credits</span>
+            </a>
+          </li>
+          
+          <!-- Logout for all authenticated users -->
+          <li class="mobile-nav-item">
+            <a href="javascript:void(0)" class="mobile-nav-link logout-link" (click)="logout(); closeMobileMenu()" aria-label="Logout from your account" title="Logout from your account">
+              <i class="fa-solid fa-sign-out-alt"></i>
+              <span>Logout</span>
+            </a>
+          </li>
+        </ng-container>
+      </ul>
+    </div>
   </div>
-</div>
+</nav>
