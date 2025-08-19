@@ -18,6 +18,7 @@ const routes: Routes = [
     { path: 'movie-details/:id', component: MovieDetailsComponent, canActivate: [AuthGuard] },
     { path: 'tvseries', component: TvseriesListWrapperComponent, canActivate: [AuthGuard] },
     { path: 'tvseries-details/:id', component: TvseriesDetailsComponent, canActivate: [AuthGuard] },
+  
     { path: 'terms', component: TermsComponent },
     // Dashboard route with lazy loading
     { 

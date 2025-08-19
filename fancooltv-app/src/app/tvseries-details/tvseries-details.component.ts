@@ -19,6 +19,7 @@ export class TvseriesDetailsComponent implements OnInit, OnDestroy {
   error = false;
   errorMessage = '';
   trailerUrl: SafeResourceUrl | null = null;
+  videoUrl: string | null = null;
   expandedSeasons: Set<number> = new Set<number>();
   modalRef?: BsModalRef;
   private subscriptions: Subscription = new Subscription();
@@ -164,12 +165,36 @@ export class TvseriesDetailsComponent implements OnInit, OnDestroy {
    * If no trailer URL is provided, it will use the first trailer of the series if available
    */
   openTrailerModal(template: TemplateRef<any>, trailerUrl?: string): void {
-    const url = trailerUrl || (this.series?.trailers && this.series.trailers.length > 0 ? this.series.trailers[0].url : '');
+    let url = trailerUrl;
+    
+    if (!url && this.series) {
+      // Check traditional trailers array first
+      if (this.series.trailers && this.series.trailers.length > 0) {
+        url = this.series.trailers[0].url;
+      }
+      // Check video_files for trailer
+      else if ((this.series as any).video_files && (this.series as any).video_files.length > 0) {
+        const trailerVideo = (this.series as any).video_files.find((video: any) => 
+          video.title && video.title.toLowerCase().includes('trailer')
+        );
+        if (trailerVideo) {
+          url = trailerVideo.public_stream_url || trailerVideo.stream_url;
+        }
+      }
+    }
+    
     if (url) {
-      this.trailerUrl = this.sanitizeTrailerUrl(url);
-      this.modalRef = this.modalService.show(template, { class: 'modal-lg modal-dialog-centered' });
+      // Check if it's a local video file (MP4) or YouTube URL
+      if (url.includes('.mp4') || url.includes('stream-video') || url.includes('public-video')) {
+        // Local video file - use video element instead of iframe
+        this.videoUrl = url;
+        this.modalRef = this.modalService.show(template, { class: 'modal-lg modal-dialog-centered' });
+      } else {
+        // YouTube URL - use iframe
+        this.trailerUrl = this.sanitizeTrailerUrl(url);
+        this.modalRef = this.modalService.show(template, { class: 'modal-lg modal-dialog-centered' });
+      }
     } else {
-      // If there is no trailer available, we show a message or handle it in another way
       console.log('No trailer available for this content');
     }
   }
@@ -182,6 +207,28 @@ export class TvseriesDetailsComponent implements OnInit, OnDestroy {
       this.modalRef.hide();
     }
     this.trailerUrl = null;
+  }
+
+  /**
+   * Open the video modal with the specified video URL for episodes
+   */
+  openVideoModal(template: TemplateRef<any>, videoUrl: string): void {
+    if (videoUrl) {
+      this.videoUrl = videoUrl;
+      this.modalRef = this.modalService.show(template, { class: 'modal-lg modal-dialog-centered' });
+    } else {
+      console.log('No video URL available for this episode');
+    }
+  }
+
+  /**
+   * Close the video modal and reset the video URL
+   */
+  closeVideoModal(): void {
+    if (this.modalRef) {
+      this.modalRef.hide();
+    }
+    this.videoUrl = null;
   }
 
   /**
@@ -221,11 +268,11 @@ export class TvseriesDetailsComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Navigate to TV series admin page (edit functionality temporarily disabled)
+   * Navigate to TV series edit page
    */
   editSeries(): void {
     if (this.series) {
-      this.router.navigate(['/dashboard/admin/tvseries']);
+      this.router.navigate(['/dashboard/admin/tvseries/edit', this.series.tv_series_id]);
     }
   }
 
@@ -278,5 +325,26 @@ export class TvseriesDetailsComponent implements OnInit, OnDestroy {
    */
   navigateToTVSeries(): void {
     this.router.navigate(['/tvseries']);
+  }
+
+  /**
+   * Check if series has trailer (either in trailers array or video_files)
+   */
+  hasTrailer(): boolean {
+    if (!this.series) return false;
+    
+    // Check traditional trailers array
+    if (this.series.trailers && this.series.trailers.length > 0) {
+      return true;
+    }
+    
+    // Check video_files for trailer
+    if ((this.series as any).video_files && (this.series as any).video_files.length > 0) {
+      return (this.series as any).video_files.some((video: any) => 
+        video.title && video.title.toLowerCase().includes('trailer')
+      );
+    }
+    
+    return false;
   }
 }

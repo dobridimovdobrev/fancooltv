@@ -47,7 +47,7 @@
                             <span id="category" *ngIf="series.category" class="meta-item"><i class="fas fa-film"></i> {{ series.category.name }}</span>
                         </div>
                         <p id="description" class="mb-4">{{ series.description }}</p>
-                        <div id="trailer" class="mb-4" *ngIf="series.trailers && series.trailers.length > 0">
+                        <div id="trailer" class="mb-4" *ngIf="hasTrailer()">
                             <button class="btn btn-primary " (click)="openTrailerModal(trailerModal)">
                                 <i class="fas fa-play me-2"></i>Watch Trailer
                             </button>
@@ -98,7 +98,9 @@
                                                     <h5 class="episode-title mb-2">{{ episode.title }}</h5>
                                                 </div>
                                             </div>
-                                            <button class="btn btn-primary watch-button" (click)="openTrailerModal(trailerModal, episode['trailer'])">
+                                            <button class="btn btn-primary watch-button" 
+                                                    *ngIf="episode.video_files && episode.video_files.length > 0"
+                                                    (click)="openVideoModal(videoModal, episode.video_files[0].public_stream_url)">
                                                 <i class="fas fa-play me-2"></i>Watch
                                             </button>
                                         </div>
@@ -129,7 +131,7 @@
 <!-- Trailer Modal Template -->
 <ng-template #trailerModal>
     <div class="modal-header">
-        <h5 class="modal-title">Watch Episode</h5>
+        <h5 class="modal-title">Watch Trailer</h5>
         <button type="button" class="btn-close" aria-label="Close" (click)="closeTrailerModal()"></button>
     </div>
     <div class="modal-body">
@@ -137,6 +139,21 @@
             <iframe [src]="trailerUrl" title="YouTube video player" frameborder="0" 
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
                 allowfullscreen></iframe>
+        </div>
+    </div>
+</ng-template>
+
+<!-- Video Modal Template -->
+<ng-template #videoModal>
+    <div class="modal-header">
+        <h5 class="modal-title">Watch Episode</h5>
+        <button type="button" class="btn-close" aria-label="Close" (click)="closeVideoModal()"></button>
+    </div>
+    <div class="modal-body">
+        <div class="ratio ratio-16x9">
+            <video [src]="videoUrl" controls class="w-100 h-100" style="background: #000;">
+                Your browser does not support the video tag.
+            </video>
         </div>
     </div>
 </ng-template>

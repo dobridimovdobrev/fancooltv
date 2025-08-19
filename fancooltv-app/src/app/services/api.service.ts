@@ -341,6 +341,36 @@ export class ApiService {
   }
 
   /**
+   * Create a complete TV series with files (FormData) - single API call
+   */
+  public createCompleteTvSeries(formData: FormData): Observable<any> {
+    const token = localStorage.getItem('auth_token');
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`
+      // Don't set Content-Type for FormData - browser will set it automatically with boundary
+    });
+    
+    return this.http.post<any>(`${this.baseUrl}/api/v1/tvseries/complete`, formData, {
+      headers: headers
+    });
+  }
+
+  /**
+   * Update a complete TV series with files (FormData) - single API call
+   */
+  public updateCompleteTvSeries(id: number, formData: FormData): Observable<any> {
+    const token = localStorage.getItem('auth_token');
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`
+      // Don't set Content-Type for FormData - browser will set it automatically with boundary
+    });
+    
+    return this.http.put<any>(`${this.baseUrl}/api/v1/tvseries/${id}/complete`, formData, {
+      headers: headers
+    });
+  }
+
+  /**
    * Search persons by name
    */
   public searchPersons(query: string): Observable<any> {
@@ -375,7 +405,7 @@ export class ApiService {
       });
     }
 
-    console.log('Requesting URL:', `${this.baseUrl}${endpoint}`, httpParams); // For debugging
+    // Debug logging removed for production performance
     
     return this.http.get<ApiResponse<T>>(`${this.baseUrl}${endpoint}`, {
       headers: this.getHeaders(),

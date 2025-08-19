@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, Output, EventEmitter, OnDestroy, TemplateRef, ViewChild } from '@angular/core';
+import { Component, OnInit, OnDestroy, OnChanges, SimpleChanges, Input, Output, EventEmitter, ViewChild, TemplateRef } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, FormArray } from '@angular/forms';
 import { TVSeries, Season, Episode } from '../../../models/tvseries.models';
 import { Category, Person } from '../../../models/media.models';
@@ -12,7 +12,7 @@ import { Subscription } from 'rxjs';
   templateUrl: './tvseries-form.component.html',
   styleUrls: ['./tvseries-form.component.scss']
 })
-export class TVSeriesFormComponent implements OnInit, OnDestroy {
+export class TVSeriesFormComponent implements OnInit, OnDestroy, OnChanges {
   @Input() tvSeries: TVSeries | null = null;
   @Input() isEditMode = false;
   @Output() formSubmit = new EventEmitter<any>();
@@ -35,12 +35,31 @@ export class TVSeriesFormComponent implements OnInit, OnDestroy {
   uploadingBackdrop = false;
   isLoadingPersons = false;
   
+  // File upload properties
+  posterFile: File | null = null;
+  backdropFile: File | null = null;
+  trailerVideoFile: File | null = null;
+  uploadingTrailerVideo: boolean = false;
+  trailerVideoUploadProgress: number = 0;
+  
+  // Image preview URLs
+  posterPreviewUrl: string | null = null;
+  backdropPreviewUrl: string | null = null;
+  
+  // Episode file properties
+  episodeFiles: { [key: string]: File } = {};
+  episodeVideoFiles: { [key: string]: File } = {};
+  uploadingEpisodeVideo: { [key: string]: boolean } = {};
+  episodeVideoUploadProgress: { [key: string]: number } = {};
+  episodeImagePreviewUrls: { [key: string]: string } = {};
+  
+  // Year validation
+  maxYear = new Date().getFullYear() + 1;
+  
   // Status options for dropdown
   statusOptions = [
-    { value: 'published', label: 'Published' },
-    { value: 'draft', label: 'Draft' },
-    { value: 'scheduled', label: 'Scheduled' },
-    { value: 'coming soon', label: 'Coming Soon' }
+    { value: 'ongoing', label: 'Ongoing' },
+    { value: 'ended', label: 'Ended' }
   ];
 
   private subscriptions = new Subscription();
@@ -58,6 +77,17 @@ export class TVSeriesFormComponent implements OnInit, OnDestroy {
     if (this.isEditMode && this.tvSeries) {
       this.populateForm();
     }
+    
+    // Form initialization complete
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['tvSeries'] && changes['tvSeries'].currentValue && this.isEditMode) {
+      // TV Series data changed, repopulate form
+      setTimeout(() => {
+        this.populateForm();
+      }, 100);
+    }
   }
 
   ngOnDestroy(): void {
@@ -73,14 +103,15 @@ export class TVSeriesFormComponent implements OnInit, OnDestroy {
       year: ['', [Validators.required, Validators.min(1900), Validators.max(new Date().getFullYear() + 5)]],
       imdb_rating: ['', [Validators.min(0), Validators.max(10)]],
       category_id: ['', Validators.required],
-      poster: [''],
-      backdrop: [''],
+      poster: ['', Validators.required],
+      backdrop: ['', Validators.required],
       description: ['', [Validators.required, Validators.minLength(10)]],
       total_seasons: ['', [Validators.min(1)]],
       total_episodes: ['', [Validators.min(1)]],
       status: ['published', Validators.required],
       persons: this.fb.array([]),
-      trailers: this.fb.array([])
+      // trailers array removed - using only video file upload
+      seasons: this.fb.array([])
     });
   }
 
@@ -136,11 +167,13 @@ export class TVSeriesFormComponent implements OnInit, OnDestroy {
   private populateForm(): void {
     if (!this.tvSeries) return;
 
+    // Debug logs removed for production
+
     this.tvSeriesForm.patchValue({
       title: this.tvSeries.title,
       year: this.tvSeries.year,
       imdb_rating: this.tvSeries.imdb_rating,
-      category_id: this.tvSeries.category?.category_id,
+      category_id: (this.tvSeries.category as any)?.id || this.tvSeries.category?.category_id,
       poster: this.tvSeries.poster,
       backdrop: this.tvSeries.backdrop,
       description: this.tvSeries.description,
@@ -149,27 +182,88 @@ export class TVSeriesFormComponent implements OnInit, OnDestroy {
       status: this.tvSeries.status
     });
 
-    // Populate persons
+    // Set poster preview if exists
+    if (this.tvSeries.poster && this.tvSeries.poster.url) {
+      this.posterPreviewUrl = this.tvSeries.poster.url;
+    }
+
+    // Set backdrop preview if exists
+    if (this.tvSeries.backdrop && this.tvSeries.backdrop.url) {
+      this.backdropPreviewUrl = this.tvSeries.backdrop.url;
+    }
+
+    // Populate persons - clear existing and add from data
+    const personsArray = this.tvSeriesForm.get('persons') as FormArray;
+    personsArray.clear(); // Clear existing persons
+    
     if (this.tvSeries.persons && this.tvSeries.persons.length > 0) {
-      const personsArray = this.tvSeriesForm.get('persons') as FormArray;
       this.tvSeries.persons.forEach(person => {
         personsArray.push(this.fb.group({
           person_id: [person.person_id],
-          role: [person.character || '']
+          role: [(person as any).character || (person as any).role || '']
         }));
       });
     }
 
-    // Populate trailers
+    // Set trailer video preview if exists
     if (this.tvSeries.trailers && this.tvSeries.trailers.length > 0) {
-      const trailersArray = this.tvSeriesForm.get('trailers') as FormArray;
-      this.tvSeries.trailers.forEach((trailer: any) => {
-        trailersArray.push(this.fb.group({
-          title: [trailer.title || ''],
-          url: [trailer.url]
-        }));
+      // Trailer exists - show some indication (we can't preload file but can show it exists)
+      this.trailerVideoFile = null; // Can't preload file from URL
+      // Could add a preview or indication here
+    }
+
+    // Populate seasons and episodes - clear existing and add from data
+    const seasonsArray = this.tvSeriesForm.get('seasons') as FormArray;
+    seasonsArray.clear(); // Clear existing seasons
+    
+    if (this.tvSeries.seasons && this.tvSeries.seasons.length > 0) {
+      this.tvSeries.seasons.forEach((season: any) => {
+        const seasonGroup = this.fb.group({
+          season_number: [season.season_number, [Validators.min(1)]],
+          total_episodes: [season.total_episodes || season.episodes?.length || ''],
+          year: [season.year || ''],
+          name: [season.name || ''],
+          overview: [season.overview || ''],
+          premiere_date: [season.premiere_date || ''],
+          episodes: this.fb.array([])
+        });
+
+        // Populate episodes for this season
+        if (season.episodes && season.episodes.length > 0) {
+          const episodesArray = seasonGroup.get('episodes') as FormArray;
+          season.episodes.forEach((episode: any) => {
+            const episodeGroup = this.fb.group({
+              episode_id: [episode.episode_id || null], // ID for existing episodes
+              episode_number: [episode.episode_number, [Validators.min(1)]],
+              title: [episode.title],
+              overview: [episode.description || episode.overview || ''],
+              air_date: [episode.air_date || ''],
+              runtime: [episode.duration || episode.runtime || ''],
+              status: [episode.status || 'published']
+            });
+            episodesArray.push(episodeGroup);
+
+            // Set episode image preview if exists
+            if (episode.still && episode.still.url) {
+              const episodeKey = `${seasonsArray.length}-${episodesArray.length - 1}`;
+              this.episodeImagePreviewUrls[episodeKey] = episode.still.url;
+            }
+
+            // Set episode video preview if exists
+            if (episode.video_files && episode.video_files.length > 0) {
+              const episodeKey = `${seasonsArray.length}-${episodesArray.length - 1}`;
+              // Can't preload file from URL, but we can indicate it exists
+              // this.episodeVideoFiles[episodeKey] = null; // Removed - causes type error
+              // Could add a preview or indication here
+            }
+          });
+        }
+
+        seasonsArray.push(seasonGroup);
       });
     }
+
+    // Form population debug logs removed for production
   }
 
   /**
@@ -179,70 +273,136 @@ export class TVSeriesFormComponent implements OnInit, OnDestroy {
     return this.tvSeriesForm.get('persons') as FormArray;
   }
 
-  /**
-   * Get trailers FormArray
-   */
-  get trailersArray(): FormArray {
-    return this.tvSeriesForm.get('trailers') as FormArray;
-  }
+  // Trailers array getter removed
 
 
-  /**
-   * Remove person from the form
-   */
-  removePerson(index: number): void {
-    this.personsArray.removeAt(index);
-  }
-
-  /**
-   * Add trailer to the form
-   */
-  addTrailer(): void {
-    const trailerGroup = this.fb.group({
-      title: [''],
-      url: ['', Validators.required]
-    });
-    this.trailersArray.push(trailerGroup);
-  }
-
-  /**
-   * Remove trailer from the form
-   */
-  removeTrailer(index: number): void {
-    this.trailersArray.removeAt(index);
-  }
+  // Duplicate methods removed - using methods at line 459+ instead
 
   /**
    * Handle form submission
    */
   onSubmit(): void {
-    if (this.tvSeriesForm.valid) {
+    if (this.isFormValid()) {
+      // Form submission started
       const formData = this.prepareFormData();
       this.formSubmit.emit(formData);
     } else {
+      // Form validation failed - marking fields as touched
       this.markFormGroupTouched();
+      
+      // Show specific validation errors
+      if (!this.posterFile) {
+        // Missing poster file
+      }
+      if (!this.backdropFile) {
+        // Missing backdrop file
+      }
     }
   }
 
   /**
-   * Prepare form data for submission
+   * Prepare form data for submission as FormData for /complete endpoint
    */
-  private prepareFormData(): any {
+  private prepareFormData(): FormData {
+    const formData = new FormData();
     const formValue = { ...this.tvSeriesForm.value };
+    
+    // Debug logs
+    console.log('DEBUG: Form value before submit:', formValue);
+    console.log('DEBUG: Title value:', formValue.title);
+    
+    // Processing form data for submission
 
-    // Process persons array
+    // Add basic TV series data - ALWAYS send these fields
+    formData.append('title', formValue.title || '');
+    formData.append('year', (formValue.year || '').toString());
+    formData.append('category_id', (formValue.category_id || '').toString());
+    formData.append('description', formValue.description || '');
+    formData.append('imdb_rating', (formValue.imdb_rating || '').toString());
+    formData.append('total_episodes', (formValue.total_episodes || '').toString());
+    
+    console.log('DEBUG: Title being sent:', formData.get('title'));
+
+    // Add status directly - backend expects ongoing/ended
+    if (formValue.status) {
+      formData.append('status', formValue.status);
+    } else {
+      formData.append('status', 'ongoing'); // Default value
+    }
+
+    // Add image files
+    if (this.posterFile) {
+      formData.append('poster_image', this.posterFile);
+    }
+    if (this.backdropFile) {
+      formData.append('backdrop_image', this.backdropFile);
+    }
+
+    // Add trailer video
+    if (this.trailerVideoFile) {
+      formData.append('trailer_video', this.trailerVideoFile);
+    }
+
+    // Add persons array
     if (formValue.persons && Array.isArray(formValue.persons)) {
-      formValue.persons = formValue.persons
+      const persons = formValue.persons
         .filter((person: any) => person.person_id && person.person_id.toString().trim() !== '')
         .map((person: any) => parseInt(person.person_id, 10));
+      
+      persons.forEach((personId: number) => {
+        formData.append('persons[]', personId.toString());
+      });
     }
 
-    // Process trailers array
-    if (formValue.trailers && Array.isArray(formValue.trailers)) {
-      formValue.trailers = formValue.trailers.filter((trailer: any) => trailer.url && trailer.url.trim() !== '');
+    // Add seasons data
+    if (formValue.seasons && Array.isArray(formValue.seasons)) {
+      formValue.seasons.forEach((season: any, seasonIndex: number) => {
+        // Processing season data
+        
+        if (season.season_number) formData.append(`seasons[${seasonIndex}][season_number]`, season.season_number.toString());
+        
+        // Calculate total_episodes automatically if not provided
+        let totalEpisodes = season.total_episodes;
+        if (!totalEpisodes && season.episodes && Array.isArray(season.episodes)) {
+          totalEpisodes = season.episodes.length;
+        }
+        if (totalEpisodes) {
+          formData.append(`seasons[${seasonIndex}][total_episodes]`, totalEpisodes.toString());
+        }
+        
+        if (season.year) formData.append(`seasons[${seasonIndex}][year]`, season.year.toString());
+        if (season.name) formData.append(`seasons[${seasonIndex}][name]`, season.name);
+        if (season.overview) formData.append(`seasons[${seasonIndex}][overview]`, season.overview);
+        if (season.premiere_date) formData.append(`seasons[${seasonIndex}][premiere_date]`, season.premiere_date);
+
+        // Add episodes for this season
+        if (season.episodes && Array.isArray(season.episodes)) {
+          season.episodes.forEach((episode: any, episodeIndex: number) => {
+            if (episode.episode_id) formData.append(`seasons[${seasonIndex}][episodes][${episodeIndex}][episode_id]`, episode.episode_id.toString());
+            if (episode.episode_number) formData.append(`seasons[${seasonIndex}][episodes][${episodeIndex}][episode_number]`, episode.episode_number.toString());
+            if (episode.title) formData.append(`seasons[${seasonIndex}][episodes][${episodeIndex}][title]`, episode.title);
+            if (episode.overview) formData.append(`seasons[${seasonIndex}][episodes][${episodeIndex}][overview]`, episode.overview);
+            if (episode.air_date) formData.append(`seasons[${seasonIndex}][episodes][${episodeIndex}][air_date]`, episode.air_date);
+            if (episode.runtime) formData.append(`seasons[${seasonIndex}][episodes][${episodeIndex}][runtime]`, episode.runtime.toString());
+            
+            // Add episode status (required by backend)
+            const episodeStatus = episode.status || 'published';
+            formData.append(`seasons[${seasonIndex}][episodes][${episodeIndex}][status]`, episodeStatus);
+
+            // Add episode files with correct field names expected by backend
+            const episodeKey = `${seasonIndex}-${episodeIndex}`;
+            if (this.episodeFiles[episodeKey]) {
+              formData.append(`seasons[${seasonIndex}][episodes][${episodeIndex}][still_image]`, this.episodeFiles[episodeKey]);
+            }
+            if (this.episodeVideoFiles[episodeKey]) {
+              formData.append(`seasons[${seasonIndex}][episodes][${episodeIndex}][episode_video]`, this.episodeVideoFiles[episodeKey]);
+            }
+          });
+        }
+      });
     }
 
-    return formValue;
+    return formData;
   }
 
   /**
@@ -314,55 +474,18 @@ export class TVSeriesFormComponent implements OnInit, OnDestroy {
    */
   getPersonName(personId: number): string {
     if (!personId) return '';
-    const person = this.personsForDisplay.find(p => p.person_id === personId);
+    
+    // First try to find in personsForDisplay (from search)
+    let person = this.personsForDisplay.find(p => p.person_id === personId);
+    
+    // If not found and we have tvSeries data, search there
+    if (!person && this.tvSeries && this.tvSeries.persons) {
+      person = this.tvSeries.persons.find(p => p.person_id === personId);
+    }
+    
     return person ? person.name : '';
   }
 
-  /**
-   * Handle poster upload
-   */
-  onPosterUpload(event: any): void {
-    const file = event.target.files[0];
-    if (!file) return;
-
-    this.uploadingPoster = true;
-    
-    this.apiService.uploadImage(file).subscribe({
-      next: (response: any) => {
-        if (response.type === HttpEventType.Response) {
-          this.tvSeriesForm.patchValue({ poster: response.body.data.url });
-          this.uploadingPoster = false;
-        }
-      },
-      error: (error: any) => {
-        console.error('Error uploading poster:', error);
-        this.uploadingPoster = false;
-      }
-    });
-  }
-
-  /**
-   * Handle backdrop upload
-   */
-  onBackdropUpload(event: any): void {
-    const file = event.target.files[0];
-    if (!file) return;
-
-    this.uploadingBackdrop = true;
-    
-    this.apiService.uploadImage(file).subscribe({
-      next: (response: any) => {
-        if (response.type === HttpEventType.Response) {
-          this.tvSeriesForm.patchValue({ backdrop: response.body.data.url });
-          this.uploadingBackdrop = false;
-        }
-      },
-      error: (error: any) => {
-        console.error('Error uploading backdrop:', error);
-        this.uploadingBackdrop = false;
-      }
-    });
-  }
 
   /**
    * Search person in modal
@@ -439,6 +562,13 @@ export class TVSeriesFormComponent implements OnInit, OnDestroy {
   }
 
   /**
+   * Remove person from the form
+   */
+  removePerson(index: number): void {
+    this.personsArray.removeAt(index);
+  }
+
+  /**
    * Cancel delete operation
    */
   cancelDelete(): void {
@@ -470,4 +600,213 @@ export class TVSeriesFormComponent implements OnInit, OnDestroy {
       });
     }
   }
+
+  /**
+   * Get seasons FormArray
+   */
+  get seasonsArray(): FormArray {
+    return this.tvSeriesForm.get('seasons') as FormArray;
+  }
+
+  /**
+   * Add new season
+   */
+  addSeason(): void {
+    const seasonGroup = this.fb.group({
+      season_number: ['', [Validators.min(1)]],
+      total_episodes: ['', [Validators.min(1)]],
+      year: ['', [Validators.min(1900), Validators.max(this.maxYear)]],
+      name: [''],
+      overview: [''],
+      premiere_date: [''],
+      episodes: this.fb.array([])
+    });
+
+    this.seasonsArray.push(seasonGroup);
+  }
+
+  /**
+   * Remove season
+   */
+  removeSeason(seasonIndex: number): void {
+    this.seasonsArray.removeAt(seasonIndex);
+  }
+
+  /**
+   * Get episodes FormArray for a specific season
+   */
+  getEpisodesArray(seasonIndex: number): FormArray {
+    return this.seasonsArray.at(seasonIndex).get('episodes') as FormArray;
+  }
+
+  /**
+   * Add new episode to a season
+   */
+  addEpisode(seasonIndex: number): void {
+    const episodeGroup = this.fb.group({
+      title: [''],
+      episode_number: ['', [Validators.min(1)]],
+      duration: ['', [Validators.min(1)]],
+      air_date: [''],
+      status: ['published'],
+      description: ['']
+    });
+
+    this.getEpisodesArray(seasonIndex).push(episodeGroup);
+  }
+
+  /**
+   * Remove episode from a season
+   */
+  removeEpisode(seasonIndex: number, episodeIndex: number): void {
+    this.getEpisodesArray(seasonIndex).removeAt(episodeIndex);
+    
+    // Clean up associated files
+    const episodeKey = `${seasonIndex}-${episodeIndex}`;
+    delete this.episodeFiles[episodeKey];
+    delete this.episodeVideoFiles[episodeKey];
+    delete this.uploadingEpisodeVideo[episodeKey];
+    delete this.episodeVideoUploadProgress[episodeKey];
+  }
+
+  /**
+   * Handle episode image upload
+   */
+  onEpisodeImageUpload(event: any, seasonIndex: number, episodeIndex: number): void {
+    const file = event.target.files[0];
+    if (file) {
+      const episodeKey = `${seasonIndex}-${episodeIndex}`;
+      this.episodeFiles[episodeKey] = file;
+      
+      // Create preview URL
+      const reader = new FileReader();
+      reader.onload = (e: any) => {
+        this.episodeImagePreviewUrls[episodeKey] = e.target.result;
+      };
+      reader.readAsDataURL(file);
+      
+      // Episode image uploaded successfully
+    }
+  }
+
+  /**
+   * Handle episode video upload
+   */
+  onEpisodeVideoUpload(event: any, seasonIndex: number, episodeIndex: number): void {
+    const file = event.target.files[0];
+    if (file) {
+      const episodeKey = `${seasonIndex}-${episodeIndex}`;
+      this.episodeVideoFiles[episodeKey] = file;
+      this.uploadingEpisodeVideo[episodeKey] = true;
+      this.episodeVideoUploadProgress[episodeKey] = 0;
+      
+      // Simulate upload progress
+      const interval = setInterval(() => {
+        this.episodeVideoUploadProgress[episodeKey] += 10;
+        if (this.episodeVideoUploadProgress[episodeKey] >= 100) {
+          this.uploadingEpisodeVideo[episodeKey] = false;
+          clearInterval(interval);
+          // Episode video uploaded successfully
+        }
+      }, 200);
+    }
+  }
+
+  /**
+   * Handle trailer video upload
+   */
+  onTrailerVideoUpload(event: any): void {
+    const file = event.target.files[0];
+    if (file) {
+      this.trailerVideoFile = file;
+      this.uploadingTrailerVideo = true;
+      this.trailerVideoUploadProgress = 0;
+      
+      // Simulate upload progress with percentage display
+      const interval = setInterval(() => {
+        this.trailerVideoUploadProgress += 10;
+        if (this.trailerVideoUploadProgress >= 100) {
+          this.uploadingTrailerVideo = false;
+          clearInterval(interval);
+          // Trailer video uploaded successfully
+        }
+      }, 200);
+    }
+  }
+
+  /**
+   * Check if form is valid
+   */
+  isFormValid(): boolean {
+    // Simplified validation - only check essential fields
+    const title = this.tvSeriesForm.get('title')?.value;
+    const description = this.tvSeriesForm.get('description')?.value;
+    const category = this.tvSeriesForm.get('category_id')?.value;
+    
+    // Basic required fields
+    if (!title || !description || !category) {
+      return false;
+    }
+    
+    // Files required only for new TV series
+    if (!this.isEditMode) {
+      if (!this.posterFile || !this.backdropFile) {
+        return false;
+      }
+    }
+    
+    return true;
+  }
+
+  /**
+   * Handle poster image upload
+   */
+  onPosterUpload(event: any): void {
+    const file = event.target.files[0];
+    if (file) {
+      this.posterFile = file;
+      this.uploadingPoster = false;
+      
+      // Create preview URL
+      const reader = new FileReader();
+      reader.onload = (e: any) => {
+        this.posterPreviewUrl = e.target.result;
+      };
+      reader.readAsDataURL(file);
+      
+      // Mark poster as valid when file is selected
+      this.tvSeriesForm.patchValue({ poster: 'file_selected' });
+      
+      // Poster uploaded successfully
+    }
+  }
+
+  /**
+   * Handle backdrop image upload
+   */
+  onBackdropUpload(event: any): void {
+    const file = event.target.files[0];
+    if (file) {
+      this.backdropFile = file;
+      this.uploadingBackdrop = false;
+      
+      // Create preview URL
+      const reader = new FileReader();
+      reader.onload = (e: any) => {
+        this.backdropPreviewUrl = e.target.result;
+      };
+      reader.readAsDataURL(file);
+      
+      // Mark backdrop as valid when file is selected
+      this.tvSeriesForm.patchValue({ backdrop: 'file_selected' });
+      
+      // Backdrop uploaded successfully
+    }
+  }
+
+  // localStorage backup system removed
+
+  // localStorage loading system removed
+
+  // localStorage clearing system removed
 }

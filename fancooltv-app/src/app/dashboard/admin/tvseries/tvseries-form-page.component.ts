@@ -19,6 +19,9 @@ export class TVSeriesFormPageComponent implements OnInit {
   loading = false;
   error = '';
   success = '';
+  
+  // Backup form data to preserve on error
+  private formDataBackup: any = null;
 
   // Modal delete
   @ViewChild('deleteModal') deleteModal!: TemplateRef<any>;
@@ -48,11 +51,10 @@ export class TVSeriesFormPageComponent implements OnInit {
     this.loading = true;
     this.error = '';
 
-    this.apiService.getTVSeries().subscribe({
+    // Use the detailed API endpoint that includes all relations
+    this.apiService.getTVSeriesDetails(id).subscribe({
       next: (response: any) => {
-        // Find the specific TV series by ID
-        const allSeries = response.data || [];
-        this.tvSeries = allSeries.find((series: any) => series.tv_series_id === id);
+        this.tvSeries = response.data || response;
         if (!this.tvSeries) {
           this.error = 'TV series not found';
         }
@@ -67,33 +69,62 @@ export class TVSeriesFormPageComponent implements OnInit {
   }
 
   /**
-   * Handle form submission
+   * Handle form submission with standard API endpoints like Movies
    */
-  onFormSubmit(formData: any): void {
+  onFormSubmit(formData: FormData): void {
+    // Backup current form data before submission
+    this.backupFormData();
+    
     this.loading = true;
     this.error = '';
     this.success = '';
 
     const request = this.isEditMode 
-      ? this.apiService.updateTVSeries(this.tvSeries!.tv_series_id, formData)
-      : this.apiService.createTVSeries(formData);
+      ? this.apiService.updateCompleteTvSeries(this.tvSeries!.tv_series_id, formData)
+      : this.apiService.createCompleteTvSeries(formData);
 
     request.subscribe({
       next: (response: any) => {
+        console.log('TV Series saved successfully:', response);
         this.success = this.isEditMode 
           ? 'TV Series updated successfully!' 
           : 'TV Series created successfully!';
         this.loading = false;
         
-        // Redirect to TV series list after a short delay
-        setTimeout(() => {
-          this.router.navigate(['/dashboard/admin/tvseries']);
-        }, 2000);
+        // Clear backup on success
+        this.formDataBackup = null;
+        
+        // For edit mode, don't reload automatically - user can see success message
+        if (this.isEditMode && this.tvSeries) {
+          // Success message shown, no automatic reload
+        } else {
+          // For create mode, redirect to list
+          setTimeout(() => {
+            this.router.navigate(['/dashboard/admin/tvseries']);
+          }, 2000);
+        }
       },
       error: (error: any) => {
         console.error('Error saving TV series:', error);
-        this.error = error.error?.message || 'Failed to save TV series';
+        console.error('Full error response:', JSON.stringify(error.error, null, 2));
+        
         this.loading = false;
+        
+        // Restore form data from backup to prevent data loss
+        this.restoreFormData();
+        
+        // Handle server-side validation errors
+        if (error.error && error.error.errors) {
+          // Show general error message
+          const errorMessages = Object.values(error.error.errors).flat();
+          this.error = `Validation errors: ${errorMessages.join(', ')}`;
+        } else if (error.error && error.error.message) {
+          this.error = `Error: ${error.error.message}`;
+        } else {
+          this.error = this.isEditMode 
+            ? 'Failed to update TV series. Please try again.'
+            : 'Failed to create TV series. Please try again.';
+        }
       }
     });
   }
@@ -155,6 +186,47 @@ export class TVSeriesFormPageComponent implements OnInit {
   viewTVSeries(): void {
     if (this.tvSeries) {
       this.router.navigate(['/tvseries-details', this.tvSeries.tv_series_id]);
+    }
+  }
+
+  /**
+   * Backup current form data before submission
+   */
+  private backupFormData(): void {
+    if (this.tvSeriesForm && this.tvSeriesForm.tvSeriesForm) {
+      this.formDataBackup = {
+        formValue: { ...this.tvSeriesForm.tvSeriesForm.value },
+        posterFile: this.tvSeriesForm.posterFile,
+        backdropFile: this.tvSeriesForm.backdropFile,
+        trailerVideoFile: this.tvSeriesForm.trailerVideoFile,
+        episodeFiles: { ...this.tvSeriesForm.episodeFiles },
+        episodeVideoFiles: { ...this.tvSeriesForm.episodeVideoFiles },
+        posterPreviewUrl: this.tvSeriesForm.posterPreviewUrl,
+        backdropPreviewUrl: this.tvSeriesForm.backdropPreviewUrl,
+        episodeImagePreviewUrls: { ...this.tvSeriesForm.episodeImagePreviewUrls }
+      };
+    }
+  }
+
+  /**
+   * Restore form data from backup to prevent data loss on error
+   */
+  private restoreFormData(): void {
+    if (this.formDataBackup && this.tvSeriesForm) {
+      // Restore form values
+      this.tvSeriesForm.tvSeriesForm.patchValue(this.formDataBackup.formValue);
+      
+      // Restore file references
+      this.tvSeriesForm.posterFile = this.formDataBackup.posterFile;
+      this.tvSeriesForm.backdropFile = this.formDataBackup.backdropFile;
+      this.tvSeriesForm.trailerVideoFile = this.formDataBackup.trailerVideoFile;
+      this.tvSeriesForm.episodeFiles = this.formDataBackup.episodeFiles;
+      this.tvSeriesForm.episodeVideoFiles = this.formDataBackup.episodeVideoFiles;
+      
+      // Restore preview URLs
+      this.tvSeriesForm.posterPreviewUrl = this.formDataBackup.posterPreviewUrl;
+      this.tvSeriesForm.backdropPreviewUrl = this.formDataBackup.backdropPreviewUrl;
+      this.tvSeriesForm.episodeImagePreviewUrls = this.formDataBackup.episodeImagePreviewUrls;
     }
   }
 }

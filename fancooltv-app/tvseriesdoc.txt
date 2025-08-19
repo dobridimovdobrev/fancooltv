@@ -1,250 +1,123 @@
-DOCUMENTAZIONE COMPLETA TV SERIES API - CRUD OPERAZIONI
-1. CREARE TV SERIES
-Endpoint
-POST /api/v1/tvseries
-Headers
-Authorization: Bearer {admin_token}
-Content-Type: multipart/form-data
-Request Body Completo (FormData)
-Campi Obbligatori
-javascript
-const formData = new FormData();
+# TV SERIES API - DOCUMENTAZIONE COMPLETA
 
-// Dati base obbligatori
-formData.append('title', 'Breaking Bad');
-formData.append('description', 'A high school chemistry teacher diagnosed with inoperable lung cancer turns to manufacturing and selling methamphetamine in order to secure his family\'s financial future before he dies.');
-formData.append('year', '2008');
-formData.append('status', 'published'); // published, draft, scheduled, coming soon
-formData.append('category_id', '1'); // ID categoria esistente
-formData.append('poster', 'https://api.dobridobrev.com/storage/images/poster/breaking-bad.jpg');
-formData.append('backdrop', 'https://api.dobridobrev.com/storage/images/backdrop/breaking-bad-bg.jpg');
-Campi Opzionali
-javascript
-// Metadati opzionali
-formData.append('slug', 'breaking-bad');
-formData.append('imdb_rating', '9.5');
-formData.append('total_seasons', '5');
-formData.append('total_episodes', '62');
-formData.append('premiere_date', '2008-01-20');
+## ENDPOINT UPDATE TV SERIES
 
-// Upload trailer video (File object)
-formData.append('trailer_video', trailerVideoFile);
+### URL
+```
+PUT /api/v1/tvseries/{id}/complete
+```
 
-// Attori (array di person_id)
-formData.append('persons[]', '1'); // Bryan Cranston
-formData.append('persons[]', '2'); // Aaron Paul
-formData.append('persons[]', '3'); // Anna Gunn
-
-// Trailer esterni YouTube
-formData.append('trailers[0][title]', 'Breaking Bad Official Trailer');
-formData.append('trailers[0][url]', 'https://www.youtube.com/watch?v=HhesaQXLuRY');
-formData.append('trailers[1][title]', 'Breaking Bad Season 5 Trailer');
-formData.append('trailers[1][url]', 'https://www.youtube.com/watch?v=abc123');
-Response Success (201)
-json
-{
-  "success": true,
-  "message": "TV Series created successfully",
-  "data": {
-    "tv_series": {
-      "tv_series_id": 31,
-      "title": "Breaking Bad",
-      "description": "A high school chemistry teacher...",
-      "year": 2008,
-      "imdb_rating": 9.5,
-      "total_seasons": 5,
-      "total_episodes": 62,
-      "status": "published",
-      "category": {
-        "id": 1,
-        "name": "Drama"
-      },
-      "poster": {
-        "url": "https://api.dobridobrev.com/storage/images/poster/breaking-bad.jpg",
-        "sizes": {
-          "w92": "...",
-          "w185": "...",
-          "original": "..."
-        }
-      }
-    }
-  }
-}
-2. VISUALIZZARE LISTA TV SERIES
-Endpoint
-GET /api/v1/tvseries
-Headers
+### HEADERS
+```
 Authorization: Bearer {token}
-Content-Type: application/json
-Query Parameters (Opzionali)
-GET /api/v1/tvseries?status=published&category_id=1&year=2008
-Response (200)
-json
-{
-  "data": [
-    {
-      "tv_series_id": 31,
-      "title": "Breaking Bad",
-      "year": 2008,
-      "imdb_rating": 9.5,
-      "total_seasons": 5,
-      "total_episodes": 62,
-      "status": "published",
-      "category": {
-        "id": 1,
-        "name": "Drama"
-      },
-      "poster": {
-        "url": "https://api.dobridobrev.com/storage/images/poster/breaking-bad.jpg",
-        "sizes": {
-          "w92": "https://api.dobridobrev.com/storage/images/poster/breaking-bad.jpg",
-          "w154": "https://api.dobridobrev.com/storage/images/poster/breaking-bad.jpg",
-          "w185": "https://api.dobridobrev.com/storage/images/poster/breaking-bad.jpg",
-          "w342": "https://api.dobridobrev.com/storage/images/poster/breaking-bad.jpg",
-          "w500": "https://api.dobridobrev.com/storage/images/poster/breaking-bad.jpg",
-          "w780": "https://api.dobridobrev.com/storage/images/poster/breaking-bad.jpg",
-          "original": "https://api.dobridobrev.com/storage/images/poster/breaking-bad.jpg"
-        },
-        "width": 500,
-        "height": 750,
-        "format": "jpg"
-      }
-    }
-  ],
-  "links": {
-    "first": "https://api.dobridobrev.com/api/v1/tvseries?page=1",
-    "last": "https://api.dobridobrev.com/api/v1/tvseries?page=3",
-    "prev": null,
-    "next": "https://api.dobridobrev.com/api/v1/tvseries?page=2"
-  },
-  "meta": {
-    "current_page": 1,
-    "per_page": 20,
-    "total": 45
-  }
-}
-3. VISUALIZZARE DETTAGLI TV SERIES
-Endpoint
-GET /api/v1/tvseries/{id}
-Response Completa (200)
-json
+Content-Type: multipart/form-data
+```
+
+## STRUTTURA RESPONSE API GET TV SERIES DETAILS
+
+### GET /api/v1/tvseries/{id}
+
+```json
 {
   "data": {
-    "tv_series_id": 31,
-    "title": "Breaking Bad",
-    "description": "A high school chemistry teacher diagnosed with inoperable lung cancer...",
-    "year": 2008,
-    "imdb_rating": 9.5,
-    "total_seasons": 5,
-    "total_episodes": 62,
-    "status": "published",
+    "tv_series_id": 38,
+    "title": "Nome Serie TV",
+    "year": 2024,
+    "imdb_rating": 8.5,
+    "total_seasons": 1,
+    "total_episodes": 10,
+    "status": "ongoing",
     "category": {
-      "id": 1,
-      "name": "Drama"
+      "id": 4,
+      "name": "thriller"
     },
     "poster": {
-      "url": "https://api.dobridobrev.com/storage/images/poster/breaking-bad.jpg",
+      "url": "https://api.dobridobrev.com/storage/images/poster/filename.jpg",
       "sizes": {
         "w92": "...",
+        "w154": "...",
         "w185": "...",
         "w342": "...",
         "w500": "...",
+        "w780": "...",
         "original": "..."
       },
-      "width": 500,
-      "height": 750,
+      "width": 960,
+      "height": 960,
       "format": "jpg"
     },
+    "description": "Descrizione della serie TV",
     "backdrop": {
-      "url": "https://api.dobridobrev.com/storage/images/backdrop/breaking-bad-bg.jpg",
+      "url": "https://api.dobridobrev.com/storage/images/backdrop/filename.png",
       "sizes": {
         "w300": "...",
         "w780": "...",
         "w1280": "...",
         "original": "..."
       },
-      "width": 1920,
-      "height": 1080,
-      "format": "jpg"
+      "width": 896,
+      "height": 326,
+      "format": "png"
     },
     "persons": [
       {
-        "person_id": 1,
-        "name": "Bryan Cranston",
-        "profile_image": {
-          "url": "https://api.dobridobrev.com/storage/images/persons/bryan-cranston.jpg",
-          "sizes": {
-            "w45": "...",
-            "w185": "...",
-            "h632": "...",
-            "original": "..."
-          }
-        }
-      },
-      {
-        "person_id": 2,
-        "name": "Aaron Paul",
-        "profile_image": {
-          "url": "https://api.dobridobrev.com/storage/images/persons/aaron-paul.jpg",
-          "sizes": {
-            "w45": "...",
-            "original": "..."
-          }
-        }
+        "person_id": 17,
+        "name": "Nome Attore",
+        "profile_image": "images/persons/filename.jpg",
+        "profile_image_full": "https://api.dobridobrev.com/storage/images/persons/filename.jpg",
+        "image_id": 25
       }
     ],
-    "trailers": [
-      {
-        "trailer_id": 1,
-        "title": "Breaking Bad Official Trailer",
-        "url": "https://www.youtube.com/watch?v=HhesaQXLuRY",
-        "type": "youtube"
-      }
-    ],
+    "trailers": [],
     "video_files": [
       {
-        "video_file_id": 1,
-        "title": "Breaking Bad - Trailer",
+        "video_file_id": 123,
+        "title": "Nome Serie - Trailer",
         "format": "mp4",
         "resolution": "1920x1080",
-        "stream_url": "https://api.dobridobrev.com/api/v1/stream-video/breaking-bad-trailer.mp4",
-        "public_stream_url": "https://api.dobridobrev.com/api/v1/public-video/breaking-bad-trailer.mp4",
+        "stream_url": "https://api.dobridobrev.com/api/v1/stream-video/filename.mp4",
+        "public_stream_url": "https://api.dobridobrev.com/api/v1/public-video/filename.mp4",
         "type": "local"
       }
     ],
     "seasons": [
       {
-        "season_id": 1,
+        "season_id": 370,
         "season_number": 1,
-        "year": 2008,
-        "total_episodes": 7,
+        "name": "Stagione 1",
+        "overview": "Descrizione stagione",
+        "total_episodes": 1,
+        "year": "2024",
+        "premiere_date": "2024-01-01",
         "episodes": [
           {
-            "episode_id": 1,
-            "title": "Pilot",
+            "episode_id": 17361,
+            "title": "Episodio 1",
+            "description": "Descrizione episodio",
             "episode_number": 1,
-            "duration": 58,
-            "air_date": "2008-01-20",
+            "duration": 45,
+            "air_date": "2024-01-01",
+            "status": "published",
             "still": {
-              "url": "https://api.dobridobrev.com/storage/images/still/bb-s1e1.jpg",
+              "url": "https://api.dobridobrev.com/storage/images/still/filename.jpg",
               "sizes": {
                 "w92": "...",
                 "w185": "...",
                 "w300": "...",
                 "original": "..."
               },
-              "width": 1920,
-              "height": 1080,
+              "width": 960,
+              "height": 960,
               "format": "jpg"
             },
             "video_files": [
               {
-                "video_file_id": 2,
-                "title": "Breaking Bad S01E01",
+                "video_file_id": 447,
+                "title": "Episodio 1 - Episode 1",
                 "format": "mp4",
                 "resolution": "1920x1080",
-                "stream_url": "https://api.dobridobrev.com/api/v1/stream-video/bb-s1e1.mp4",
-                "public_stream_url": "https://api.dobridobrev.com/api/v1/public-video/bb-s1e1.mp4",
+                "stream_url": "https://api.dobridobrev.com/api/v1/stream-video/filename.mp4",
+                "public_stream_url": "https://api.dobridobrev.com/api/v1/public-video/filename.mp4",
                 "type": "local"
               }
             ]
@@ -254,785 +127,325 @@ json
     ]
   }
 }
-4. AGGIORNARE TV SERIES (Parziale)
-Endpoint
-PUT /api/v1/tvseries/{id}
-Headers
-Authorization: Bearer {admin_token}
-Content-Type: multipart/form-data
-Request Body (Solo campi da aggiornare)
-javascript
+```
+
+## FORMATO RICHIESTA UPDATE
+
+### FormData per UPDATE TV Series
+
+```javascript
 const formData = new FormData();
 
-// Aggiorna solo i campi necessari
-formData.append('title', 'Breaking Bad - Updated Title');
-formData.append('imdb_rating', '9.6');
-formData.append('total_episodes', '65');
+// CAMPI BASE (TUTTI REQUIRED PER PRECOMPILAZIONE)
+formData.append('title', 'Nuovo Titolo');
+formData.append('year', '2024');
+formData.append('imdb_rating', '8.5');  // IMPORTANTE: inviare sempre
+formData.append('total_seasons', '1');
+formData.append('total_episodes', '10'); // IMPORTANTE: inviare sempre
+formData.append('status', 'ongoing');    // ongoing|ended|canceled|unknown|published|draft|upcoming
+formData.append('category_id', '4');
+formData.append('description', 'Nuova descrizione');
 
-// Aggiorna poster (opzionale)
-formData.append('poster', 'https://api.dobridobrev.com/storage/images/poster/bb-new.jpg');
+// PERSONS (CAST) - Array di person_id
+formData.append('persons[]', '17');
+formData.append('persons[]', '25');
 
-// Aggiorna backdrop (opzionale)
-formData.append('backdrop', 'https://api.dobridobrev.com/storage/images/backdrop/bb-new-bg.jpg');
-
-// Sostituisci trailer video (opzionale)
-formData.append('trailer_video', newTrailerFile);
-
-// Sostituisci completamente gli attori (opzionale)
-formData.append('persons[]', '1');
-formData.append('persons[]', '2');
-formData.append('persons[]', '4'); // Nuovo attore
-Response Success (200)
-json
-{
-  "success": true,
-  "message": "TV Series successfully updated",
-  "data": {
-    "tv_series": {
-      "tv_series_id": 31,
-      "title": "Breaking Bad - Updated Title",
-      "imdb_rating": 9.6,
-      "total_episodes": 65,
-      // ... altri campi aggiornati
-    }
-  }
+// FILE UPLOADS (OPZIONALI PER UPDATE)
+if (posterFile) {
+  formData.append('poster_image', posterFile);
 }
-5. CODICE ANGULAR COMPLETO
-Fornire esempi Angular completi per tutti i casi d'uso
-
-Service TypeScript
-typescript
-import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
-
-export interface TvSeries {
-  tv_series_id: number;
-  title: string;
-  description?: string;
-  year: number;
-  imdb_rating?: number;
-  total_seasons?: number;
-  total_episodes?: number;
-  status: 'published' | 'draft' | 'scheduled' | 'coming soon';
-  category: {
-    id: number;
-    name: string;
-  };
-  poster: ImageData;
-  backdrop?: ImageData;
-  persons?: Person[];
-  trailers?: Trailer[];
-  video_files?: VideoFile[];
-  seasons?: Season[];
+if (backdropFile) {
+  formData.append('backdrop_image', backdropFile);
+}
+if (trailerFile) {
+  formData.append('trailer_video', trailerFile);
 }
 
-export interface CreateTvSeriesRequest {
-  title: string;
-  description: string;
-  year: number;
-  status: 'published' | 'draft' | 'scheduled' | 'coming soon';
-  category_id: number;
-  poster: string;
-  backdrop: string;
-  slug?: string;
-  imdb_rating?: number;
-  total_seasons?: number;
-  total_episodes?: number;
-  premiere_date?: string;
-  trailer_video?: File;
-  persons?: number[];
-  trailers?: {title: string, url: string}[];
+// SEASONS E EPISODES
+formData.append('seasons[0][season_number]', '1');
+formData.append('seasons[0][name]', 'Stagione 1');
+formData.append('seasons[0][total_episodes]', '1');
+formData.append('seasons[0][year]', '2024');
+
+// EPISODES
+formData.append('seasons[0][episodes][0][episode_id]', '17361'); // Per update esistente
+formData.append('seasons[0][episodes][0][title]', 'Nuovo Titolo Episodio');
+formData.append('seasons[0][episodes][0][description]', 'Nuova descrizione');
+formData.append('seasons[0][episodes][0][episode_number]', '1');
+formData.append('seasons[0][episodes][0][duration]', '45');
+formData.append('seasons[0][episodes][0][status]', 'published');
+
+// FILE UPLOADS EPISODI (OPZIONALI)
+if (episodeVideoFile) {
+  formData.append('seasons[0][episodes][0][episode_video]', episodeVideoFile);
+}
+if (stillImageFile) {
+  formData.append('seasons[0][episodes][0][still_image]', stillImageFile);
+}
+```
+
+## PRECOMPILAZIONE FORM ANGULAR
+
+### 1. Caricare Dati TV Series
+
+```typescript
+// Nel componente edit
+ngOnInit() {
+  const tvSeriesId = this.route.snapshot.params['id'];
+  this.loadTvSeriesData(tvSeriesId);
 }
 
-export interface UpdateTvSeriesRequest {
-  title?: string;
-  description?: string;
-  year?: number;
-  status?: 'published' | 'draft' | 'scheduled' | 'coming soon';
-  category_id?: number;
-  poster?: string;
-  backdrop?: string;
-  slug?: string;
-  imdb_rating?: number;
-  total_seasons?: number;
-  total_episodes?: number;
-  premiere_date?: string;
-  trailer_video?: File;
-  persons?: number[];
+loadTvSeriesData(id: number) {
+  this.tvSeriesService.getTvSeriesDetails(id).subscribe(response => {
+    this.precompileForm(response.data);
+  });
 }
+```
 
-@Injectable({
-  providedIn: 'root'
-})
-export class TvSeriesService {
-  private apiUrl = 'https://api.dobridobrev.com/api/v1';
+### 2. Precompilare Form con Tutti i Campi
 
-  constructor(private http: HttpClient) {}
+```typescript
+precompileForm(tvSeries: any) {
+  // CAMPI BASE
+  this.tvSeriesForm.patchValue({
+    title: tvSeries.title,
+    year: tvSeries.year,
+    imdb_rating: tvSeries.imdb_rating,        // IMPORTANTE
+    total_seasons: tvSeries.total_seasons,
+    total_episodes: tvSeries.total_episodes,  // IMPORTANTE
+    status: tvSeries.status,                  // IMPORTANTE per dropdown
+    category_id: tvSeries.category?.id,
+    description: tvSeries.description
+  });
 
-  // Lista TV Series con filtri
-  getTvSeriesList(filters?: any): Observable<TvSeries[]> {
-    let params = '';
-    if (filters) {
-      const queryParams = new URLSearchParams();
-      Object.keys(filters).forEach(key => {
-        if (filters[key]) {
-          queryParams.append(key, filters[key]);
-        }
-      });
-      params = queryParams.toString() ? `?${queryParams.toString()}` : '';
-    }
-    
-    return this.http.get<{data: TvSeries[]}>(`${this.apiUrl}/tvseries${params}`)
-      .pipe(map(response => response.data));
-  }
-
-  // Dettaglio TV Series completo
-  getTvSeriesDetails(id: number): Observable<TvSeries> {
-    return this.http.get<{data: TvSeries}>(`${this.apiUrl}/tvseries/${id}`)
-      .pipe(map(response => response.data));
-  }
-
-  // Crea TV Series completa
-  createTvSeries(tvSeriesData: CreateTvSeriesRequest): Observable<any> {
-    const formData = this.buildCreateFormData(tvSeriesData);
-    return this.http.post(`${this.apiUrl}/tvseries`, formData);
-  }
-
-  // Aggiorna TV Series (parziale)
-  updateTvSeries(id: number, tvSeriesData: UpdateTvSeriesRequest): Observable<any> {
-    const formData = this.buildUpdateFormData(tvSeriesData);
-    return this.http.put(`${this.apiUrl}/tvseries/${id}`, formData);
-  }
-
-  // Elimina TV Series
-  deleteTvSeries(id: number): Observable<any> {
-    return this.http.delete(`${this.apiUrl}/tvseries/${id}`);
-  }
-
-  private buildCreateFormData(data: CreateTvSeriesRequest): FormData {
-    const formData = new FormData();
-    
-    // Campi obbligatori
-    formData.append('title', data.title);
-    formData.append('description', data.description);
-    formData.append('year', data.year.toString());
-    formData.append('status', data.status);
-    formData.append('category_id', data.category_id.toString());
-    formData.append('poster', data.poster);
-    formData.append('backdrop', data.backdrop);
-    
-    // Campi opzionali
-    if (data.slug) formData.append('slug', data.slug);
-    if (data.imdb_rating) formData.append('imdb_rating', data.imdb_rating.toString());
-    if (data.total_seasons) formData.append('total_seasons', data.total_seasons.toString());
-    if (data.total_episodes) formData.append('total_episodes', data.total_episodes.toString());
-    if (data.premiere_date) formData.append('premiere_date', data.premiere_date);
-    
-    // File trailer
-    if (data.trailer_video) {
-      formData.append('trailer_video', data.trailer_video);
-    }
-    
-    // Attori
-    if (data.persons && data.persons.length > 0) {
-      data.persons.forEach(personId => {
-        formData.append('persons[]', personId.toString());
-      });
-    }
-    
-    // Trailer YouTube
-    if (data.trailers && data.trailers.length > 0) {
-      data.trailers.forEach((trailer, index) => {
-        formData.append([trailers[${index}][title]](cci:1://file:///c:/Users/Dobri/Desktop/sessione4/sessione4-main/app/Models/TvSerie.php:52:5-57:5), trailer.title);
-        formData.append([trailers[${index}][url]](cci:1://file:///c:/Users/Dobri/Desktop/sessione4/sessione4-main/app/Models/TvSerie.php:52:5-57:5), trailer.url);
-      });
-    }
-    
-    return formData;
-  }
-
-  private buildUpdateFormData(data: UpdateTvSeriesRequest): FormData {
-    const formData = new FormData();
-    
-    // Solo campi forniti
-    Object.keys(data).forEach(key => {
-      const value = (data as any)[key];
-      if (value !== null && value !== undefined) {
-        if (key === 'persons' && Array.isArray(value)) {
-          value.forEach((personId: number) => {
-            formData.append('persons[]', personId.toString());
-          });
-        } else if (key === 'trailer_video' && value instanceof File) {
-          formData.append('trailer_video', value);
-        } else if (typeof value !== 'object') {
-          formData.append(key, value.toString());
-        }
-      }
-    });
-    
-    return formData;
-  }
-}
-Component TypeScript
-typescript
-import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Router, ActivatedRoute } from '@angular/router';
-import { TvSeriesService, TvSeries, CreateTvSeriesRequest, UpdateTvSeriesRequest } from './tv-series.service';
-
-@Component({
-  selector: 'app-tv-series',
-  templateUrl: './tv-series.component.html'
-})
-export class TvSeriesComponent implements OnInit {
-  tvSeriesList: TvSeries[] = [];
-  selectedSeries: TvSeries | null = null;
-  tvSeriesForm: FormGroup;
-  isEditMode = false;
-  loading = false;
-  selectedTrailerFile: File | null = null;
-
-  constructor(
-    private tvSeriesService: TvSeriesService,
-    private fb: FormBuilder,
-    private router: Router,
-    private route: ActivatedRoute
-  ) {
-    this.tvSeriesForm = this.createForm();
-  }
-
-  ngOnInit() {
-    this.loadTvSeriesList();
-    
-    // Se c'è un ID nella route, carica i dettagli
-    const id = this.route.snapshot.params['id'];
-    if (id) {
-      this.loadSeriesDetails(+id);
-      this.isEditMode = true;
-    }
-  }
-
-  createForm(): FormGroup {
-    return this.fb.group({
-      title: ['', [Validators.required, Validators.maxLength(255)]],
-      description: ['', Validators.required],
-      year: ['', [Validators.required, Validators.min(1900), Validators.max(2030)]],
-      status: ['published', Validators.required],
-      category_id: ['', Validators.required],
-      poster: ['', [Validators.required, Validators.pattern('https?://.+')]],
-      backdrop: ['', [Validators.required, Validators.pattern('https?://.+')]],
-      slug: [''],
-      imdb_rating: ['', [Validators.min(0), Validators.max(10)]],
-      total_seasons: ['', Validators.min(1)],
-      total_episodes: ['', Validators.min(1)],
-      premiere_date: [''],
-      persons: [[]],
-      trailers: [[]]
-    });
-  }
-
-  // Carica lista TV Series
-  loadTvSeriesList(filters?: any) {
-    this.loading = true;
-    this.tvSeriesService.getTvSeriesList(filters).subscribe({
-      next: (series) => {
-        this.tvSeriesList = series;
-        this.loading = false;
-      },
-      error: (error) => {
-        console.error('Error loading TV series:', error);
-        this.loading = false;
-      }
-    });
-  }
-
-  // Carica dettagli TV Series
-  loadSeriesDetails(id: number) {
-    this.loading = true;
-    this.tvSeriesService.getTvSeriesDetails(id).subscribe({
-      next: (series) => {
-        this.selectedSeries = series;
-        if (this.isEditMode) {
-          this.populateForm(series);
-        }
-        this.loading = false;
-      },
-      error: (error) => {
-        console.error('Error loading series details:', error);
-        this.loading = false;
-      }
-    });
-  }
-
-  // Popola form per modifica
-  populateForm(series: TvSeries) {
+  // PRECOMPILARE CAST (PERSONS)
+  if (tvSeries.persons && tvSeries.persons.length > 0) {
+    const selectedPersons = tvSeries.persons.map(p => p.person_id);
     this.tvSeriesForm.patchValue({
-      title: series.title,
-      description: series.description,
-      year: series.year,
-      status: series.status,
-      category_id: series.category.id,
-      poster: series.poster?.url,
-      backdrop: series.backdrop?.url,
-      imdb_rating: series.imdb_rating,
-      total_seasons: series.total_seasons,
-      total_episodes: series.total_episodes,
-      persons: series.persons?.map(p => p.person_id) || []
+      persons: selectedPersons
     });
   }
 
-  // Gestione selezione trailer file
-  onTrailerFileSelected(event: any) {
-    const file = event.target.files[0];
-    if (file) {
-      // Validazione file
-      const validFormats = ['mp4', 'webm', 'ogg', 'mov'];
-      const fileExtension = file.name.split('.').pop()?.toLowerCase();
-      
-      if (!validFormats.includes(fileExtension || '')) {
-        alert('Formato file non supportato. Usa: mp4, webm, ogg, mov');
-        return;
+  // PRECOMPILARE POSTER
+  if (tvSeries.poster) {
+    this.posterPreviewUrl = tvSeries.poster.url;
+    this.tvSeriesForm.patchValue({
+      poster: {
+        url: tvSeries.poster.url,
+        width: tvSeries.poster.width,
+        height: tvSeries.poster.height
       }
-      
-      if (file.size > 512 * 1024 * 1024) { // 512MB
-        alert('File troppo grande. Massimo 512MB');
-        return;
+    });
+  }
+
+  // PRECOMPILARE BACKDROP
+  if (tvSeries.backdrop) {
+    this.backdropPreviewUrl = tvSeries.backdrop.url;
+    this.tvSeriesForm.patchValue({
+      backdrop: {
+        url: tvSeries.backdrop.url,
+        width: tvSeries.backdrop.width,
+        height: tvSeries.backdrop.height
       }
-      
-      this.selectedTrailerFile = file;
+    });
+  }
+
+  // PRECOMPILARE TRAILER VIDEO
+  if (tvSeries.video_files && tvSeries.video_files.length > 0) {
+    const trailer = tvSeries.video_files.find(v => v.title.includes('Trailer'));
+    if (trailer) {
+      this.trailerVideoUrl = trailer.stream_url;
+      this.showWatchTrailerButton = true;
     }
   }
 
-  // Crea TV Series
-  createSeries() {
-    if (this.tvSeriesForm.invalid) {
-      this.markFormGroupTouched();
-      return;
-    }
-
-    const formValue = this.tvSeriesForm.value;
-    const createRequest: CreateTvSeriesRequest = {
-      ...formValue,
-      trailer_video: this.selectedTrailerFile || undefined
-    };
-
-    this.loading = true;
-    this.tvSeriesService.createTvSeries(createRequest).subscribe({
-      next: (response) => {
-        console.log('TV Series created:', response);
-        this.router.navigate(['/admin/tvseries']);
-        this.loadTvSeriesList(); // Ricarica lista
-        this.loading = false;
-      },
-      error: (error) => {
-        console.error('Error creating series:', error);
-        this.handleApiError(error);
-        this.loading = false;
-      }
-    });
+  // PRECOMPILARE SEASONS
+  if (tvSeries.seasons && tvSeries.seasons.length > 0) {
+    this.precompileSeasons(tvSeries.seasons);
   }
+}
+```
 
-  // Aggiorna TV Series
-  updateSeries() {
-    if (!this.selectedSeries) return;
+### 3. Precompilare Seasons e Episodes
 
-    const formValue = this.tvSeriesForm.value;
-    const updateRequest: UpdateTvSeriesRequest = {
-      ...formValue,
-      trailer_video: this.selectedTrailerFile || undefined
-    };
+```typescript
+precompileSeasons(seasons: any[]) {
+  const seasonsFormArray = this.tvSeriesForm.get('seasons') as FormArray;
+  seasonsFormArray.clear();
 
-    this.loading = true;
-    this.tvSeriesService.updateTvSeries(this.selectedSeries.tv_series_id, updateRequest).subscribe({
-      next: (response) => {
-        console.log('TV Series updated:', response);
-        this.loadSeriesDetails(this.selectedSeries!.tv_series_id);
-        this.loading = false;
-      },
-      error: (error) => {
-        console.error('Error updating series:', error);
-        this.handleApiError(error);
-        this.loading = false;
-      }
+  seasons.forEach(season => {
+    const seasonGroup = this.fb.group({
+      season_id: [season.season_id],
+      season_number: [season.season_number],
+      name: [season.name],
+      total_episodes: [season.total_episodes],
+      year: [season.year],
+      episodes: this.fb.array([])
     });
-  }
 
-  // Elimina TV Series
-  deleteSeries(id: number) {
-    if (confirm('Sei sicuro di voler eliminare questa serie TV?')) {
-      this.loading = true;
-      this.tvSeriesService.deleteTvSeries(id).subscribe({
-        next: () => {
-          console.log('TV Series deleted');
-          this.loadTvSeriesList();
-          this.loading = false;
-        },
-        error: (error) => {
-          console.error('Error deleting series:', error);
-          this.loading = false;
+    // Precompilare episodes
+    if (season.episodes && season.episodes.length > 0) {
+      const episodesArray = seasonGroup.get('episodes') as FormArray;
+      
+      season.episodes.forEach(episode => {
+        const episodeGroup = this.fb.group({
+          episode_id: [episode.episode_id],      // IMPORTANTE per update
+          title: [episode.title],
+          description: [episode.description],
+          episode_number: [episode.episode_number],
+          duration: [episode.duration],
+          status: [episode.status]
+        });
+
+        // Precompilare episode video
+        if (episode.video_files && episode.video_files.length > 0) {
+          this.episodeVideoUrls[episode.episode_id] = episode.video_files[0].stream_url;
         }
+
+        // Precompilare still image
+        if (episode.still) {
+          this.episodeStillUrls[episode.episode_id] = episode.still.url;
+        }
+
+        episodesArray.push(episodeGroup);
       });
     }
-  }
 
-  // Submit form
-  onSubmit() {
-    if (this.isEditMode) {
-      this.updateSeries();
-    } else {
-      this.createSeries();
+    seasonsFormArray.push(seasonGroup);
+  });
+}
+```
+
+### 4. Gestire Update Response
+
+```typescript
+updateTvSeries() {
+  const formData = this.buildFormData();
+  
+  this.tvSeriesService.updateTvSeries(this.tvSeriesId, formData).subscribe({
+    next: (response) => {
+      // AGGIORNARE UI CON NUOVI DATI
+      this.precompileForm(response.tv_series);
+      
+      // MOSTRARE MESSAGGIO SUCCESSO
+      this.showSuccessMessage('TV Series aggiornata con successo');
+      
+      // AGGIORNARE PREVIEW URLS
+      this.updatePreviewUrls(response.tv_series);
+    },
+    error: (error) => {
+      console.error('Errore update:', error);
+    }
+  });
+}
+
+updatePreviewUrls(tvSeries: any) {
+  // Aggiornare poster preview
+  if (tvSeries.poster) {
+    this.posterPreviewUrl = tvSeries.poster.url;
+  }
+  
+  // Aggiornare backdrop preview
+  if (tvSeries.backdrop) {
+    this.backdropPreviewUrl = tvSeries.backdrop.url;
+  }
+  
+  // Aggiornare trailer video
+  if (tvSeries.video_files && tvSeries.video_files.length > 0) {
+    const trailer = tvSeries.video_files.find(v => v.title.includes('Trailer'));
+    if (trailer) {
+      this.trailerVideoUrl = trailer.stream_url;
+      this.showWatchTrailerButton = true;
     }
   }
+}
+```
 
-  // Utility methods
-  private markFormGroupTouched() {
-    Object.keys(this.tvSeriesForm.controls).forEach(key => {
-      this.tvSeriesForm.get(key)?.markAsTouched();
+## CAMPI OBBLIGATORI PER EVITARE NULL
+
+### Nel FormData di Update, SEMPRE includere:
+
+1. **`imdb_rating`** - Anche se vuoto, inviare `''` o valore esistente
+2. **`total_episodes`** - Sempre inviare valore numerico o esistente
+3. **`status`** - Sempre inviare uno dei valori validi
+4. **`persons`** - Sempre inviare array (anche vuoto `[]`)
+
+### Esempio Controllo Pre-Invio:
+
+```typescript
+buildFormData(): FormData {
+  const formData = new FormData();
+  const formValue = this.tvSeriesForm.value;
+  
+  // SEMPRE includere questi campi
+  formData.append('imdb_rating', formValue.imdb_rating || '');
+  formData.append('total_episodes', formValue.total_episodes || '0');
+  formData.append('status', formValue.status || 'ongoing');
+  
+  // Persons array
+  if (formValue.persons && formValue.persons.length > 0) {
+    formValue.persons.forEach(personId => {
+      formData.append('persons[]', personId.toString());
     });
   }
-
-  private handleApiError(error: any) {
-    if (error.status === 422) {
-      // Errori di validazione
-      const errors = error.error.errors;
-      Object.keys(errors).forEach(field => {
-        const control = this.tvSeriesForm.get(field);
-        if (control) {
-          control.setErrors({ serverError: errors[field][0] });
-        }
-      });
-    } else {
-      alert('Errore durante l\'operazione. Riprova.');
-    }
-  }
-
-  // Getter per template
-  get f() { return this.tvSeriesForm.controls; }
-}
-Template HTML
-html
-<!-- Lista TV Series -->
-<div *ngIf="!isEditMode" class="tv-series-list">
-  <h2>TV Series</h2>
   
-  <div class="series-grid">
-    <div *ngFor="let series of tvSeriesList" class="series-card">
-      <img [src]="series.poster?.sizes?.w342 || series.poster?.url" 
-           [alt]="series.title" class="poster">
-      <h3>{{ series.title }}</h3>
-      <p>{{ series.year }} • {{ series.total_seasons }} stagioni</p>
-      <p>Rating: {{ series.imdb_rating }}/10</p>
-      <div class="actions">
-        <button (click)="loadSeriesDetails(series.tv_series_id)">Dettagli</button>
-        <button (click)="router.navigate(['/admin/tvseries/edit', series.tv_series_id])">Modifica</button>
-        <button (click)="deleteSeries(series.tv_series_id)" class="danger">Elimina</button>
-      </div>
-    </div>
-  </div>
-</div>
+  return formData;
+}
+```
 
-<!-- Form Crea/Modifica -->
-<div *ngIf="isEditMode" class="tv-series-form">
-  <h2>{{ selectedSeries ? 'Modifica' : 'Crea' }} TV Series</h2>
+## GESTIONE PROGRESS BAR UPLOAD
+
+### Per Upload con Percentuali:
+
+```typescript
+updateTvSeries() {
+  const formData = this.buildFormData();
   
-  <form [formGroup]="tvSeriesForm" (ngSubmit)="onSubmit()">
-    <div class="form-group">
-      <label>Titolo *</label>
-      <input formControlName="title" type="text" class="form-control">
-      <div *ngIf="f['title'].touched && f['title'].errors" class="error">
-        Titolo obbligatorio
-      </div>
-    </div>
-
-    <div class="form-group">
-      <label>Descrizione *</label>
-      <textarea formControlName="description" class="form-control" rows="4"></textarea>
-    </div>
-
-    <div class="form-row">
-      <div class="form-group">
-        <label>Anno *</label>
-        <input formControlName="year" type="number" class="form-control">
-      </div>
-      
-      <div class="form-group">
-        <label>Stato *</label>
-        <select formControlName="status" class="form-control">
-          <option value="published">Pubblicato</option>
-          <option value="draft">Bozza</option>
-          <option value="scheduled">Programmato</option>
-          <option value="coming soon">Prossimamente</option>
-        </select>
-      </div>
-    </div>
-
-    <div class="form-group">
-      <label>URL Poster *</label>
-      <input formControlName="poster" type="url" class="form-control" 
-             placeholder="https://api.dobridobrev.com/storage/images/poster/...">
-    </div>
-
-    <div class="form-group">
-      <label>URL Backdrop *</label>
-      <input formControlName="backdrop" type="url" class="form-control"
-             placeholder="https://api.dobridobrev.com/storage/images/backdrop/...">
-    </div>
-
-    <div class="form-group">
-      <label>Trailer Video (File)</label>
-      <input type="file" (change)="onTrailerFileSelected($event)" 
-             accept="video/mp4,video/webm,video/ogg,video/mov">
-      <small>Formati supportati: MP4, WebM, OGG, MOV. Max 512MB</small>
-    </div>
-
-    <div class="form-row">
-      <div class="form-group">
-        <label>Rating IMDB</label>
-        <input formControlName="imdb_rating" type="number" 
-               step="0.1" min="0" max="10" class="form-control">
-      </div>
-      
-      <div class="form-group">
-        <label>Stagioni</label>
-        <input formControlName="total_seasons" type="number" class="form-control">
-      </div>
-      
-      <div class="form-group">
-        <label>Episodi</label>
-        <input formControlName="total_episodes" type="number" class="form-control">
-      </div>
-    </div>
-
-    <div class="form-actions">
-      <button type="submit" [disabled]="loading" class="btn-primary">
-        {{ loading ? 'Salvando...' : (selectedSeries ? 'Aggiorna' : 'Crea') }}
-      </button>
-      <button type="button" (click)="router.navigate(['/admin/tvseries'])" class="btn-secondary">
-        Annulla
-      </button>
-    </div>
-  </form>
-</div>
-
-<!-- Dettagli TV Series -->
-<div *ngIf="selectedSeries && !isEditMode" class="tv-series-details">
-  <div class="backdrop" [style.background-image]="'url(' + selectedSeries.backdrop?.url + ')'">
-    <div class="content">
-      <img [src]="selectedSeries.poster?.sizes?.w500" [alt]="selectedSeries.title" class="poster">
-      <div class="info">
-        <h1>{{ selectedSeries.title }}</h1>
-        <p class="meta">{{ selectedSeries.year }} • {{ selectedSeries.total_seasons }} stagioni • {{ selectedSeries.total_episodes }} episodi</p>
-        <p class="rating">⭐ {{ selectedSeries.imdb_rating }}/10</p>
-        <p class="description">{{ selectedSeries.description }}</p>
-        
-        <div class="cast" *ngIf="selectedSeries.persons?.length">
-          <h3>Cast</h3>
-          <div class="cast-list">
-            <div *ngFor="let person of selectedSeries.persons" class="cast-member">
-              <img [src]="person.profile_image?.sizes?.w185" [alt]="person.name">
-              <span>{{ person.name }}</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="seasons" *ngIf="selectedSeries.seasons?.length">
-    <h2>Stagioni</h2>
-    <div *ngFor="let season of selectedSeries.seasons" class="season">
-      <h3>Stagione {{ season.season_number }}</h3>
-      <div class="episodes">
-        <div *ngFor="let episode of season.episodes" class="episode">
-          <img [src]="episode.still?.sizes?.w185" [alt]="episode.title">
-          <div class="episode-info">
-            <h4>{{ episode.episode_number }}. {{ episode.title }}</h4>
-            <p>{{ episode.duration }} min</p>
-            <button *ngIf="episode.video_files?.length" 
-                    (click)="playEpisode(episode)">
-              ▶ Riproduci
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-
-DOCUMENTAZIONE COMPLETA TV SERIES API - OPERAZIONI CRUD
-RIEPILOGO ENDPOINT
-Operazione	Endpoint	Metodo	Autorizzazione
-Crea TV Series	/api/v1/tvseries	POST	Solo Admin
-Lista TV Series	/api/v1/tvseries	GET	Admin + User
-Dettagli TV Series	/api/v1/tvseries/{id}	GET	Admin + User
-Aggiorna TV Series	/api/v1/tvseries/{id}	PUT	Solo Admin
-Elimina TV Series	/api/v1/tvseries/{id}	DELETE	Solo Admin
-VALIDAZIONE CAMPI
-Campi Obbligatori (CREATE)
-title - string, max 255 caratteri
-description - string, testo lungo
-year - integer, anno di uscita
-status - enum: published, draft, scheduled, coming soon
-category_id - integer, deve esistere in tabella categories
-poster - string, URL valido
-backdrop - string, URL valido
-Campi Opzionali (CREATE)
-slug - string, max 128 caratteri
-imdb_rating - float, tra 0 e 10
-total_seasons - integer, numero stagioni
-total_episodes - integer, numero episodi totali
-premiere_date - date, formato YYYY-MM-DD
-trailer_video - file, formati: mp4,webm,ogg,mov (max 512MB)
-persons[]
- - array di person_id esistenti
-trailers[]
- - array con oggetti {title, url} per YouTube
-UPDATE (Tutti Opzionali)
-Stessi campi del CREATE ma tutti nullable
-Aggiornamento parziale - solo campi forniti vengono modificati
-poster/backdrop sostituiscono completamente le immagini esistenti
-persons[]
- sostituisce completamente la lista attori
-trailer_video sostituisce il trailer esistente
-ESEMPI PRATICI WORKFLOW
-1. Workflow Creazione Completa
-javascript
-// 1. Prepara dati
-const createData = {
-  title: 'Breaking Bad',
-  description: 'A high school chemistry teacher...',
-  year: 2008,
-  status: 'published',
-  category_id: 1,
-  poster: 'https://api.dobridobrev.com/storage/images/poster/bb.jpg',
-  backdrop: 'https://api.dobridobrev.com/storage/images/backdrop/bb-bg.jpg',
-  imdb_rating: 9.5,
-  total_seasons: 5,
-  total_episodes: 62,
-  premiere_date: '2008-01-20',
-  trailer_video: trailerFile, // File object
-  persons: [1, 2, 3], // Bryan Cranston, Aaron Paul, Anna Gunn
-  trailers: [
-    {title: 'Official Trailer', url: 'https://youtube.com/watch?v=abc'},
-    {title: 'Season 5 Trailer', url: 'https://youtube.com/watch?v=def'}
-  ]
-};
-
-// 2. Crea serie
-this.tvSeriesService.createTvSeries(createData).subscribe({
-  next: (response) => {
-    console.log('Serie creata:', response.data.tv_series);
-    // Redirect alla lista o ai dettagli
-  },
-  error: (error) => this.handleError(error)
-});
-2. Workflow Visualizzazione Lista
-javascript
-// Lista con filtri
-const filters = {
-  status: 'published',
-  category_id: 1,
-  year: 2008
-};
-
-this.tvSeriesService.getTvSeriesList(filters).subscribe({
-  next: (seriesList) => {
-    this.tvSeriesList = seriesList;
-    // Ogni serie ha: id, title, year, poster, category, rating
-  }
-});
-3. Workflow Dettagli Completi
-javascript
-// Carica dettagli con tutto (stagioni, episodi, cast, trailer)
-this.tvSeriesService.getTvSeriesDetails(31).subscribe({
-  next: (series) => {
-    this.selectedSeries = series;
-    // Disponibili: description, backdrop, persons, trailers, video_files, seasons
-    console.log('Stagioni:', series.seasons);
-    console.log('Cast:', series.persons);
-    console.log('Trailer:', series.video_files);
-  }
-});
-4. Workflow Aggiornamento Parziale
-javascript
-// Aggiorna solo alcuni campi
-const updateData = {
-  title: 'Breaking Bad - Updated',
-  imdb_rating: 9.6,
-  poster: 'https://api.dobridobrev.com/storage/images/poster/bb-new.jpg',
-  persons: [1, 2, 4] // Cambia cast
-};
-
-this.tvSeriesService.updateTvSeries(31, updateData).subscribe({
-  next: (response) => {
-    console.log('Serie aggiornata:', response.data.tv_series);
-    // Ricarica dettagli per vedere le modifiche
-    this.loadSeriesDetails(31);
-  }
-});
-GESTIONE ERRORI
-Errori Comuni e Soluzioni
-422 - Validation Error
-
-json
-{
-  "message": "The given data was invalid.",
-  "errors": {
-    "title": ["The title field is required."],
-    "poster": ["The poster field must be a valid URL."],
-    "category_id": ["The selected category id is invalid."]
-  }
-}
-403 - Unauthorized
-
-json
-{
-  "message": "This action is unauthorized."
-}
-404 - Not Found
-
-json
-{
-  "message": "No query results for model [App\\Models\\TvSerie] 31"
-}
-Gestione in Angular
-typescript
-private handleApiError(error: any) {
-  if (error.status === 422) {
-    // Mostra errori di validazione nei campi del form
-    const errors = error.error.errors;
-    Object.keys(errors).forEach(field => {
-      const control = this.tvSeriesForm.get(field);
-      if (control) {
-        control.setErrors({ serverError: errors[field][0] });
+  this.http.put(`/api/v1/tvseries/${this.tvSeriesId}/complete`, formData, {
+    reportProgress: true,
+    observe: 'events'
+  }).subscribe({
+    next: (event) => {
+      if (event.type === HttpEventType.UploadProgress) {
+        const progress = Math.round(100 * event.loaded / event.total!);
+        this.uploadProgress = progress;
+      } else if (event.type === HttpEventType.Response) {
+        // Upload completato
+        this.handleUpdateSuccess(event.body);
       }
-    });
-  } else if (error.status === 403) {
-    this.showError('Non hai i permessi per questa operazione');
-  } else if (error.status === 404) {
-    this.showError('Serie TV non trovata');
-  } else {
-    this.showError('Errore del server. Riprova più tardi.');
+    }
+  });
+}
+```
+
+## WATCH TRAILER BUTTON
+
+### Nel Template TV Series Details:
+
+```html
+<button 
+  *ngIf="tvSeries.video_files && tvSeries.video_files.length > 0"
+  (click)="watchTrailer()"
+  class="btn btn-primary">
+  <i class="fas fa-play"></i> Watch Trailer
+</button>
+```
+
+### Nel Component:
+
+```typescript
+watchTrailer() {
+  const trailer = this.tvSeries.video_files.find(v => v.title.includes('Trailer'));
+  if (trailer) {
+    if (trailer.type === 'youtube') {
+      // Apri YouTube iframe
+      this.openYouTubePlayer(trailer.url);
+    } else {
+      // Apri video player locale
+      this.openVideoPlayer(trailer.stream_url);
+    }
   }
 }
-NOTE IMPORTANTI
-Upload File
-Trailer Video: Max 512MB, formati mp4/webm/ogg/mov
-Poster/Backdrop: Fornire URL, non file upload diretto
-Validazione: Frontend deve validare prima dell'invio
-Relazioni
-Persons: Array di ID esistenti, sostituisce completamente
-Trailers: Array di oggetti {title, url} per YouTube
-Categories: Deve esistere category_id valido
-Performance
-Lista: Solo dati essenziali + poster
-Dettagli: Eager loading completo con stagioni/episodi
-Paginazione: 20 elementi per pagina
-Autorizzazioni
-Admin: CRUD completo
-User: Solo lettura (GET)
-Token: Bearer token obbligatorio in header
-La documentazione è completa e il backend è perfettamente funzionante per tutti i casi d'uso TV Series.
+```
+
+Questa documentazione copre tutto quello che serve per precompilare correttamente il form e gestire gli update senza perdere dati.
