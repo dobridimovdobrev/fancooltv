@@ -18,10 +18,13 @@ export class TVSeriesService {
    * Load TV series with pagination and filters
    */
   loadTVSeries(params: Partial<PaginationParams> = { page: 1 }): Observable<TVSeries[]> {
+    console.log('TVSeriesService.loadTVSeries called with params:', params);
     this.loadingSubject.next(true);
     return this.apiService.getTVSeries(params).pipe(
       map((response: ApiResponse<TVSeries[]>) => {
+        console.log('TVSeriesService received response:', response);
         if (response && response.data) {
+          console.log('TVSeriesService returning data:', response.data);
           // Restituisci direttamente i dati
           return response.data;
         } else {
@@ -42,18 +45,63 @@ export class TVSeriesService {
    * Load TV series details by ID
    */
   loadTVSeriesDetails(seriesId: number): Observable<TVSeries> {
+    console.log('TVSeriesService.loadTVSeriesDetails called with ID:', seriesId);
     this.loadingSubject.next(true);
     return this.apiService.getTVSeriesDetails(seriesId).pipe(
-      map((response: ApiResponse<TVSeries>) => {
+      map((response: any) => {
+        console.log('TVSeriesService details response:', response);
+        console.log('Response structure:', JSON.stringify(response, null, 2));
+        
+        // Check if response has ApiResponse wrapper structure
         if (response && response.data) {
+          console.log('TVSeriesService returning wrapped data:', response.data);
+          const data = response.data;
+          if (!data.description && !data.backdrop && !data.persons && !data.trailers) {
+            console.warn('Backend returned incomplete TV series data - missing relations');
+            // Add default values for missing relations to prevent template errors
+            data.persons = data.persons || [];
+            data.trailers = data.trailers || [];
+            data.seasons = data.seasons || [];
+            data.description = data.description || 'Descrizione non disponibile';
+            data.backdrop = data.backdrop || null;
+          }
           return response.data;
-        } else {
+        } 
+        // Handle direct response without wrapper (current backend behavior)
+        else if (response && response.tv_series_id) {
+          console.log('TVSeriesService returning direct data:', response);
+          if (!response.description && !response.backdrop && !response.persons && !response.trailers) {
+            console.warn('Backend returned incomplete TV series data - missing relations');
+            // Add default values for missing relations to prevent template errors
+            response.persons = response.persons || [];
+            response.trailers = response.trailers || [];
+            response.seasons = response.seasons || [];
+            response.description = response.description || 'Descrizione non disponibile';
+            response.backdrop = response.backdrop || null;
+          }
+          return response as TVSeries;
+        } 
+        else {
+          console.error('Invalid response structure:', response);
           throw new Error('Errore nel caricamento dei dettagli della serie TV');
         }
       }),
       catchError((error: any) => {
         console.error('Errore nel caricamento dei dettagli della serie TV:', error);
-        return throwError(() => new Error('Errore nel caricamento dei dettagli della serie TV'));
+        console.error('Error status:', error.status);
+        console.error('Error message:', error.message);
+        console.error('Error details:', error.error);
+        
+        let errorMessage = 'Errore nel caricamento dei dettagli della serie TV';
+        if (error.status === 500) {
+          errorMessage = 'Errore interno del server. Controlla i log del backend.';
+        } else if (error.status === 404) {
+          errorMessage = 'Serie TV non trovata.';
+        } else if (error.status === 403) {
+          errorMessage = 'Non autorizzato a visualizzare questa serie TV.';
+        }
+        
+        return throwError(() => new Error(errorMessage));
       }),
       finalize(() => {
         this.loadingSubject.next(false);

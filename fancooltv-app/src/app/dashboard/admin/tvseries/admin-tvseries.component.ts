@@ -162,11 +162,17 @@ export class AdminTVSeriesComponent implements OnInit {
   /**
    * Get image URL for TV series poster
    */
-  getImageUrl(imagePath: string): string {
-    if (!imagePath) {
+  getImageUrl(poster: any): string {
+    if (!poster) {
       return '/assets/images/no-poster.jpg';
     }
-    return this.apiService.getImageUrl(imagePath, 'poster');
+    if (poster && poster.url) {
+      return poster.url;
+    }
+    if (poster && poster.sizes && poster.sizes.original) {
+      return poster.sizes.original;
+    }
+    return poster || '/assets/images/no-poster.jpg';
   }
 
   /**

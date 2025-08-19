@@ -53,40 +53,51 @@ export class TvseriesComponent implements OnInit, OnDestroy {
    * Initialize the component
    */
   initialize(): void {
+    console.log('TvseriesComponent.initialize() called');
     this.loadTVSeries();
-    this.loadCategories();
-    this.generateYears();
   }
   
   /**
-   * Load TV series with current filters and pagination
+   * Load TV series data from API
    */
-  loadTVSeries(): void {
+  private loadTVSeries(): void {
+    console.log('TvseriesComponent.loadTVSeries called');
     this.loading = true;
     this.error = false;
     
-    const params: Partial<PaginationParams> = {
+    const params = {
       page: this.currentPage,
-      q: this.currentSearch || undefined,
-      category: this.currentGenre || undefined,
-      year: this.currentYear || undefined
+      category_id: this.currentGenre || undefined,
+      year: this.currentYear || undefined,
+      search: this.currentSearch || undefined
     };
     
     const subscription = this.tvSeriesService.loadTVSeries(params).subscribe({
       next: (data) => {
+        console.log('TvseriesComponent received data:', data);
+        
+        // Debug: Log each series poster data
+        data.forEach((series, index) => {
+          console.log(`Series ${index + 1} (${series.title}):`, {
+            poster: series.poster,
+            hasUrl: series.poster?.url ? 'YES' : 'NO',
+            url: series.poster?.url
+          });
+        });
+        
         if (this.currentPage === 1) {
           this.series = data;
         } else {
           this.series = [...this.series, ...data];
         }
-        
-        this.hasMorePages = data.length > 0;
         this.loading = false;
+        this.hasMorePages = data.length === 20; // Assuming 20 items per page
       },
-      error: (err) => {
+      error: (error) => {
         this.error = true;
-        this.errorMessage = err.message || 'Errore nel caricamento delle serie TV';
+        this.errorMessage = 'Errore nel caricamento delle serie TV';
         this.loading = false;
+        console.error('TvseriesComponent API Error:', error);
       }
     });
     
@@ -138,10 +149,26 @@ export class TvseriesComponent implements OnInit, OnDestroy {
   }
   
   /**
-   * Get image URL from API
+   * Get image URL from poster object
    */
-  getImageUrl(path: string): string {
-    return this.apiService.getImageUrl(path);
+  getImageUrl(poster: any): string {
+    console.log('TV Series poster data:', poster);
+    
+    if (poster && poster.url) {
+      console.log('Using poster.url:', poster.url);
+      return poster.url;
+    }
+    if (poster && poster.sizes && poster.sizes.original) {
+      console.log('Using poster.sizes.original:', poster.sizes.original);
+      return poster.sizes.original;
+    }
+    if (typeof poster === 'string') {
+      console.log('Using poster as string:', poster);
+      return this.apiService.getImageUrl(poster);
+    }
+    
+    console.log('No valid poster found for series, returning placeholder');
+    return '/assets/images/placeholder-poster.jpg';
   }
   
   /**

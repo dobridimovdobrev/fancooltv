@@ -380,3 +380,32 @@ $breakpoint-xl: 1200px;
     font-size: 1rem;
   }
 }
+
+// Action buttons hover effects - Same as movie details
+.btn {
+  transition: all 0.3s ease;
+  
+  &.btn-warning {
+    &:hover {
+      background-color: transparent !important;
+      border-color: #ffc107 !important;
+      color: #ffc107 !important;
+    }
+  }
+  
+  &.btn-danger {
+    &:hover {
+      background-color: transparent !important;
+      border-color: #dc3545 !important;
+      color: #dc3545 !important;
+    }
+  }
+  
+  &.btn-secondary {
+    &:hover {
+      background-color: transparent !important;
+      border-color: #6c757d !important;
+      color: #6c757d !important;
+    }
+  }
+}

@@ -90,12 +90,7 @@
     </div>
 
     <!-- End of Results Message -->
-    <div *ngIf="items.length > 0 && !hasMorePages && !loading" class="text-center mt-5">
-      <div class="end-of-results">
-        <i class="fas fa-check-circle text-success mb-2" style="font-size: 2rem;"></i>
-        <p class="text-muted mb-0">You've reached the end of the results</p>
-      </div>
-    </div>
+    <!-- End of results message removed -->
 
     <!-- Retry Button for Errors -->
     <div *ngIf="error && items.length === 0" class="text-center mt-4">

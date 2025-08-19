@@ -1,0 +1,168 @@
+// Variables
+$primary: #f8b547;
+$dark: #20273d;
+$light: #fbf9f5;
+$white: #fff;
+$gray-300: #dee2e6;
+$gray-400: #ced4da;
+$gray-500: #adb5bd;
+$border-radius: 0.375rem;
+$transition-base: all 0.2s ease-in-out;
+
+.tvseries-form-page-container {
+  background: $dark;
+  color: $white;
+  min-height: calc(100vh - 200px);
+  padding: 2rem;
+  
+  .page-header {
+    .page-title {
+      color: $white;
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+    
+    .breadcrumb {
+      background: transparent;
+      padding: 0;
+      margin-bottom: 0;
+      
+      .breadcrumb-item {
+        color: $gray-400;
+        
+        a {
+          color: $primary;
+          text-decoration: none;
+          transition: $transition-base;
+          
+          &:hover {
+            color: lighten($primary, 10%);
+          }
+        }
+        
+        &.active {
+          color: $white;
+        }
+        
+        &::before {
+          color: $gray-500;
+        }
+      }
+    }
+    
+    .page-actions {
+      .btn-outline-danger {
+        border-color: #dc3545;
+        color: #dc3545;
+        
+        &:hover {
+          background-color: #dc3545;
+          border-color: #dc3545;
+          color: $white;
+        }
+      }
+    }
+  }
+  
+  .alert {
+    border: none;
+    border-radius: $border-radius;
+    
+    &.alert-danger {
+      background-color: rgba(220, 53, 69, 0.1);
+      color: #dc3545;
+      border: 1px solid rgba(220, 53, 69, 0.3);
+    }
+    
+    &.alert-success {
+      background-color: rgba(25, 135, 84, 0.1);
+      color: #198754;
+      border: 1px solid rgba(25, 135, 84, 0.3);
+    }
+    
+    .btn-close {
+      filter: brightness(0) invert(1);
+    }
+  }
+  
+  .spinner-border {
+    color: $primary;
+  }
+}
+
+// Modal styling
+.modal-content {
+  background: $dark;
+  color: $white;
+  border: 1px solid rgba($white, 0.2);
+  
+  .modal-header {
+    border-bottom: 1px solid rgba($white, 0.1);
+    
+    .modal-title {
+      color: $white;
+    }
+    
+    .btn-close {
+      filter: brightness(0) invert(1);
+    }
+  }
+  
+  .modal-body {
+    .text-warning {
+      color: #ffc107 !important;
+    }
+    
+    .text-muted {
+      color: rgba($white, 0.6) !important;
+    }
+  }
+  
+  .modal-footer {
+    border-top: 1px solid rgba($white, 0.1);
+    
+    .btn {
+      transition: $transition-base;
+      
+      &.btn-danger {
+        &:hover {
+          background-color: transparent !important;
+          border-color: #dc3545 !important;
+          color: #dc3545 !important;
+        }
+      }
+      
+      &.btn-secondary {
+        &:hover {
+          background-color: transparent !important;
+          border-color: #6c757d !important;
+          color: #6c757d !important;
+        }
+      }
+    }
+  }
+}
+
+// Responsive design
+@media (max-width: 768px) {
+  .tvseries-form-page-container {
+    padding: 1rem;
+    
+    .page-header {
+      .d-flex {
+        flex-direction: column;
+        align-items: flex-start !important;
+        gap: 1rem;
+      }
+      
+      .page-actions {
+        width: 100%;
+        
+        .btn {
+          width: 100%;
+        }
+      }
+    }
+  }
+}

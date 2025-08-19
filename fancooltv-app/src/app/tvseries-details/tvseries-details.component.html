@@ -26,6 +26,16 @@
                         <img [src]="getImageUrl(series.poster, 'poster')" [alt]="series.title + ' poster'" class="poster-img"
                              (error)="$any($event.target).style.display='none'">
                     </div>
+                    
+                    <!-- Action Buttons - Only for Admin -->
+                    <div *ngIf="authService.isAdmin()" class="mt-4 d-flex flex-column gap-2">
+                        <button class="btn btn-warning w-100" (click)="editSeries()">
+                            <i class="fas fa-edit me-2"></i>Edit TV Series
+                        </button>
+                        <button class="btn btn-danger w-100 mb-2" (click)="deleteSeries()">
+                            <i class="fas fa-trash me-2"></i>Delete TV Series
+                        </button>
+                    </div>
                 </div>
                 <div class="col-md-9">
                     <div class="details-info mb-5">
@@ -44,7 +54,7 @@
                         </div>
                         
                         <!-- Cast Section -->
-                        <div id="cast" class="cast-section mt-4" *ngIf="series?.persons && series.persons.length > 0">
+                        <div id="cast" class="cast-section mt-4" *ngIf="series?.persons && (series.persons?.length || 0) > 0">
                             <h3>Cast</h3>
                             <div class="cast-grid">
                                 <div *ngFor="let person of series.persons" class="cast-item">
@@ -60,7 +70,7 @@
                         </div>
                         
                         <!-- Seasons Section -->
-                        <div id="seasons" class="seasons-container mt-4" *ngIf="series?.seasons && series.seasons.length > 0">
+                        <div id="seasons" class="seasons-container mt-4" *ngIf="series?.seasons && (series.seasons?.length || 0) > 0">
                             <h3>Seasons</h3>
                             <div class="season-section mb-4" *ngFor="let season of getVisibleSeasons()">
                                 <div class="season-header d-flex justify-content-between align-items-center p-3 bg-secondary bg-opacity-25 rounded" 
@@ -86,7 +96,6 @@
                                                 </div>
                                                 <div>
                                                     <h5 class="episode-title mb-2">{{ episode.title }}</h5>
-                                                    <p class="episode-description mb-0 text-muted">{{ episode.description }}</p>
                                                 </div>
                                             </div>
                                             <button class="btn btn-primary watch-button" (click)="openTrailerModal(trailerModal, episode['trailer'])">
@@ -130,6 +139,31 @@
                 allowfullscreen></iframe>
         </div>
     </div>
+</ng-template>
+
+<!-- Delete Confirmation Modal -->
+<ng-template #deleteModal>
+    <div class="modal-header">
+        <h4 class="modal-title">Confirm Message</h4>
+        <button type="button" class="btn-close" aria-label="Close" (click)="cancelDelete()"></button>
+    </div>
+    <div class="modal-body">
+        <div class="text-center">
+            <h5>Are you sure?</h5>
+            <p class="mb-3">
+                Do you want to delete the TV series <strong>"{{ series?.title }}"</strong>?
+            </p>
+        </div>
+    </div>
+  <div class="modal-footer d-flex justify-content-between">
+    <button type="button" class="btn btn-danger flex-fill me-2" (click)="confirmDelete()" [disabled]="loading">
+      <span *ngIf="loading" class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+      <i *ngIf="!loading" class="fas fa-trash me-2"></i>Delete
+    </button>
+    <button type="button" class="btn btn-secondary flex-fill" (click)="cancelDelete()">
+      <i class="fas fa-times me-2"></i>Cancel
+    </button>
+  </div>
 </ng-template>
 <!-- footer -->
 <app-footer></app-footer>

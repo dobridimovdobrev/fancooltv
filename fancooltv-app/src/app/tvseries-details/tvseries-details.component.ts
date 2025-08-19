@@ -1,9 +1,10 @@
-import { Component, OnInit, OnDestroy, TemplateRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, TemplateRef, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { TVSeries } from '../models/tvseries.models';
 import { TVSeriesService } from '../services/tvseries.service';
 import { ApiService } from '../services/api.service';
+import { AuthService } from '../services/auth.service';
 import { Subscription } from 'rxjs';
 import { BsModalService, BsModalRef } from 'ngx-bootstrap/modal';
 
@@ -22,6 +23,9 @@ export class TvseriesDetailsComponent implements OnInit, OnDestroy {
   modalRef?: BsModalRef;
   private subscriptions: Subscription = new Subscription();
   
+  // Modal delete
+  @ViewChild('deleteModal') deleteModal!: TemplateRef<any>;
+  
   // Episodes pagination
   episodesPerPage = 10;
   visibleEpisodes: Map<number, number> = new Map<number, number>();
@@ -35,6 +39,7 @@ export class TvseriesDetailsComponent implements OnInit, OnDestroy {
     private router: Router,
     private tvSeriesService: TVSeriesService,
     private apiService: ApiService,
+    public authService: AuthService,
     private sanitizer: DomSanitizer,
     private modalService: BsModalService
   ) { }
@@ -60,11 +65,13 @@ export class TvseriesDetailsComponent implements OnInit, OnDestroy {
    * Load TV series details from the API
    */
   loadSeriesDetails(seriesId: number): void {
+    console.log('TvseriesDetailsComponent.loadSeriesDetails called with ID:', seriesId);
     this.loading = true;
     this.error = false;
     this.subscriptions.add(
       this.tvSeriesService.loadTVSeriesDetails(seriesId).subscribe({
         next: (series) => {
+          console.log('TvseriesDetailsComponent received series data:', series);
           this.series = series;
           this.loading = false;
           if (series.trailers && series.trailers.length > 0) {
@@ -73,8 +80,9 @@ export class TvseriesDetailsComponent implements OnInit, OnDestroy {
         },
         error: (error) => {
           this.error = true;
-          this.errorMessage = error.message;
+          this.errorMessage = 'Errore nel caricamento dei dettagli della serie TV';
           this.loading = false;
+          console.error('TvseriesDetailsComponent API Error:', error);
         }
       })
     );
@@ -187,9 +195,19 @@ export class TvseriesDetailsComponent implements OnInit, OnDestroy {
   /**
    * Get the image URL with proper formatting
    */
-  getImageUrl(path: string, type: 'cast' | 'poster' | 'backdrop' | 'still' = 'poster'): string {
-    if (!path) return '';
-    return this.apiService.getImageUrl(path, type);
+  getImageUrl(imageData: any, type: 'cast' | 'poster' | 'backdrop' | 'still' = 'poster'): string {
+    if (!imageData) return '';
+    
+    if (imageData && imageData.url) {
+      return imageData.url;
+    }
+    if (imageData && imageData.sizes && imageData.sizes.original) {
+      return imageData.sizes.original;
+    }
+    if (typeof imageData === 'string') {
+      return this.apiService.getImageUrl(imageData, type);
+    }
+    return '';
   }
 
   /**
@@ -200,5 +218,65 @@ export class TvseriesDetailsComponent implements OnInit, OnDestroy {
     if (imgElement) {
       imgElement.src = placeholderSrc;
     }
+  }
+
+  /**
+   * Navigate to TV series admin page (edit functionality temporarily disabled)
+   */
+  editSeries(): void {
+    if (this.series) {
+      this.router.navigate(['/dashboard/admin/tvseries']);
+    }
+  }
+
+  /**
+   * Show delete confirmation modal
+   */
+  deleteSeries(): void {
+    if (this.series) {
+      // Open the delete confirmation modal
+      this.modalRef = this.modalService.show(this.deleteModal, {
+        class: 'modal-lg modal-dialog-centered',
+        backdrop: 'static',
+        keyboard: false
+      });
+    }
+  }
+
+  /**
+   * Confirm TV series deletion
+   */
+  confirmDelete(): void {
+    if (this.series) {
+      this.loading = true;
+      
+      this.apiService.deleteTVSeries(this.series.tv_series_id).subscribe({
+        next: (response: any) => {
+          console.log('TV Series deleted successfully:', response);
+          this.modalRef?.hide();
+          this.loading = false;
+          this.navigateToTVSeries();
+        },
+        error: (error: any) => {
+          console.error('Error deleting TV series:', error);
+          this.loading = false;
+          this.modalRef?.hide();
+        }
+      });
+    }
+  }
+
+  /**
+   * Cancel TV series deletion
+   */
+  cancelDelete(): void {
+    this.modalRef?.hide();
+  }
+
+  /**
+   * Navigate to TV series page
+   */
+  navigateToTVSeries(): void {
+    this.router.navigate(['/tvseries']);
   }
 }

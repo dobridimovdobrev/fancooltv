@@ -8,8 +8,9 @@ import { TVSeries } from '../../models/tvseries.models';
 import { ApiResponse } from '../../models/api.models';
 
 // Extended interface for TV Series items with BaseMediaItem compatibility
-interface TVSeriesItem extends Omit<TVSeries, 'category'>, BaseMediaItem {
+interface TVSeriesItem extends Omit<TVSeries, 'category' | 'poster' | 'backdrop' | 'description'>, BaseMediaItem {
   id: number; // Maps to tv_series_id
+  category: string; // Override category to be string instead of Category object
 }
 
 @Injectable({
@@ -274,7 +275,11 @@ export class TVSeriesServiceRefactored extends BaseMediaService<TVSeriesItem> {
         const mappedItems = response.data?.map(series => ({
           ...series,
           id: series.tv_series_id,
-          category: typeof series.category === 'string' ? series.category : series.category?.name || 'Unknown'
+          category: typeof series.category === 'string' ? series.category : series.category?.name || 'Unknown',
+          duration: 45, // Default episode duration for TV series
+          poster: series.poster?.url || '',
+          backdrop: series.backdrop?.url || '',
+          description: series.description || ''
         } as TVSeriesItem)) || [];
         
         if (resetPagination) {
@@ -315,7 +320,11 @@ export class TVSeriesServiceRefactored extends BaseMediaService<TVSeriesItem> {
         return {
           ...series,
           id: series.tv_series_id,
-          category: typeof series.category === 'string' ? series.category : series.category?.name || 'Unknown'
+          category: typeof series.category === 'string' ? series.category : series.category?.name || 'Unknown',
+          duration: 45, // Default episode duration for TV series
+          poster: series.poster?.url || '',
+          backdrop: series.backdrop?.url || '',
+          description: series.description || ''
         } as TVSeriesItem;
       }),
       catchError(error => {

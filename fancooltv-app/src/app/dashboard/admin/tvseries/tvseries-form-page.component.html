@@ -1,0 +1,90 @@
+<div class="tvseries-form-page-container">
+  <!-- Header -->
+  <div class="page-header mb-4">
+    <div class="d-flex justify-content-between align-items-center">
+      <div>
+        <h2 class="page-title">{{ pageTitle }}</h2>
+        <nav aria-label="breadcrumb">
+          <ol class="breadcrumb">
+            <li class="breadcrumb-item">
+              <a routerLink="/dashboard/admin">Dashboard</a>
+            </li>
+            <li class="breadcrumb-item">
+              <a routerLink="/dashboard/admin/tvseries">TV Series</a>
+            </li>
+            <li class="breadcrumb-item active" aria-current="page">
+              {{ isEditMode ? 'Edit' : 'Add New' }}
+            </li>
+          </ol>
+        </nav>
+      </div>
+      
+      <!-- Delete button for edit mode -->
+      <div *ngIf="isEditMode && tvSeries" class="page-actions">
+        <button type="button" class="btn btn-outline-danger" (click)="showDeleteModal()">
+          <i class="fas fa-trash me-2"></i>Delete TV Series
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="d-flex justify-content-center align-items-center" style="height: 300px;">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+  </div>
+
+  <!-- Error Message -->
+  <div *ngIf="error" class="alert alert-danger alert-dismissible fade show" role="alert">
+    <i class="fas fa-exclamation-triangle me-2"></i>
+    {{ error }}
+    <button type="button" class="btn-close" (click)="error = ''"></button>
+  </div>
+
+  <!-- Success Message -->
+  <div *ngIf="success" class="alert alert-success alert-dismissible fade show" role="alert">
+    <i class="fas fa-check-circle me-2"></i>
+    {{ success }}
+    <button type="button" class="btn-close" (click)="success = ''"></button>
+  </div>
+
+  <!-- TV Series Form -->
+  <div *ngIf="!loading">
+    <app-tvseries-form
+      [tvSeries]="tvSeries"
+      [isEditMode]="isEditMode"
+      (formSubmit)="onFormSubmit($event)"
+      (formCancel)="onFormCancel()">
+    </app-tvseries-form>
+  </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<ng-template #deleteModal>
+  <div class="modal-header">
+    <h4 class="modal-title">Confirm Deletion</h4>
+    <button type="button" class="btn-close" aria-label="Close" (click)="cancelDelete()"></button>
+  </div>
+  <div class="modal-body">
+    <div class="text-center">
+      <i class="fas fa-exclamation-triangle text-warning mb-3" style="font-size: 3rem;"></i>
+      <h5>Are you sure?</h5>
+      <p class="mb-3">
+        Do you want to delete the TV series <strong>"{{ tvSeries?.title }}"</strong>?
+      </p>
+      <p class="text-muted">
+        This action cannot be undone. All associated data will be permanently deleted.
+      </p>
+    </div>
+  </div>
+  <div class="modal-footer d-flex justify-content-between">
+    <button type="button" class="btn btn-danger flex-fill me-2" (click)="confirmDelete()" [disabled]="loading">
+      <span *ngIf="loading" class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+      <i *ngIf="!loading" class="fas fa-trash me-2"></i>Delete
+    </button>
+    <button type="button" class="btn btn-secondary flex-fill" (click)="cancelDelete()">
+      <i class="fas fa-times me-2"></i>Cancel
+    </button>
+  </div>
+</ng-template>

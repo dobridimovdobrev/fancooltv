@@ -1,0 +1,271 @@
+<div class="tvseries-form-container">
+  <form [formGroup]="tvSeriesForm" (ngSubmit)="onSubmit()" novalidate>
+    
+    <!-- Basic Information Section -->
+    <div class="form-section">
+      <h4 class="section-title">Basic Information</h4>
+      
+      <div class="row">
+        <div class="col-md-8">
+          <div class="form-group mb-3">
+            <label for="title" class="form-label required">Title</label>
+            <input 
+              type="text" 
+              id="title" 
+              class="form-control"
+              [class.is-invalid]="hasError('title')"
+              formControlName="title"
+              placeholder="Enter TV series title">
+            <div class="invalid-feedback" *ngIf="hasError('title')">
+              {{ getErrorMessage('title') }}
+            </div>
+          </div>
+        </div>
+        
+        <div class="col-md-4">
+          <div class="form-group mb-3">
+            <label for="year" class="form-label required">Year</label>
+            <input 
+              type="number" 
+              id="year" 
+              class="form-control"
+              [class.is-invalid]="hasError('year')"
+              formControlName="year"
+              placeholder="2024">
+            <div class="invalid-feedback" *ngIf="hasError('year')">
+              {{ getErrorMessage('year') }}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-4">
+          <div class="form-group mb-3">
+            <label for="imdb_rating" class="form-label">IMDB Rating</label>
+            <input 
+              type="number" 
+              id="imdb_rating" 
+              class="form-control"
+              [class.is-invalid]="hasError('imdb_rating')"
+              formControlName="imdb_rating"
+              step="0.1"
+              min="0"
+              max="10"
+              placeholder="8.5">
+            <div class="invalid-feedback" *ngIf="hasError('imdb_rating')">
+              {{ getErrorMessage('imdb_rating') }}
+            </div>
+          </div>
+        </div>
+        
+        <div class="col-md-4">
+          <div class="form-group mb-3">
+            <label for="total_seasons" class="form-label required">Total Seasons</label>
+            <input 
+              type="number" 
+              id="total_seasons" 
+              class="form-control"
+              [class.is-invalid]="hasError('total_seasons')"
+              formControlName="total_seasons"
+              min="1"
+              placeholder="5">
+            <div class="invalid-feedback" *ngIf="hasError('total_seasons')">
+              {{ getErrorMessage('total_seasons') }}
+            </div>
+          </div>
+        </div>
+        
+        <div class="col-md-4">
+          <div class="form-group mb-3">
+            <label for="category_id" class="form-label required">Category</label>
+            <select 
+              id="category_id" 
+              class="form-select"
+              [class.is-invalid]="hasError('category_id')"
+              formControlName="category_id">
+              <option value="">Select a category</option>
+              <option *ngFor="let category of categories" [value]="category.category_id">
+                {{ category.name }}
+              </option>
+            </select>
+            <div class="invalid-feedback" *ngIf="hasError('category_id')">
+              {{ getErrorMessage('category_id') }}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-6">
+          <div class="form-group mb-3">
+            <label for="status" class="form-label required">Status</label>
+            <select 
+              id="status" 
+              class="form-select"
+              [class.is-invalid]="hasError('status')"
+              formControlName="status">
+              <option value="active">Active</option>
+              <option value="inactive">Inactive</option>
+              <option value="draft">Draft</option>
+            </select>
+            <div class="invalid-feedback" *ngIf="hasError('status')">
+              {{ getErrorMessage('status') }}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Description Section -->
+    <div class="form-section">
+      <h4 class="section-title">Description</h4>
+      
+      <div class="form-group mb-3">
+        <label for="description" class="form-label required">Plot Summary</label>
+        <textarea 
+          id="description" 
+          class="form-control"
+          [class.is-invalid]="hasError('description')"
+          formControlName="description"
+          rows="4"
+          placeholder="Enter TV series description..."></textarea>
+        <div class="invalid-feedback" *ngIf="hasError('description')">
+          {{ getErrorMessage('description') }}
+        </div>
+      </div>
+    </div>
+
+    <!-- Images Section -->
+    <div class="form-section">
+      <h4 class="section-title">Images</h4>
+      
+      <div class="row">
+        <div class="col-md-6">
+          <div class="form-group mb-3">
+            <label for="poster" class="form-label">Poster URL</label>
+            <input 
+              type="url" 
+              id="poster" 
+              class="form-control"
+              [class.is-invalid]="hasError('poster')"
+              formControlName="poster"
+              placeholder="https://example.com/poster.jpg">
+            <div class="invalid-feedback" *ngIf="hasError('poster')">
+              {{ getErrorMessage('poster') }}
+            </div>
+          </div>
+        </div>
+        
+        <div class="col-md-6">
+          <div class="form-group mb-3">
+            <label for="backdrop" class="form-label">Backdrop URL</label>
+            <input 
+              type="url" 
+              id="backdrop" 
+              class="form-control"
+              [class.is-invalid]="hasError('backdrop')"
+              formControlName="backdrop"
+              placeholder="https://example.com/backdrop.jpg">
+            <div class="invalid-feedback" *ngIf="hasError('backdrop')">
+              {{ getErrorMessage('backdrop') }}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Cast Section -->
+    <div class="form-section">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="section-title mb-0">Cast</h4>
+        <button type="button" class="btn btn-outline-primary btn-sm" (click)="addPerson()">
+          <i class="fas fa-plus me-1"></i>Add Person
+        </button>
+      </div>
+      
+      <div formArrayName="persons">
+        <div *ngFor="let person of personsArray.controls; let i = index" 
+             [formGroupName]="i" 
+             class="person-item mb-3 p-3 border rounded">
+          <div class="row align-items-end">
+            <div class="col-md-6">
+              <label class="form-label">Person</label>
+              <select class="form-select" formControlName="person_id">
+                <option value="">Select a person</option>
+                <option *ngFor="let person of persons" [value]="person.person_id">
+                  {{ person.name }}
+                </option>
+              </select>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Role/Character</label>
+              <input type="text" class="form-control" formControlName="role" placeholder="Character name">
+            </div>
+            <div class="col-md-2">
+              <button type="button" class="btn btn-outline-danger btn-sm w-100" (click)="removePerson(i)">
+                <i class="fas fa-trash"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+        
+        <div *ngIf="personsArray.length === 0" class="text-muted text-center py-3">
+          No cast members added yet. Click "Add Person" to add cast members.
+        </div>
+      </div>
+    </div>
+
+    <!-- Trailers Section -->
+    <div class="form-section">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="section-title mb-0">Trailers</h4>
+        <button type="button" class="btn btn-outline-primary btn-sm" (click)="addTrailer()">
+          <i class="fas fa-plus me-1"></i>Add Trailer
+        </button>
+      </div>
+      
+      <div formArrayName="trailers">
+        <div *ngFor="let trailer of trailersArray.controls; let i = index" 
+             [formGroupName]="i" 
+             class="trailer-item mb-3 p-3 border rounded">
+          <div class="row align-items-end">
+            <div class="col-md-8">
+              <label class="form-label">Trailer URL</label>
+              <input type="url" class="form-control" formControlName="url" placeholder="https://youtube.com/watch?v=...">
+            </div>
+            <div class="col-md-2">
+              <label class="form-label">Type</label>
+              <select class="form-select" formControlName="type">
+                <option value="youtube">YouTube</option>
+                <option value="vimeo">Vimeo</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+            <div class="col-md-2">
+              <button type="button" class="btn btn-outline-danger btn-sm w-100" (click)="removeTrailer(i)">
+                <i class="fas fa-trash"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+        
+        <div *ngIf="trailersArray.length === 0" class="text-muted text-center py-3">
+          No trailers added yet. Click "Add Trailer" to add trailers.
+        </div>
+      </div>
+    </div>
+
+    <!-- Form Actions -->
+    <div class="form-actions d-flex justify-content-end gap-2 mt-4">
+      <button type="button" class="btn btn-secondary" (click)="onCancel()">
+        <i class="fas fa-times me-2"></i>Cancel
+      </button>
+      <button type="submit" class="btn btn-primary" [disabled]="loading || tvSeriesForm.invalid">
+        <span *ngIf="loading" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+        <i *ngIf="!loading" class="fas fa-save me-2"></i>
+        {{ isEditMode ? 'Update TV Series' : 'Create TV Series' }}
+      </button>
+    </div>
+  </form>
+</div>
