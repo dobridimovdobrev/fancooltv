@@ -19,7 +19,7 @@ export class TvseriesDetailsComponent implements OnInit, OnDestroy {
   error = false;
   errorMessage = '';
   trailerUrl: SafeResourceUrl | null = null;
-  videoUrl: string | null = null;
+  videoUrl: SafeResourceUrl | null = null;
   expandedSeasons: Set<number> = new Set<number>();
   modalRef?: BsModalRef;
   private subscriptions: Subscription = new Subscription();
@@ -75,6 +75,36 @@ export class TvseriesDetailsComponent implements OnInit, OnDestroy {
           console.log('TvseriesDetailsComponent received series data:', series);
           this.series = series;
           this.loading = false;
+          
+          // Debug: Log series data like movie-details does
+          console.log('=== TV SERIES DEBUG ===');
+          
+          // Process video_files to ensure proper URLs like movie-details does
+          if ((series as any).video_files && (series as any).video_files.length > 0) {
+            (series as any).video_files = (series as any).video_files.map((video: any) => {
+              // Use public_stream_url if available, otherwise fallback to authenticated URL
+              const videoUrl = video.public_stream_url || video.stream_url || video.url;
+              console.log('Processing TV series video file:', video.title, 'URL:', videoUrl);
+              return {
+                ...video,
+                url: videoUrl // Ensure url property uses the correct URL
+              };
+            });
+          }
+          
+          // Process episodes to ensure proper video URLs
+          if (series.seasons && series.seasons.length > 0) {
+            series.seasons.forEach((season: any, seasonIndex: number) => {
+              if (season.episodes && season.episodes.length > 0) {
+                season.episodes.forEach((episode: any, episodeIndex: number) => {
+                  if (episode.public_stream_url) {
+                    console.log(`Episode S${season.season_number}E${episode.episode_number} video URL:`, episode.public_stream_url);
+                  }
+                });
+              }
+            });
+          }
+          
           if (series.trailers && series.trailers.length > 0) {
             this.trailerUrl = this.sanitizeTrailerUrl(series.trailers[0].url);
           }
@@ -166,11 +196,15 @@ export class TvseriesDetailsComponent implements OnInit, OnDestroy {
    */
   openTrailerModal(template: TemplateRef<any>, trailerUrl?: string): void {
     let url = trailerUrl;
+    console.log('DEBUG: openTrailerModal called with URL:', trailerUrl);
     
+    // If no URL provided, try to find one from the series data
     if (!url && this.series) {
+      console.log('DEBUG: No URL provided, searching in series data');
       // Check traditional trailers array first
       if (this.series.trailers && this.series.trailers.length > 0) {
         url = this.series.trailers[0].url;
+        console.log('DEBUG: Found trailer in trailers array:', url);
       }
       // Check video_files for trailer
       else if ((this.series as any).video_files && (this.series as any).video_files.length > 0) {
@@ -179,18 +213,22 @@ export class TvseriesDetailsComponent implements OnInit, OnDestroy {
         );
         if (trailerVideo) {
           url = trailerVideo.public_stream_url || trailerVideo.stream_url;
+          console.log('DEBUG: Found trailer in video_files:', url);
         }
       }
     }
     
+    console.log('DEBUG: Final trailer URL:', url);
     if (url) {
       // Check if it's a local video file (MP4) or YouTube URL
       if (url.includes('.mp4') || url.includes('stream-video') || url.includes('public-video')) {
         // Local video file - use video element instead of iframe
-        this.videoUrl = url;
+        console.log('DEBUG: Using video element for local file');
+        this.videoUrl = this.sanitizer.bypassSecurityTrustResourceUrl(url);
         this.modalRef = this.modalService.show(template, { class: 'modal-lg modal-dialog-centered' });
       } else {
         // YouTube URL - use iframe
+        console.log('DEBUG: Using iframe for YouTube URL');
         this.trailerUrl = this.sanitizeTrailerUrl(url);
         this.modalRef = this.modalService.show(template, { class: 'modal-lg modal-dialog-centered' });
       }
@@ -207,14 +245,17 @@ export class TvseriesDetailsComponent implements OnInit, OnDestroy {
       this.modalRef.hide();
     }
     this.trailerUrl = null;
+    this.videoUrl = null;
   }
 
   /**
    * Open the video modal with the specified video URL for episodes
    */
   openVideoModal(template: TemplateRef<any>, videoUrl: string): void {
+    console.log('DEBUG: openVideoModal called with URL:', videoUrl);
     if (videoUrl) {
-      this.videoUrl = videoUrl;
+      this.videoUrl = this.sanitizer.bypassSecurityTrustResourceUrl(videoUrl);
+      console.log('DEBUG: Setting sanitized videoUrl to:', this.videoUrl);
       this.modalRef = this.modalService.show(template, { class: 'modal-lg modal-dialog-centered' });
     } else {
       console.log('No video URL available for this episode');
@@ -340,9 +381,14 @@ export class TvseriesDetailsComponent implements OnInit, OnDestroy {
     
     // Check video_files for trailer
     if ((this.series as any).video_files && (this.series as any).video_files.length > 0) {
-      return (this.series as any).video_files.some((video: any) => 
-        video.title && video.title.toLowerCase().includes('trailer')
-      );
+      console.log('DEBUG: Checking video_files for trailer:', (this.series as any).video_files);
+      const hasTrailerVideo = (this.series as any).video_files.some((video: any) => {
+        const titleLower = video.title ? video.title.toLowerCase() : '';
+        console.log('DEBUG: Video title:', video.title, 'lowercase:', titleLower, 'includes trailer:', titleLower.includes('trailer'));
+        return video.title && titleLower.includes('trailer');
+      });
+      console.log('DEBUG: hasTrailerVideo result:', hasTrailerVideo);
+      return hasTrailerVideo;
     }
     
     return false;

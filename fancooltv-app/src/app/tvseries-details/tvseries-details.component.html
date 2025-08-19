@@ -136,7 +136,11 @@
     </div>
     <div class="modal-body">
         <div class="ratio ratio-16x9">
-            <iframe [src]="trailerUrl" title="YouTube video player" frameborder="0" 
+            <!-- Use video element for local files, iframe for YouTube -->
+            <video *ngIf="videoUrl && !trailerUrl" [src]="videoUrl" controls class="w-100 h-100" style="background: #000;">
+                Your browser does not support the video tag.
+            </video>
+            <iframe *ngIf="trailerUrl && !videoUrl" [src]="trailerUrl" title="YouTube video player" frameborder="0" 
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
                 allowfullscreen></iframe>
         </div>

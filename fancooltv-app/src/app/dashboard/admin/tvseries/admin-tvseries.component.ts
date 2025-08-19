@@ -24,7 +24,7 @@ export class AdminTVSeriesComponent implements OnInit {
   // Pagination
   currentPage = 1;
   totalItems = 0;
-  itemsPerPage = 20;
+  itemsPerPage = 10;
   totalPages = 0;
 
   // Search and Filters (Movies-like)
@@ -57,7 +57,9 @@ export class AdminTVSeriesComponent implements OnInit {
     
     const params: any = {
       page: page,
-      limit: this.itemsPerPage
+      limit: this.itemsPerPage,
+      sort_by: 'created_at',
+      sort_direction: 'desc'
     };
     
     // Add filters if selected
@@ -65,8 +67,25 @@ export class AdminTVSeriesComponent implements OnInit {
     if (this.selectedCategory) params.category = this.selectedCategory;
     if (this.selectedStatus) params.status = this.selectedStatus;
     
+    console.log('Loading TV Series with params:', params);
+    const startTime = performance.now();
+    
     this.apiService.getTVSeries(params).subscribe({
       next: (response) => {
+        const endTime = performance.now();
+        console.log(`TV Series API call took ${endTime - startTime} milliseconds`);
+        console.log('TV Series response:', response);
+        
+        // Debug poster data for each TV series
+        response.data.forEach((series: any, index: number) => {
+          console.log(`TV Series ${index + 1} (${series.title}):`, {
+            poster: series.poster,
+            hasUrl: series.poster?.url ? 'YES' : 'NO',
+            url: series.poster?.url,
+            posterType: typeof series.poster
+          });
+        });
+        
         if (page === 1) {
           this.tvSeries = response.data;
         } else {

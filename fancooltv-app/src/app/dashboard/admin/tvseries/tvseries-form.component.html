@@ -276,6 +276,14 @@
                       <!-- Episode Video/Trailer -->
                       <div class="col-md-6 mb-3">
                         <label class="form-label">Episode Video</label>
+                        
+                        <!-- Show existing episode video if found -->
+                        <div *ngIf="hasExistingEpisodeVideo(seasonIndex, episodeIndex)" class="alert alert-info mb-2">
+                          <i class="fas fa-video me-2"></i>
+                          <strong>Existing Video:</strong> {{ getExistingEpisodeVideoTitle(seasonIndex, episodeIndex) }}
+                          <small class="d-block mt-1">Upload a new video to replace the existing episode video</small>
+                        </div>
+                        
                         <input type="file" 
                                class="form-control" 
                                (change)="onEpisodeVideoUpload($event, seasonIndex, episodeIndex)" 
@@ -401,6 +409,14 @@
         <div class="card-body">
           <div class="col-12 mb-3">
             <label for="trailerVideoUpload" class="form-label">Upload Trailer Video (Optional)</label>
+            
+            <!-- Show existing trailer if found -->
+            <div *ngIf="hasExistingTrailer()" class="alert alert-info mb-2">
+              <i class="fas fa-video me-2"></i>
+              <strong>Existing Trailer:</strong> {{ getExistingTrailerTitle() }}
+              <small class="d-block mt-1">Upload a new video to replace the existing trailer</small>
+            </div>
+            
             <input type="file" class="form-control" id="trailerVideoUpload" (change)="onTrailerVideoUpload($event)" accept="video/*">
             
             <!-- Progress bar during upload -->

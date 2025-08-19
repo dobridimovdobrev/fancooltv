@@ -86,6 +86,13 @@ export class TVSeriesFormPageComponent implements OnInit {
     request.subscribe({
       next: (response: any) => {
         console.log('TV Series saved successfully:', response);
+        console.log('DEBUG: Full backend response:', JSON.stringify(response, null, 2));
+        
+        // Check if the response contains the updated data
+        if (response && (response as any).message) {
+          console.log('DEBUG: Response message:', (response as any).message);
+        }
+        
         this.success = this.isEditMode 
           ? 'TV Series updated successfully!' 
           : 'TV Series created successfully!';
@@ -157,11 +164,16 @@ export class TVSeriesFormPageComponent implements OnInit {
       this.loading = true;
       
       this.apiService.deleteTVSeries(this.tvSeries.tv_series_id).subscribe({
-        next: (response: any) => {
-          console.log('TV Series deleted successfully:', response);
-          this.modalRef?.hide();
+        next: (response) => {
+          console.log('TV Series saved successfully:', response);
+          console.log('DEBUG: Full backend response:', JSON.stringify(response, null, 2));
+          
+          // Check if the response contains the updated data
+          // Response debug removed
+          
           this.loading = false;
-          this.router.navigate(['/dashboard/admin/tvseries']);
+          // Reload the current page to see if changes persisted
+          window.location.reload();
         },
         error: (error: any) => {
           console.error('Error deleting TV series:', error);

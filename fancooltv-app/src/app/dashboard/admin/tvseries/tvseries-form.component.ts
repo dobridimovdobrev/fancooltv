@@ -37,10 +37,12 @@ export class TVSeriesFormComponent implements OnInit, OnDestroy, OnChanges {
   
   // File upload properties
   posterFile: File | null = null;
-  backdropFile: File | null = null;
   trailerVideoFile: File | null = null;
-  uploadingTrailerVideo: boolean = false;
   trailerVideoUploadProgress: number = 0;
+  uploadingTrailerVideo: boolean = false;
+  existingTrailerVideo: any = null;
+  existingEpisodeVideos: { [key: string]: any } = {};
+  backdropFile: File | null = null;
   
   // Image preview URLs
   posterPreviewUrl: string | null = null;
@@ -206,10 +208,21 @@ export class TVSeriesFormComponent implements OnInit, OnDestroy, OnChanges {
     }
 
     // Set trailer video preview if exists
-    if (this.tvSeries.trailers && this.tvSeries.trailers.length > 0) {
+    if (this.hasExistingTrailer()) {
       // Trailer exists - show some indication (we can't preload file but can show it exists)
       this.trailerVideoFile = null; // Can't preload file from URL
-      // Could add a preview or indication here
+    }
+    
+    // Check video_files for trailer (new format)
+    if ((this.tvSeries as any).video_files && (this.tvSeries as any).video_files.length > 0) {
+      const trailerVideo = (this.tvSeries as any).video_files.find((video: any) => 
+        video.title && video.title.toLowerCase().includes('trailer')
+      );
+      if (trailerVideo) {
+        // Show indication that trailer exists
+        this.trailerVideoFile = null; // Can't preload file from URL
+        this.existingTrailerVideo = trailerVideo; // Store for display
+      }
     }
 
     // Populate seasons and episodes - clear existing and add from data
@@ -252,9 +265,13 @@ export class TVSeriesFormComponent implements OnInit, OnDestroy, OnChanges {
             // Set episode video preview if exists
             if (episode.video_files && episode.video_files.length > 0) {
               const episodeKey = `${seasonsArray.length}-${episodesArray.length - 1}`;
-              // Can't preload file from URL, but we can indicate it exists
-              // this.episodeVideoFiles[episodeKey] = null; // Removed - causes type error
-              // Could add a preview or indication here
+              const episodeVideo = episode.video_files.find((video: any) => 
+                video.title && video.title.toLowerCase().includes('episode')
+              );
+              if (episodeVideo) {
+                // Store existing episode video for display
+                this.existingEpisodeVideos[episodeKey] = episodeVideo;
+              }
             }
           });
         }
@@ -308,50 +325,45 @@ export class TVSeriesFormComponent implements OnInit, OnDestroy, OnChanges {
     const formValue = { ...this.tvSeriesForm.value };
     
     // Debug logs
-    console.log('DEBUG: Form value before submit:', formValue);
-    console.log('DEBUG: Title value:', formValue.title);
+    console.log('DEBUG: Form value before submit:', this.tvSeriesForm.value);
+    console.log('DEBUG: Title value:', this.tvSeriesForm.get('title')?.value);
     
-    // Processing form data for submission
+    if (this.tvSeriesForm.valid) {
+      // Add basic TV series data - ALWAYS send these fields
+      formData.append('title', this.tvSeriesForm.get('title')?.value || '');
+      console.log('DEBUG: Title being sent:', this.tvSeriesForm.get('title')?.value);
+      console.log('DEBUG: FormData title:', formData.get('title'));
 
-    // Add basic TV series data - ALWAYS send these fields
-    formData.append('title', formValue.title || '');
-    formData.append('year', (formValue.year || '').toString());
-    formData.append('category_id', (formValue.category_id || '').toString());
-    formData.append('description', formValue.description || '');
-    formData.append('imdb_rating', (formValue.imdb_rating || '').toString());
-    formData.append('total_episodes', (formValue.total_episodes || '').toString());
-    
-    console.log('DEBUG: Title being sent:', formData.get('title'));
+      // Add status directly - backend expects ongoing/ended
+      if (formValue.status) {
+        formData.append('status', formValue.status);
+      } else {
+        formData.append('status', 'ongoing'); // Default value
+      }
 
-    // Add status directly - backend expects ongoing/ended
-    if (formValue.status) {
-      formData.append('status', formValue.status);
-    } else {
-      formData.append('status', 'ongoing'); // Default value
-    }
+      // Add image files
+      if (this.posterFile) {
+        formData.append('poster_image', this.posterFile);
+      }
+      if (this.backdropFile) {
+        formData.append('backdrop_image', this.backdropFile);
+      }
 
-    // Add image files
-    if (this.posterFile) {
-      formData.append('poster_image', this.posterFile);
-    }
-    if (this.backdropFile) {
-      formData.append('backdrop_image', this.backdropFile);
-    }
+      // Add trailer video
+      if (this.trailerVideoFile) {
+        formData.append('trailer_video', this.trailerVideoFile);
+      }
 
-    // Add trailer video
-    if (this.trailerVideoFile) {
-      formData.append('trailer_video', this.trailerVideoFile);
-    }
-
-    // Add persons array
-    if (formValue.persons && Array.isArray(formValue.persons)) {
-      const persons = formValue.persons
-        .filter((person: any) => person.person_id && person.person_id.toString().trim() !== '')
-        .map((person: any) => parseInt(person.person_id, 10));
-      
-      persons.forEach((personId: number) => {
-        formData.append('persons[]', personId.toString());
-      });
+      // Add persons array
+      if (formValue.persons && Array.isArray(formValue.persons)) {
+        const persons = formValue.persons
+          .filter((person: any) => person.person_id && person.person_id.toString().trim() !== '')
+          .map((person: any) => parseInt(person.person_id, 10));
+        
+        persons.forEach((personId: number) => {
+          formData.append('persons[]', personId.toString());
+        });
+      }
     }
 
     // Add seasons data
@@ -809,4 +821,35 @@ export class TVSeriesFormComponent implements OnInit, OnDestroy, OnChanges {
   // localStorage loading system removed
 
   // localStorage clearing system removed
+
+  /**
+   * Check if there's an existing trailer video
+   */
+  hasExistingTrailer(): boolean {
+    return this.existingTrailerVideo !== null;
+  }
+
+  /**
+   * Get the title of existing trailer video
+   */
+  getExistingTrailerTitle(): string {
+    return this.existingTrailerVideo ? this.existingTrailerVideo.title : '';
+  }
+
+  /**
+   * Check if there's an existing episode video for a specific season/episode
+   */
+  hasExistingEpisodeVideo(seasonIndex: number, episodeIndex: number): boolean {
+    const episodeKey = `${seasonIndex}-${episodeIndex}`;
+    return this.existingEpisodeVideos[episodeKey] !== undefined;
+  }
+
+  /**
+   * Get the title of existing episode video for a specific season/episode
+   */
+  getExistingEpisodeVideoTitle(seasonIndex: number, episodeIndex: number): string {
+    const episodeKey = `${seasonIndex}-${episodeIndex}`;
+    const video = this.existingEpisodeVideos[episodeKey];
+    return video ? video.title : '';
+  }
 }

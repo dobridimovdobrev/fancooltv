@@ -65,8 +65,25 @@ export class AdminMoviesComponent implements OnInit {
     if (this.selectedCategory) params.category = this.selectedCategory;
     if (this.selectedYear) params.year = this.selectedYear;
     
+    console.log('Loading Movies with params:', params);
+    const startTime = performance.now();
+    
     this.apiService.getMovies(params).subscribe({
       next: (response) => {
+        const endTime = performance.now();
+        console.log(`Movies API call took ${endTime - startTime} milliseconds`);
+        console.log('Movies response:', response);
+        
+        // Debug poster data for each movie
+        response.data.forEach((movie: any, index: number) => {
+          console.log(`Movie ${index + 1} (${movie.title}):`, {
+            poster: movie.poster,
+            hasUrl: movie.poster?.url ? 'YES' : 'NO',
+            url: movie.poster?.url,
+            posterType: typeof movie.poster
+          });
+        });
+        
         if (page === 1) {
           this.movies = response.data;
         } else {
