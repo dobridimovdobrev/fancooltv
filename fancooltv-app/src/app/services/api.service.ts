@@ -380,6 +380,38 @@ export class ApiService {
   }
 
   /**
+   * Create a complete movie with files (FormData) - single API call
+   */
+  public createCompleteMovie(formData: FormData): Observable<any> {
+    const token = localStorage.getItem('auth_token');
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`
+      // Don't set Content-Type for FormData - browser will set it automatically with boundary
+    });
+    
+    return this.http.post<any>(`${this.baseUrl}/api/v1/movies/complete`, formData, {
+      headers: headers
+    });
+  }
+
+  /**
+   * Update a complete movie with files (FormData) - single API call
+   * Uses POST to fix Laravel FormData issue with PUT
+   */
+  public updateCompleteMovie(id: number, formData: FormData): Observable<any> {
+    const token = localStorage.getItem('auth_token');
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`
+      // Don't set Content-Type for FormData - browser will set it automatically with boundary
+    });
+    
+    // Use POST with complete-update endpoint as requested
+    return this.http.post<any>(`${this.baseUrl}/api/v1/movies/${id}/complete-update`, formData, {
+      headers: headers
+    });
+  }
+
+  /**
    * Search persons by name
    */
   public searchPersons(query: string): Observable<any> {

@@ -1,0 +1,134 @@
+<div class="upload-progress-container" [ngClass]="{'compact': compact}">
+  <!-- Overall Progress Bar -->
+  <div class="overall-progress mb-3" *ngIf="items.length > 0">
+    <div class="d-flex justify-content-between align-items-center mb-2">
+      <h6 class="mb-0">
+        <i class="fas fa-cloud-upload-alt me-2"></i>
+        Upload Progress
+      </h6>
+      <span class="badge" 
+            [ngClass]="{
+              'bg-success': isAllCompleted(),
+              'bg-danger': hasErrors(),
+              'bg-primary': !isAllCompleted() && !hasErrors()
+            }">
+        {{ getOverallProgress() }}%
+      </span>
+    </div>
+    
+    <!-- Overall Progress Bar -->
+    <div class="progress mb-3" style="height: 8px;">
+      <div class="progress-bar" 
+           [ngClass]="{
+             'bg-success': isAllCompleted(),
+             'bg-danger': hasErrors(),
+             'bg-primary': !isAllCompleted() && !hasErrors()
+           }"
+           [style.width.%]="getOverallProgress()"
+           role="progressbar">
+      </div>
+    </div>
+
+    <!-- Status Summary -->
+    <div class="status-summary mb-3" *ngIf="!compact">
+      <div class="row text-center">
+        <div class="col-3">
+          <div class="text-muted">Completed</div>
+          <div class="fw-bold text-success">{{ getCompletedCount() }}</div>
+        </div>
+        <div class="col text-center">
+          <small class="text-muted">Uploading</small>
+          <div class="fw-bold text-primary">{{ getUploadingCount() }}</div>
+        </div>
+        <div class="col text-center">
+          <small class="text-muted">Pending</small>
+          <div class="fw-bold text-warning">{{ getTotalCount() - getCompletedCount() - getUploadingCount() - getErrorCount() }}</div>
+        </div>
+        <div class="col text-center">
+          <small class="text-muted">Errors</small>
+          <div class="fw-bold text-danger">{{ getErrorCount() }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Individual File Progress -->
+  <div class="upload-items" *ngIf="showDetails && items.length > 0">
+    <div class="upload-item" 
+         *ngFor="let item of items; trackBy: trackByItemId"
+         [ngClass]="'status-' + item.status">
+      
+      <div class="d-flex align-items-center mb-2">
+        <!-- File Icon & Type -->
+        <div class="file-icon me-3">
+          <i class="fas" 
+             [ngClass]="{
+               'fa-image text-info': item.type === 'image',
+               'fa-video text-warning': item.type === 'video'
+             }"></i>
+        </div>
+
+        <!-- File Info -->
+        <div class="file-info flex-grow-1">
+          <div class="file-name fw-bold">{{ item.name }}</div>
+          <div class="file-details text-muted small" *ngIf="!compact">
+            <span>{{ item.type | titlecase }}</span>
+            <span *ngIf="item.size"> • {{ formatFileSize(item.size) }}</span>
+          </div>
+        </div>
+
+        <!-- Status Icon -->
+        <div class="status-icon me-2">
+          <i class="fas" [ngClass]="getStatusIcon(item)"
+             [ngClass]="{
+               'text-success': item.status === 'completed',
+               'text-danger': item.status === 'error',
+               'text-primary': item.status === 'uploading',
+               'text-muted': item.status === 'pending'
+             }"></i>
+        </div>
+
+        <!-- Progress Percentage -->
+        <div class="progress-text">
+          <span class="small fw-bold">{{ item.progress }}%</span>
+        </div>
+      </div>
+
+      <!-- Progress Bar -->
+      <div class="progress" style="height: 4px;">
+        <div class="progress-bar" 
+             [ngClass]="'bg-' + getProgressBarColor(item)"
+             [style.width.%]="item.progress"
+             role="progressbar">
+        </div>
+      </div>
+
+      <!-- Error Message -->
+      <div class="error-message text-danger small mt-1" *ngIf="item.status === 'error' && item.errorMessage">
+        <i class="fas fa-exclamation-triangle me-1"></i>
+        {{ item.errorMessage }}
+      </div>
+    </div>
+  </div>
+
+  <!-- Current Upload Info (Compact Mode) -->
+  <div class="current-upload" *ngIf="compact && getCurrentUploadingItem() as currentItem">
+    <div class="d-flex align-items-center">
+      <i class="fas fa-spinner fa-spin text-primary me-2"></i>
+      <span class="small">Uploading {{ currentItem.name }}...</span>
+      <span class="ms-auto small fw-bold">{{ currentItem.progress }}%</span>
+    </div>
+  </div>
+
+  <!-- Success Message -->
+  <div class="success-message text-success text-center py-2" *ngIf="isAllCompleted()">
+    <i class="fas fa-check-circle me-2"></i>
+    All files uploaded successfully!
+  </div>
+
+  <!-- Error Summary -->
+  <div class="error-summary text-danger text-center py-2" *ngIf="hasErrors()">
+    <i class="fas fa-exclamation-triangle me-2"></i>
+    {{ getErrorCount() }} file(s) failed to upload
+  </div>
+</div>

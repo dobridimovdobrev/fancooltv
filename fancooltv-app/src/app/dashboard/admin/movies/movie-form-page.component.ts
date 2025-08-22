@@ -82,14 +82,34 @@ export class MovieFormPageComponent implements OnInit {
     this.loading = true;
 
     if (this.isEditMode && this.movie) {
-      // Update existing movie
+      // Update existing movie - check if formData is FormData or regular object
       console.log('Updating existing movie:', this.movie.movie_id);
-      this.apiService.updateMovie(this.movie.movie_id, formData).subscribe({
+      const apiCall = formData instanceof FormData 
+        ? this.apiService.updateCompleteMovie(this.movie.movie_id, formData)
+        : this.apiService.updateMovie(this.movie.movie_id, formData);
+      
+      apiCall.subscribe({
         next: (response) => {
           console.log('Movie updated successfully:', response);
+          console.log('Response video_files:', response?.data?.video_files);
           this.loading = false;
           this.error = '';
           this.success = 'Movie updated successfully!';
+          
+          // For updateCompleteMovie, always reload since response doesn't include video_files
+          // For regular updateMovie, use response data if available
+          if (formData instanceof FormData || !response?.data?.video_files) {
+            console.log('Reloading movie data (FormData update or missing video_files)');
+            if (this.movie && this.movie.movie_id) {
+              this.loadMovie(this.movie.movie_id);
+            }
+          } else {
+            console.log('Using response data directly');
+            this.movie = response.data;
+            if (this.movie?.category && (this.movie.category as any)?.id && !this.movie.category_id) {
+              this.movie.category_id = (this.movie.category as any).id;
+            }
+          }
           
           // Clear success message after 5 seconds
           setTimeout(() => {
@@ -123,9 +143,13 @@ export class MovieFormPageComponent implements OnInit {
         }
       });
     } else {
-      // Create new movie
+      // Create new movie - check if formData is FormData or regular object
       console.log('Creating new movie with data:', formData);
-      this.apiService.createMovie(formData).subscribe({
+      const apiCall = formData instanceof FormData 
+        ? this.apiService.createCompleteMovie(formData)
+        : this.apiService.createMovie(formData);
+      
+      apiCall.subscribe({
         next: (response) => {
           console.log('Movie created successfully:', response);
           // Only reset form after successful creation

@@ -27,13 +27,25 @@ export class MovieFormComponent implements OnInit {
   
   // Modal delete
   @ViewChild('deleteModal') deleteModal!: TemplateRef<any>;
+  @ViewChild('deleteVideoModal') deleteVideoModal!: TemplateRef<any>;
   modalRef?: BsModalRef;
+  videoToDeleteIndex: number = -1;
   uploadingPoster = false;
   uploadingBackdrop = false;
   uploadingTrailer: boolean[] = [];
   uploadingVideoFile: boolean[] = [];
   trailerUploadProgress: number[] = [];
   videoFileUploadProgress: number[] = [];
+  
+  // File storage variables (like TV series form)
+  posterFile: File | null = null;
+  backdropFile: File | null = null;
+  videoFiles: { [key: string]: File } = {};
+  deletedVideoIds: number[] = []; // Track deleted video IDs
+  
+  // Preview URLs
+  posterPreviewUrl: string | null = null;
+  backdropPreviewUrl: string | null = null;
 
   // Status options for dropdown
   statusOptions = [
@@ -188,11 +200,13 @@ export class MovieFormComponent implements OnInit {
     // Clear and populate video files array
     const videoFilesArray = this.movieForm.get('video_files') as FormArray;
     videoFilesArray.clear();
+    // Reset deleted video IDs when repopulating form
+    this.deletedVideoIds = [];
     if (movie.video_files && movie.video_files.length) {
       movie.video_files.forEach(videoFile => {
         videoFilesArray.push(this.fb.group({
-          id: [videoFile.id || null],
-          url: [videoFile.url || ''],
+          id: [videoFile.video_file_id || null], // Use video_file_id from API
+          url: [videoFile.stream_url || videoFile.url || ''],
           title: [videoFile.title || '']
         }));
       });
@@ -495,15 +509,106 @@ export class MovieFormComponent implements OnInit {
     return this.prepareFormData();
   }
 
-  // Form submission
+  // Form submission - now uploads files like TV series form
   onSubmit(): void {
     // Mark all fields as touched to show validation errors
     this.movieForm.markAllAsTouched();
     
     if (this.isValid()) {
-      const formData = this.prepareFormData();
+      const formData = this.prepareFormDataWithFiles();
       this.formSubmit.emit(formData);
     }
+  }
+  
+  /**
+   * Prepare form data with files for submission (like TV series form)
+   */
+  private prepareFormDataWithFiles(): FormData {
+    const formData = new FormData();
+    const formValue = { ...this.movieForm.value };
+    
+    // Add basic movie data
+    if (formValue.title) formData.append('title', formValue.title);
+    if (formValue.slug) formData.append('slug', formValue.slug);
+    if (formValue.description) formData.append('description', formValue.description);
+    if (formValue.year) formData.append('year', formValue.year.toString());
+    if (formValue.duration) formData.append('duration', formValue.duration.toString());
+    if (formValue.imdb_rating) formData.append('imdb_rating', formValue.imdb_rating.toString());
+    if (formValue.premiere_date) formData.append('premiere_date', formValue.premiere_date);
+    if (formValue.status) formData.append('status', formValue.status);
+    if (formValue.category_id) formData.append('category_id', formValue.category_id.toString());
+    
+    // Add default fields
+    formData.append('format', 'HD');
+    formData.append('language', 'en');
+    formData.append('country', 'US');
+    
+    // Add image files
+    if (this.posterFile) {
+      formData.append('poster_image', this.posterFile);
+    }
+    if (this.backdropFile) {
+      formData.append('backdrop_image', this.backdropFile);
+    }
+    
+      // Add video files - all videos are treated as movie videos
+    Object.keys(this.videoFiles).forEach((key, index) => {
+      const file = this.videoFiles[key];
+      if (file) {
+        formData.append('movie_video', file);
+      }
+    });
+    
+    // Add existing video file IDs to keep (excluding deleted ones)
+    const existingVideoIds: number[] = [];
+    this.videoFilesArray.controls.forEach((control: any) => {
+      const videoId = control.get('id')?.value;
+      if (videoId && videoId !== null && !this.deletedVideoIds.includes(videoId)) {
+        existingVideoIds.push(videoId);
+      }
+    });
+    
+    // If we're uploading a new video file, we want to replace all existing videos
+    // So we should not keep any existing video IDs when there's a new upload
+    const hasNewVideoUpload = Object.keys(this.videoFiles).length > 0;
+    if (hasNewVideoUpload) {
+      console.log('New video upload detected, clearing existing video IDs to replace all videos');
+      existingVideoIds.length = 0; // Clear the array to replace all existing videos
+    }
+    
+    console.log('Existing video IDs to keep:', existingVideoIds);
+    console.log('Deleted video IDs:', this.deletedVideoIds);
+    
+    // Send existing video IDs to backend for sync
+    // Always send the array, even if empty, so backend knows to sync
+    if (existingVideoIds.length > 0) {
+      existingVideoIds.forEach(id => {
+        formData.append('existing_video_ids[]', id.toString());
+      });
+    } else {
+      // Send empty array - append empty string to existing_video_ids[] to create empty array
+      formData.append('existing_video_ids[]', '');
+    }
+    
+    // Debug: Log all FormData entries
+    console.log('=== FormData being sent to backend ===');
+    for (let pair of (formData as any).entries()) {
+      console.log(pair[0] + ': ' + pair[1]);
+    }
+    console.log('=== End FormData ===');
+    
+    // Add persons array
+    if (formValue.persons && Array.isArray(formValue.persons)) {
+      const persons = formValue.persons
+        .filter((person: any) => person.person_id && person.person_id.toString().trim() !== '')
+        .map((person: any) => parseInt(person.person_id, 10));
+      
+      persons.forEach((personId: number) => {
+        formData.append('persons[]', personId.toString());
+      });
+    }
+    
+    return formData;
   }
 
   // Cancel form
@@ -570,9 +675,49 @@ export class MovieFormComponent implements OnInit {
     }));
   }
 
-  // Remove video file
+  // Show video delete confirmation modal
   removeVideoFile(index: number): void {
-    this.videoFilesArray.removeAt(index);
+    this.videoToDeleteIndex = index;
+    this.modalRef = this.modalService.show(this.deleteVideoModal, {
+      class: 'modal-md modal-dialog-centered',
+      backdrop: 'static',
+      keyboard: false
+    });
+  }
+
+  // Confirm video deletion
+  confirmVideoDelete(): void {
+    if (this.videoToDeleteIndex >= 0) {
+      // Get the video control before removing it
+      const videoControl = this.videoFilesArray.at(this.videoToDeleteIndex);
+      const videoId = videoControl?.get('id')?.value;
+      
+      // If it's an existing video (has ID), add to deleted list
+      if (videoId && videoId !== null) {
+        this.deletedVideoIds.push(videoId);
+        console.log('Added video ID to deletion list:', videoId);
+        console.log('Current deleted video IDs:', this.deletedVideoIds);
+      }
+      
+      // Remove the video file from local storage if it exists
+      const videoKey = `video_${this.videoToDeleteIndex}`;
+      if (this.videoFiles[videoKey]) {
+        delete this.videoFiles[videoKey];
+      }
+      
+      // Remove from form array
+      this.videoFilesArray.removeAt(this.videoToDeleteIndex);
+      
+      // Reset index
+      this.videoToDeleteIndex = -1;
+    }
+    this.modalRef?.hide();
+  }
+
+  // Cancel video deletion
+  cancelVideoDelete(): void {
+    this.videoToDeleteIndex = -1;
+    this.modalRef?.hide();
   }
 
   // Add person - open modal
@@ -595,129 +740,71 @@ export class MovieFormComponent implements OnInit {
 
 
 
-  // Handle file uploads
+  // Handle file uploads - store files locally like TV series form
   onPosterUpload(event: any): void {
     const file = event.target.files[0];
     if (file) {
-      this.uploadingPoster = true;
-      const formData = new FormData();
-      formData.append('image', file);
-      formData.append('type', 'poster');
+      this.posterFile = file;
+      this.uploadingPoster = false;
       
-      this.apiService.uploadImage(formData).subscribe({
-        next: (response: any) => {
-          console.log('Poster upload response:', response);
-          if (response && response.message) {
-            const imageUrl = response.message.full_url || response.message.url || response.message.path;
-            if (imageUrl) {
-              this.movieForm.patchValue({ poster: imageUrl });
-            } else {
-              console.error('No image URL found in response:', response.message);
-            }
-          } else {
-            console.error('Invalid response structure:', response);
-          }
-          this.uploadingPoster = false;
-        },
-        error: (error: any) => {
-          console.error('Error uploading poster', error);
-          this.uploadingPoster = false;
-        }
-      });
+      // Create preview URL
+      const reader = new FileReader();
+      reader.onload = (e: any) => {
+        this.posterPreviewUrl = e.target.result;
+      };
+      reader.readAsDataURL(file);
+      
+      // Mark poster as valid when file is selected
+      this.movieForm.patchValue({ poster: 'file_selected' });
+      
+      console.log('Poster file selected for upload on submit');
     }
   }
 
   onBackdropUpload(event: any): void {
     const file = event.target.files[0];
     if (file) {
-      this.uploadingBackdrop = true;
-      const formData = new FormData();
-      formData.append('image', file);
-      formData.append('type', 'backdrop');
+      this.backdropFile = file;
+      this.uploadingBackdrop = false;
       
-      this.apiService.uploadImage(formData).subscribe({
-        next: (response: any) => {
-          console.log('Backdrop upload response:', response);
-          if (response && response.message) {
-            const imageUrl = response.message.full_url || response.message.url || response.message.path;
-            if (imageUrl) {
-              this.movieForm.patchValue({ backdrop: imageUrl });
-            } else {
-              console.error('No image URL found in response:', response.message);
-            }
-          } else {
-            console.error('Invalid response structure:', response);
-          }
-          this.uploadingBackdrop = false;
-        },
-        error: (error: any) => {
-          console.error('Error uploading backdrop', error);
-          this.uploadingBackdrop = false;
-        }
-      });
+      // Create preview URL
+      const reader = new FileReader();
+      reader.onload = (e: any) => {
+        this.backdropPreviewUrl = e.target.result;
+      };
+      reader.readAsDataURL(file);
+      
+      // Mark backdrop as valid when file is selected
+      this.movieForm.patchValue({ backdrop: 'file_selected' });
+      
+      console.log('Backdrop file selected for upload on submit');
     }
   }
 
 
-  // Handle video file upload
+  // Handle video file upload - store files locally like TV series form
   onVideoFileUpload(event: any, index: number): void {
     const file = event.target.files[0];
     if (file) {
-      if (!this.canUploadFiles()) {
-        alert('Please fill in Title, Description, Year, Category, and upload Poster & Backdrop before uploading videos.');
-        event.target.value = '';
-        return;
-      }
-
-      this.uploadingVideoFile[index] = true;
-      this.videoFileUploadProgress[index] = 0;
-      const formData = new FormData();
-      formData.append('video', file);
-      formData.append('type', 'movie');
+      // Store file locally for upload on submit
+      const videoKey = `video_${index}`;
+      this.videoFiles[videoKey] = file;
       
-      this.apiService.uploadVideoWithProgress(formData).subscribe({
-        next: (event: any) => {
-          if (event.type === 'progress') {
-            this.videoFileUploadProgress[index] = event.progress;
-          } else if (event.type === 'response') {
-            console.log('Video file upload response:', event.response);
-            console.log('DEBUG: Checking response structure...');
-            console.log('DEBUG: event.response.stream_url =', event.response.stream_url);
-            console.log('DEBUG: event.response.message =', event.response.message);
-            
-            if (event.response && event.response.message && event.response.message.stream_url) {
-              // Use the stream_url from the upload response
-              const videoFileId = event.response.message.video.video_file_id;
-              console.log('DEBUG: videoFileId extracted =', videoFileId);
-              
-              this.videoFilesArray.at(index).patchValue({
-                url: event.response.message.stream_url,
-                id: videoFileId,
-                video_file_id: videoFileId,
-                format: event.response.message.video.format || 'mp4',
-                resolution: event.response.message.video.resolution || '720p',
-                title: event.response.message.video.title || ''
-              });
-              console.log('✅ Video URL updated in form:', event.response.message.stream_url);
-              console.log('✅ Video file ID added to form:', videoFileId);
-            } else if (event.response && event.response.message && event.response.message.streaming_url) {
-              // Fallback to old format
-              this.videoFilesArray.at(index).patchValue({
-                url: event.response.message.streaming_url
-              });
-            } else {
-              console.log('❌ No stream_url found in response');
-            }
-            this.uploadingVideoFile[index] = false;
-            this.videoFileUploadProgress[index] = 100;
-          }
-        },
-        error: (error: any) => {
-          console.error('Error uploading video file', error);
-          this.uploadingVideoFile[index] = false;
-          this.videoFileUploadProgress[index] = 0;
-        }
+      // Update form with placeholder to indicate file is selected
+      const videoControl = this.videoFilesArray.at(index);
+      const currentTitle = videoControl.get('title')?.value;
+      
+      videoControl.patchValue({
+        url: 'file_selected',
+        // Only update title if it's empty (preserve user-set titles)
+        title: currentTitle || file.name.replace(/\.[^/.]+$/, '') // Remove extension for title
       });
+      
+      console.log(`Video file ${file.name} selected for upload on submit`);
+      
+      // Reset upload states
+      this.uploadingVideoFile[index] = false;
+      this.videoFileUploadProgress[index] = 0;
     }
   }
   
@@ -767,19 +854,10 @@ export class MovieFormComponent implements OnInit {
     return this.videoProgress[id] || 0;
   }
 
-  // Check if basic required fields are filled to allow video uploads
+  // Check if basic required fields are filled - simplified since files are uploaded on submit
   canUploadFiles(): boolean {
-    const form = this.movieForm;
-    const title = form.get('title')?.value;
-    const description = form.get('description')?.value;
-    const year = form.get('year')?.value;
-    const categoryId = form.get('category_id')?.value;
-    const poster = form.get('poster')?.value;
-    const backdrop = form.get('backdrop')?.value;
-    
-    const canUpload = !!(title && description && year && categoryId && poster && backdrop);
-    
-    return canUpload;
+    // Always allow file selection since they're uploaded on submit
+    return true;
   }
 
   // Funzione di confronto per il select della categoria

@@ -22,18 +22,21 @@ export interface ApiResponse<T> {
         }>;
     };
 }
+
 // Auth API response interface
 export interface AuthApiResponse<T> {
     data: T;
     status: 'success' | 'error';
     message?: string;
 }
+
 // Error API response interface
 export interface ApiError {
     status: 'error';
     message: string;
     errors?: Record<string, string[]>;
 }
+
 // Pagination parameters interface
 export interface PaginationParams {
     page: number;
@@ -41,11 +44,13 @@ export interface PaginationParams {
     category?: string;    // per il filtro categoria
     year?: string;        // per il filtro anno
 }
+
 // Login credentials interface
 export interface LoginCredentials {
     username: string;
     password: string;
 }
+
 // Registration data interface
 export interface RegistrationData {
     username: string;
