@@ -31,7 +31,11 @@ export class AdminTVSeriesComponent implements OnInit {
   @ViewChild('searchInput', { static: true }) searchInput!: ElementRef;
   searchTerm: string = '';
   selectedCategory: string = '';
-  selectedStatus: string = '';
+  selectedYear: string = '';
+  
+  // Categories and years for filters
+  categories: any[] = [];
+  years: number[] = [];
   
   // Modal delete
   @ViewChild('deleteModal') deleteModal!: TemplateRef<any>;
@@ -47,6 +51,8 @@ export class AdminTVSeriesComponent implements OnInit {
   ngOnInit(): void {
     this.loadTVSeries();
     this.setupSearchListener();
+    this.loadCategories();
+    this.generateYears();
   }
 
   /**
@@ -65,7 +71,7 @@ export class AdminTVSeriesComponent implements OnInit {
     // Add filters if selected
     if (this.searchTerm) params.q = this.searchTerm;
     if (this.selectedCategory) params.category = this.selectedCategory;
-    if (this.selectedStatus) params.status = this.selectedStatus;
+    if (this.selectedYear) params.year = this.selectedYear;
     
     console.log('Loading TV Series with params:', params);
     const startTime = performance.now();
@@ -118,25 +124,7 @@ export class AdminTVSeriesComponent implements OnInit {
    * Setup search input listener with debounce
    */
   setupSearchListener(): void {
-    if (this.searchInput) {
-      fromEvent(this.searchInput.nativeElement, 'input')
-        .pipe(
-          debounceTime(300),
-          distinctUntilChanged()
-        )
-        .subscribe(() => {
-          this.onSearchInputChange();
-        });
-    }
-  }
-
-  /**
-   * Handle search input change
-   */
-  onSearchInputChange(): void {
-    this.searchTerm = this.searchInput.nativeElement.value;
-    this.currentPage = 1;
-    this.loadTVSeries(1);
+    // Removed automatic search - now only search with button like client
   }
 
   /**
@@ -172,7 +160,7 @@ export class AdminTVSeriesComponent implements OnInit {
   resetFilters(): void {
     this.searchTerm = '';
     this.selectedCategory = '';
-    this.selectedStatus = '';
+    this.selectedYear = '';
     this.searchInput.nativeElement.value = '';
     this.currentPage = 1;
     this.loadTVSeries(1);
@@ -271,5 +259,31 @@ export class AdminTVSeriesComponent implements OnInit {
    */
   editTVSeries(seriesId: number): void {
     this.router.navigate(['/admin/tvseries/edit', seriesId]);
+  }
+
+  /**
+   * Load categories for filter
+   */
+  private loadCategories(): void {
+    this.apiService.getCategories().subscribe({
+      next: (response) => {
+        if (response && response.data) {
+          this.categories = response.data;
+        }
+      },
+      error: (err) => {
+        console.error('Errore nel caricamento delle categorie:', err);
+      }
+    });
+  }
+
+  /**
+   * Generate years for filter (from 1950 to current year)
+   */
+  private generateYears(): void {
+    const currentYear = new Date().getFullYear();
+    for (let year = currentYear; year >= 1950; year--) {
+      this.years.push(year);
+    }
   }
 }

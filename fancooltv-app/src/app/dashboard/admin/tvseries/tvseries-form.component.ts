@@ -34,6 +34,10 @@ export class TVSeriesFormComponent implements OnInit, OnDestroy, OnChanges {
   uploadingPoster = false;
   uploadingBackdrop = false;
   isLoadingPersons = false;
+  currentPersonIndex: number = -1;
+  
+  // Riferimenti agli elementi del DOM
+  @ViewChild('searchPersonInput') searchPersonInput!: any;
   
   // File upload properties
   posterFile: File | null = null;
@@ -340,6 +344,14 @@ export class TVSeriesFormComponent implements OnInit, OnDestroy, OnChanges {
     if (formValue.imdb_rating) formData.append('imdb_rating', formValue.imdb_rating.toString());
     if (formValue.category_id) formData.append('category_id', formValue.category_id.toString());
     if (formValue.description) formData.append('description', formValue.description);
+    if (formValue.total_episodes) {
+      formData.append('total_episodes', formValue.total_episodes.toString());
+      console.log('DEBUG: total_episodes being sent:', formValue.total_episodes);
+    }
+    if (formValue.total_seasons) {
+      formData.append('total_seasons', formValue.total_seasons.toString());
+      console.log('DEBUG: total_seasons being sent:', formValue.total_seasons);
+    }
     
     // Add status directly - backend expects ongoing/ended
     if (formValue.status) {
@@ -541,18 +553,50 @@ export class TVSeriesFormComponent implements OnInit, OnDestroy, OnChanges {
   /**
    * Get person name by ID
    */
-  getPersonName(personId: number): string {
+  getPersonName(personId: string): string {
     if (!personId) return '';
     
-    // First try to find in personsForDisplay (from search)
-    let person = this.personsForDisplay.find(p => p.person_id === personId);
+    // Prima cerchiamo nell'array principale
+    let person = this.persons.find(p => p.person_id.toString() === personId.toString());
     
-    // If not found and we have tvSeries data, search there
-    if (!person && this.tvSeries && this.tvSeries.persons) {
-      person = this.tvSeries.persons.find(p => p.person_id === personId);
+    // Se non troviamo la persona nell'array principale, cerchiamo nell'array di visualizzazione
+    if (!person && this.personsForDisplay.length > 0) {
+      person = this.personsForDisplay.find(p => p.person_id.toString() === personId.toString());
     }
     
-    return person ? person.name : '';
+    // Se non troviamo la persona e abbiamo i dati della TV Series, cerchiamo lì
+    if (!person && this.tvSeries && this.tvSeries.persons) {
+      person = this.tvSeries.persons.find(p => p.person_id.toString() === personId.toString());
+      if (person) {
+        // Aggiungiamo la persona all'array di visualizzazione per future ricerche
+        this.personsForDisplay.push(person);
+      }
+    }
+    
+    // Se abbiamo trovato la persona, restituiamo il suo nome
+    if (person) {
+      return person.name;
+    }
+    
+    // Se non abbiamo trovato la persona in nessun array, carichiamola dall'API
+    console.log(`Persona con ID ${personId} non trovata in nessun array. Caricamento dall'API...`);
+    
+    // Caricamento asincrono della persona dall'API
+    this.apiService.getPerson(personId).subscribe({
+      next: (response: any) => {
+        if (response && response.data) {
+          // Aggiungiamo la persona all'array di visualizzazione
+          this.personsForDisplay.push(response.data);
+          console.log(`Persona caricata dall'API: ${response.data.name}`);
+        }
+      },
+      error: (err: any) => {
+        console.error(`Errore nel caricamento della persona con ID ${personId}:`, err);
+      }
+    });
+    
+    // Restituiamo l'ID come fallback mentre aspettiamo la risposta dell'API
+    return `ID: ${personId}`;
   }
 
 
@@ -592,15 +636,21 @@ export class TVSeriesFormComponent implements OnInit, OnDestroy, OnChanges {
       this.personsForDisplay.push(person);
     }
 
-    // Find the current person index being edited
-    const currentPersonIndex = this.personsArray.length - 1;
-    if (currentPersonIndex >= 0) {
-      this.personsArray.at(currentPersonIndex).patchValue({
-        person_id: person.person_id
-      });
+    if (this.currentPersonIndex >= 0) {
+      // Modifica persona esistente
+      const personsArray = this.tvSeriesForm.get('persons') as FormArray;
+      personsArray.at(this.currentPersonIndex).get('person_id')?.setValue(person.person_id.toString());
+    } else {
+      // Aggiungi nuova persona
+      this.personsArray.push(this.fb.group({
+        person_id: [person.person_id.toString()]
+      }));
     }
 
     this.personModalRef?.hide();
+    
+    // Reset dell'indice corrente
+    this.currentPersonIndex = -1;
   }
 
   /**
@@ -616,18 +666,31 @@ export class TVSeriesFormComponent implements OnInit, OnDestroy, OnChanges {
   addPerson(): void {
     if (!this.canAddPerson()) return;
 
-    // Add empty person to form array
-    const personGroup = this.fb.group({
-      person_id: ['', Validators.required],
-      role: ['']
-    });
-    this.personsArray.push(personGroup);
+    this.openPersonModal(-1);
+  }
 
-    // Open modal
+  /**
+   * Open person modal for search
+   */
+  openPersonModal(index: number = -1): void {
+    this.currentPersonIndex = index;
+    
+    // Reset della lista delle persone per la ricerca
+    this.persons = [];
+    
+    // Apre il modal usando ngx-bootstrap
     this.personModalRef = this.modalService.show(this.personModal, {
+      class: 'modal-lg modal-dialog-centered',
       backdrop: 'static',
       keyboard: false
     });
+    
+    // Focus sul campo di ricerca dopo un breve delay
+    setTimeout(() => {
+      if (this.searchPersonInput && this.searchPersonInput.nativeElement) {
+        this.searchPersonInput.nativeElement.focus();
+      }
+    }, 300);
   }
 
   /**
@@ -874,24 +937,49 @@ export class TVSeriesFormComponent implements OnInit, OnDestroy, OnChanges {
     }
   }
 
-  // localStorage backup system removed
-
-  // localStorage loading system removed
-
-  // localStorage clearing system removed
-
   /**
-   * Check if there's an existing trailer video
+   * Check if TV Series has existing trailer video
    */
   hasExistingTrailer(): boolean {
-    return this.existingTrailerVideo !== null;
+    // Check if we have stored existing trailer video
+    if (this.existingTrailerVideo) {
+      return true;
+    }
+    
+    // Check video_files array for trailer
+    if (this.tvSeries && (this.tvSeries as any).video_files && (this.tvSeries as any).video_files.length > 0) {
+      const trailerVideo = (this.tvSeries as any).video_files.find((video: any) => 
+        video.title && video.title.toLowerCase().includes('trailer')
+      );
+      if (trailerVideo) {
+        this.existingTrailerVideo = trailerVideo; // Store for future use
+        return true;
+      }
+    }
+    
+    return false;
   }
 
   /**
    * Get the title of existing trailer video
    */
   getExistingTrailerTitle(): string {
-    return this.existingTrailerVideo ? this.existingTrailerVideo.title : '';
+    if (this.existingTrailerVideo) {
+      return this.existingTrailerVideo.title;
+    }
+    
+    // Check video_files array for trailer
+    if (this.tvSeries && (this.tvSeries as any).video_files && (this.tvSeries as any).video_files.length > 0) {
+      const trailerVideo = (this.tvSeries as any).video_files.find((video: any) => 
+        video.title && video.title.toLowerCase().includes('trailer')
+      );
+      if (trailerVideo) {
+        this.existingTrailerVideo = trailerVideo; // Store for future use
+        return trailerVideo.title;
+      }
+    }
+    
+    return '';
   }
 
   /**
