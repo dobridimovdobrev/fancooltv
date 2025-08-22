@@ -395,6 +395,14 @@ export class MovieFormComponent implements OnInit {
       delete formValue.backdrop; // Remove if null/undefined
     }
     
+    // Filter and validate video_files before sending
+    if (formValue.video_files && Array.isArray(formValue.video_files)) {
+      formValue.video_files = formValue.video_files.filter((videoFile: any) => {
+        // Keep only video files with valid URLs
+        return videoFile && videoFile.url && videoFile.url.toString().trim() !== '';
+      });
+    }
+    
     // Add missing database fields with default values
     if (!formValue.format) {
       formValue.format = 'HD'; // Default format
@@ -410,9 +418,6 @@ export class MovieFormComponent implements OnInit {
     if (!formValue.slug && formValue.title) {
       formValue.slug = this.generateSlug(formValue.title);
     }
-
-    // ... (rest of the code remains the same)
-    // No field name changes needed
 
     // Log each field for debugging
     console.log('=== FORM DATA ANALYSIS ===');

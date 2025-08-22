@@ -232,6 +232,7 @@ export class TVSeriesFormComponent implements OnInit, OnDestroy, OnChanges {
     if (this.tvSeries.seasons && this.tvSeries.seasons.length > 0) {
       this.tvSeries.seasons.forEach((season: any) => {
         const seasonGroup = this.fb.group({
+          season_id: [season.season_id || null], // ID for existing seasons - CRITICAL for preventing duplicates
           season_number: [season.season_number, [Validators.min(1)]],
           total_episodes: [season.total_episodes || season.episodes?.length || ''],
           year: [season.year || ''],
@@ -327,49 +328,94 @@ export class TVSeriesFormComponent implements OnInit, OnDestroy, OnChanges {
     // Debug logs
     console.log('DEBUG: Form value before submit:', this.tvSeriesForm.value);
     console.log('DEBUG: Title value:', this.tvSeriesForm.get('title')?.value);
+    console.log('DEBUG: Form valid status:', this.tvSeriesForm.valid);
     
-    if (this.tvSeriesForm.valid) {
-      // Add basic TV series data - ALWAYS send these fields
-      formData.append('title', this.tvSeriesForm.get('title')?.value || '');
-      console.log('DEBUG: Title being sent:', this.tvSeriesForm.get('title')?.value);
-      console.log('DEBUG: FormData title:', formData.get('title'));
+    // Add basic TV series data - ALWAYS send these fields regardless of form validity
+    formData.append('title', this.tvSeriesForm.get('title')?.value || '');
+    console.log('DEBUG: Title being sent:', this.tvSeriesForm.get('title')?.value);
+    console.log('DEBUG: FormData title:', formData.get('title'));
 
-      // Add status directly - backend expects ongoing/ended
-      if (formValue.status) {
-        formData.append('status', formValue.status);
-      } else {
-        formData.append('status', 'ongoing'); // Default value
-      }
-
-      // Add image files
-      if (this.posterFile) {
-        formData.append('poster_image', this.posterFile);
-      }
-      if (this.backdropFile) {
-        formData.append('backdrop_image', this.backdropFile);
-      }
-
-      // Add trailer video
-      if (this.trailerVideoFile) {
-        formData.append('trailer_video', this.trailerVideoFile);
-      }
-
-      // Add persons array
-      if (formValue.persons && Array.isArray(formValue.persons)) {
-        const persons = formValue.persons
-          .filter((person: any) => person.person_id && person.person_id.toString().trim() !== '')
-          .map((person: any) => parseInt(person.person_id, 10));
-        
-        persons.forEach((personId: number) => {
-          formData.append('persons[]', personId.toString());
-        });
-      }
+    // Add other basic fields
+    if (formValue.year) formData.append('year', formValue.year.toString());
+    if (formValue.imdb_rating) formData.append('imdb_rating', formValue.imdb_rating.toString());
+    if (formValue.category_id) formData.append('category_id', formValue.category_id.toString());
+    if (formValue.description) formData.append('description', formValue.description);
+    
+    // Add status directly - backend expects ongoing/ended
+    if (formValue.status) {
+      formData.append('status', formValue.status);
+    } else {
+      formData.append('status', 'ongoing'); // Default value
+    }
+    
+    // Add image files - ALWAYS send if present
+    if (this.posterFile) {
+      formData.append('poster_image', this.posterFile);
+    }
+    if (this.backdropFile) {
+      formData.append('backdrop_image', this.backdropFile);
     }
 
-    // Add seasons data
+    // Add trailer video - ALWAYS send if present
+    if (this.trailerVideoFile) {
+      formData.append('trailer_video', this.trailerVideoFile);
+      console.log('DEBUG: Trailer video file added to FormData:', this.trailerVideoFile.name);
+    } else {
+      console.log('DEBUG: No trailer video file to add');
+    }
+
+    // Add persons array - ALWAYS send if present
+    if (formValue.persons && Array.isArray(formValue.persons)) {
+      const persons = formValue.persons
+        .filter((person: any) => person.person_id && person.person_id.toString().trim() !== '')
+        .map((person: any) => parseInt(person.person_id, 10));
+      
+      persons.forEach((personId: number) => {
+        formData.append('persons[]', personId.toString());
+      });
+    }
+    
+    // Keep this condition only for optional validation-dependent data
+    if (this.tvSeriesForm.valid) {
+      // Any additional validation-dependent logic can go here
+    }
+
+    // Add seasons data - filter out empty/invalid seasons to prevent duplicates
     if (formValue.seasons && Array.isArray(formValue.seasons)) {
-      formValue.seasons.forEach((season: any, seasonIndex: number) => {
+      // Filter seasons: only include seasons with valid data (season_id OR episodes with content)
+      const validSeasons = formValue.seasons.filter((season: any) => {
+        // Keep season if it has a season_id (existing season) OR has episodes with content
+        return season.season_id || 
+               (season.episodes && Array.isArray(season.episodes) && season.episodes.length > 0 && 
+                season.episodes.some((ep: any) => ep.episode_id || ep.title || ep.overview));
+      });
+
+      console.log('DEBUG: Original seasons count:', formValue.seasons.length);
+      console.log('DEBUG: Valid seasons count:', validSeasons.length);
+      console.log('DEBUG: Valid seasons:', validSeasons);
+      
+      // Debug: Log what will be sent to backend
+      console.log('DEBUG: FormData seasons being sent:');
+      validSeasons.forEach((season: any, index: number) => {
+        console.log(`Season ${index}:`, {
+          season_id: season.season_id,
+          season_number: season.season_number,
+          name: season.name,
+          year: season.year,
+          episodes_count: season.episodes?.length || 0
+        });
+      });
+
+      validSeasons.forEach((season: any, seasonIndex: number) => {
         // Processing season data
+        
+        // Add season_id if it exists (for updates) - CRITICAL for preventing duplicates
+        if (season.season_id) {
+          formData.append(`seasons[${seasonIndex}][season_id]`, season.season_id.toString());
+          console.log(`DEBUG: Adding existing season_id ${season.season_id} at index ${seasonIndex}`);
+        } else {
+          console.log(`DEBUG: New season at index ${seasonIndex} (no season_id)`);
+        }
         
         if (season.season_number) formData.append(`seasons[${seasonIndex}][season_number]`, season.season_number.toString());
         
@@ -390,7 +436,18 @@ export class TVSeriesFormComponent implements OnInit, OnDestroy, OnChanges {
         // Add episodes for this season
         if (season.episodes && Array.isArray(season.episodes)) {
           season.episodes.forEach((episode: any, episodeIndex: number) => {
-            if (episode.episode_id) formData.append(`seasons[${seasonIndex}][episodes][${episodeIndex}][episode_id]`, episode.episode_id.toString());
+            // Only add episode_id if it exists AND the episode has valid content
+            // This prevents "Episode not found" errors for deleted/invalid episodes
+            if (episode.episode_id && episode.title) {
+              formData.append(`seasons[${seasonIndex}][episodes][${episodeIndex}][episode_id]`, episode.episode_id.toString());
+              console.log(`DEBUG: Adding existing episode_id ${episode.episode_id} for episode "${episode.title}"`);
+            } else if (episode.title) {
+              console.log(`DEBUG: New episode "${episode.title}" (no episode_id)`);
+            } else {
+              console.log(`DEBUG: Skipping invalid episode at index ${episodeIndex} - no title`);
+              return; // Skip this episode if it has no title
+            }
+            
             if (episode.episode_number) formData.append(`seasons[${seasonIndex}][episodes][${episodeIndex}][episode_number]`, episode.episode_number.toString());
             if (episode.title) formData.append(`seasons[${seasonIndex}][episodes][${episodeIndex}][title]`, episode.title);
             if (episode.overview) formData.append(`seasons[${seasonIndex}][episodes][${episodeIndex}][overview]`, episode.overview);
@@ -625,6 +682,7 @@ export class TVSeriesFormComponent implements OnInit, OnDestroy, OnChanges {
    */
   addSeason(): void {
     const seasonGroup = this.fb.group({
+      season_id: [null], // null for new seasons
       season_number: ['', [Validators.min(1)]],
       total_episodes: ['', [Validators.min(1)]],
       year: ['', [Validators.min(1900), Validators.max(this.maxYear)]],

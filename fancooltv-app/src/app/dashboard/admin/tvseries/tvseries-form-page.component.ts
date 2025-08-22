@@ -101,9 +101,12 @@ export class TVSeriesFormPageComponent implements OnInit {
         // Clear backup on success
         this.formDataBackup = null;
         
-        // For edit mode, don't reload automatically - user can see success message
+        // For edit mode, reload data to show changes
         if (this.isEditMode && this.tvSeries) {
-          // Success message shown, no automatic reload
+          // Reload the TV series data to show updated information
+          setTimeout(() => {
+            this.loadTVSeries(this.tvSeries!.tv_series_id);
+          }, 1000);
         } else {
           // For create mode, redirect to list
           setTimeout(() => {

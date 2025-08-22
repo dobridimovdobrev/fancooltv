@@ -188,8 +188,8 @@
                       <small *ngIf="season.get('year')?.errors?.['max']">Year cannot be more than {{ maxYear }}</small>
                     </div>
                   </div>
-                  <div class="col-md-1 text-end">
-                    <button type="button" class="btn btn-outline-danger btn-sm" (click)="removeSeason(seasonIndex)" title="Remove Season">
+                  <div class="col-md-1 text-end d-flex align-items-end">
+                    <button type="button" class="btn btn-outline-danger btn-sm mb-3" (click)="removeSeason(seasonIndex)" title="Remove Season">
                       <i class="fas fa-trash"></i>
                     </button>
                   </div>
@@ -268,7 +268,8 @@
                         <div *ngIf="episodeFiles[seasonIndex + '-' + episodeIndex]" class="mt-2">
                           <div class="alert alert-success py-2">
                             <i class="fas fa-check-circle me-2"></i>
-                            <strong>Image selected: {{ episodeFiles[seasonIndex + '-' + episodeIndex].name }}</strong>
+                            <strong>Episode Still Uploaded: {{ episodeFiles[seasonIndex + '-' + episodeIndex].name }}</strong>
+                            <small class="d-block mt-1">This still image will be saved when you submit the form</small>
                           </div>
                         </div>
                       </div>
@@ -307,7 +308,8 @@
                         <div *ngIf="episodeVideoFiles[seasonIndex + '-' + episodeIndex] && !uploadingEpisodeVideo[seasonIndex + '-' + episodeIndex]" class="mt-2">
                           <div class="alert alert-success py-2">
                             <i class="fas fa-check-circle me-2"></i>
-                            <strong>Video selected: {{ episodeVideoFiles[seasonIndex + '-' + episodeIndex].name }}</strong>
+                            <strong>Episode Video Uploaded: {{ episodeVideoFiles[seasonIndex + '-' + episodeIndex].name }}</strong>
+                            <small class="d-block mt-1">This episode video will be saved when you submit the form</small>
                           </div>
                         </div>
                       </div>
@@ -357,7 +359,8 @@
             <div *ngIf="posterFile" class="mt-2">
               <div class="alert alert-success py-2 w-100">
                 <i class="fas fa-check-circle me-2"></i>
-                <strong>Poster selected: {{ posterFile.name }}</strong>
+                <strong>Poster Uploaded: {{ posterFile.name }}</strong>
+                <small class="d-block mt-1">This poster will be saved when you submit the form</small>
               </div>
             </div>
             <div *ngIf="hasError('poster')" class="text-danger mt-2">
@@ -391,7 +394,8 @@
             <div *ngIf="backdropFile" class="mt-2">
               <div class="alert alert-success py-2 w-100">
                 <i class="fas fa-check-circle me-2"></i>
-                <strong>Backdrop selected: {{ backdropFile.name }}</strong>
+                <strong>Backdrop Uploaded: {{ backdropFile.name }}</strong>
+                <small class="d-block mt-1">This backdrop will be saved when you submit the form</small>
               </div>
             </div>
             <div *ngIf="hasError('backdrop')" class="text-danger mt-2">
@@ -415,6 +419,13 @@
               <i class="fas fa-video me-2"></i>
               <strong>Existing Trailer:</strong> {{ getExistingTrailerTitle() }}
               <small class="d-block mt-1">Upload a new video to replace the existing trailer</small>
+            </div>
+            
+            <!-- Show uploaded trailer confirmation -->
+            <div *ngIf="trailerVideoFile && !uploadingTrailerVideo" class="alert alert-success mb-2">
+              <i class="fas fa-check-circle me-2"></i>
+              <strong>Trailer Uploaded:</strong> {{ trailerVideoFile.name }}
+              <small class="d-block mt-1">This trailer will be saved when you submit the form</small>
             </div>
             
             <input type="file" class="form-control" id="trailerVideoUpload" (change)="onTrailerVideoUpload($event)" accept="video/*">

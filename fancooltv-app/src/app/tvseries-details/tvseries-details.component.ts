@@ -78,6 +78,12 @@ export class TvseriesDetailsComponent implements OnInit, OnDestroy {
           
           // Debug: Log series data like movie-details does
           console.log('=== TV SERIES DEBUG ===');
+          console.log('Full TV Series object:', JSON.stringify(series, null, 2));
+          console.log('TV Series video_files:', (series as any).video_files);
+          console.log('TV Series video_files length:', (series as any).video_files?.length || 0);
+          console.log('TV Series trailers:', series.trailers);
+          console.log('TV Series trailers length:', series.trailers?.length || 0);
+          console.log('hasTrailer() result before processing:', this.hasTrailer());
           
           // Process video_files to ensure proper URLs like movie-details does
           if ((series as any).video_files && (series as any).video_files.length > 0) {
@@ -90,6 +96,9 @@ export class TvseriesDetailsComponent implements OnInit, OnDestroy {
                 url: videoUrl // Ensure url property uses the correct URL
               };
             });
+            
+            // Debug trailer detection after processing
+            console.log('After processing - hasTrailer() result:', this.hasTrailer());
           }
           
           // Process episodes to ensure proper video URLs

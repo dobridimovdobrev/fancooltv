@@ -42,7 +42,14 @@ export class ApiService {
    * Get TV series details by ID
    */
   public getTVSeriesDetails(id: number): Observable<ApiResponse<TVSeries>> {
-    return this.get<TVSeries>(`/api/v1/tvseries/${id}`);
+    console.log('ApiService.getTVSeriesDetails called with ID:', id);
+    return this.get<TVSeries>(`/api/v1/tvseries/${id}`).pipe(
+      map((response: any) => {
+        console.log('ApiService.getTVSeriesDetails raw response:', response);
+        console.log('Response video_files:', response?.data?.video_files || response?.video_files);
+        return response;
+      })
+    );
   }
 
   /**
@@ -357,6 +364,7 @@ export class ApiService {
 
   /**
    * Update a complete TV series with files (FormData) - single API call
+   * Uses POST to fix Laravel FormData issue with PUT
    */
   public updateCompleteTvSeries(id: number, formData: FormData): Observable<any> {
     const token = localStorage.getItem('auth_token');
@@ -365,7 +373,8 @@ export class ApiService {
       // Don't set Content-Type for FormData - browser will set it automatically with boundary
     });
     
-    return this.http.put<any>(`${this.baseUrl}/api/v1/tvseries/${id}/complete`, formData, {
+    // Use POST with complete-update endpoint as requested
+    return this.http.post<any>(`${this.baseUrl}/api/v1/tvseries/${id}/complete-update`, formData, {
       headers: headers
     });
   }
