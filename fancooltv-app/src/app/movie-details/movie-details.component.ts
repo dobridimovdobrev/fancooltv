@@ -428,6 +428,7 @@ export class MovieDetailsComponent implements OnInit, OnDestroy {
     if (this.authService.isAdmin()) {
       console.log('[DEBUG] Utente admin: skip verifica crediti');
       this.canPlayVideo = true;
+      this.creditsError = false; // Assicuriamoci che non ci siano errori visualizzati
       return;
     }
     
@@ -447,7 +448,7 @@ export class MovieDetailsComponent implements OnInit, OnDestroy {
     console.log(`[DEBUG] Verifico crediti per film ID: ${this.movie.movie_id}, titolo: ${this.movie.title}`);
     
     this.checkingCredits = true;
-    this.creditsError = false;
+    this.creditsError = false; // Reset dell'errore prima della verifica
     
     // Specifichiamo esplicitamente che stiamo verificando i crediti per un film e passiamo l'ID del film
     this.creditsService.canPlay('movie', this.movie.movie_id)
@@ -466,12 +467,27 @@ export class MovieDetailsComponent implements OnInit, OnDestroy {
           } else {
             this.insufficientCredits = true;
           }
+          
+          // Importante: crediti insufficienti NON è un errore, quindi non mostriamo il messaggio di errore
+          this.creditsError = false;
         },
         error: (error) => {
+          // Solo errori di rete o del server sono veri errori, non crediti insufficienti
           console.error('[ERROR] Error during credits check:', error);
-          this.creditsError = true;
-          // In case of error, we still allow playback
-          this.canPlayVideo = true;
+          
+          // Mostriamo l'errore solo se è un vero errore di sistema, non per crediti insufficienti
+          if (error.status !== 402) {
+            this.creditsError = true;
+          } else {
+            this.creditsError = false;
+            // Crediti insufficienti non è un errore di sistema
+            console.log('[INFO] Crediti insufficienti (non è un errore di sistema)');
+            this.insufficientCredits = true;
+          }
+          
+          // In caso di errore di sistema, permettiamo comunque la riproduzione
+          // ma in caso di crediti insufficienti, non permettiamo la riproduzione
+          this.canPlayVideo = (error.status !== 402);
         }
       });
   }

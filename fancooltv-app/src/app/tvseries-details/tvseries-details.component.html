@@ -77,21 +77,8 @@
                             <span>Verifying credits...</span>
                         </div>
                         
-                        <!-- Messaggio crediti insufficienti (verifica iniziale) -->
-                        <div *ngIf="!checkingCredits && !canPlayVideo && !authService.isAdmin() && !insufficientCredits" class="alert alert-warning mb-3">
-                            <i class="fas fa-coins me-2"></i>
-                            <strong>Insufficient credits!</strong> You don't have enough credits to play this video.
-                            <a href="javascript:void(0)" (click)="openCreditsModal()" class="alert-link">Purchase more credits</a> to continue watching.
-                        </div>
-                        
-                        <!-- Messaggio crediti insufficienti (durante riproduzione) -->
-                        <div *ngIf="insufficientCredits" class="alert alert-danger mb-3">
-                            <i class="fas fa-exclamation-circle me-2"></i>
-                            You don't have enough credits to play this content <a href="javascript:void(0)" (click)="openCreditsModal()" class="alert-link">Purchase more credits</a> to continue watching.
-                        </div>
-                        
-                        <!-- Errore verifica crediti -->
-                        <div *ngIf="creditsError" class="alert alert-danger mb-3">
+                        <!-- Errore verifica crediti (solo per errori di sistema, non per crediti insufficienti) -->
+                        <div *ngIf="creditsError && !insufficientCredits" class="alert alert-danger mb-3">
                             <i class="fas fa-exclamation-triangle me-2"></i>
                             <strong>Error!</strong> An error occurred while verifying credits.
                         </div>
@@ -126,11 +113,10 @@
                                                 </div>
                                             </div>
                                             <button class="btn btn-primary watch-button" 
-                                                    [disabled]="!authService.isAdmin() && !canPlayVideo && !checkingCredits"
                                                     [ngClass]="{'btn-primary': authService.isAdmin() || canPlayVideo, 'btn-secondary': !authService.isAdmin() && !canPlayVideo && !checkingCredits}"
                                                     (click)="openEpisodeContent(videoModal, episode)">
-                                                <i class="fas" [ngClass]="{'fa-play': authService.isAdmin() || canPlayVideo, 'fa-lock': !authService.isAdmin() && !canPlayVideo && !checkingCredits, 'fa-spinner fa-spin': checkingCredits}"></i>
-                                                <span class="ms-2">{{ (authService.isAdmin() || canPlayVideo) ? 'Watch' : 'Insufficient credits' }}</span>
+                                                <i class="fas" [ngClass]="{'fa-play': !checkingCredits, 'fa-spinner fa-spin': checkingCredits}"></i>
+                                                <span class="ms-2">Watch</span>
                                             </button>
                                         </div>
                                     </div>
@@ -168,12 +154,19 @@
             <!-- Overlay per crediti insufficienti -->
             <div *ngIf="insufficientCredits && !authService.isAdmin()" 
                  class="position-absolute w-100 h-100 d-flex flex-column justify-content-center align-items-center text-center p-3"
-                 style="background-color: rgba(0,0,0,0.8); z-index: 10;">
+                 style="background-color: rgba(0,0,0,0.8); z-index: 1000; pointer-events: all;">
                 <i class="fas fa-lock text-danger mb-3" style="font-size: 3rem;"></i>
                 <p class="text-white mb-3">You don't have enough credits to play this content</p>
                 <a href="javascript:void(0)" (click)="openCreditsModal()" class="btn btn-primary">
                     <i class="fas fa-coins me-2"></i>Purchase Credits
                 </a>
+            </div>
+            
+            <!-- Overlay cliccabile per consumo crediti YouTube (invisibile) -->
+            <div *ngIf="trailerUrl && !videoUrl && !youtubeCreditsConsumed && !insufficientCredits && !authService.isAdmin()" 
+                 class="position-absolute w-100 h-100"
+                 style="background-color: transparent; z-index: 10; cursor: pointer;"
+                 (click)="consumeCreditsForYouTube()">
             </div>
             
             <!-- Use video element for local files, iframe for YouTube -->
@@ -198,7 +191,7 @@
             <!-- Overlay per crediti insufficienti -->
             <div *ngIf="insufficientCredits && !authService.isAdmin()" 
                  class="position-absolute w-100 h-100 d-flex flex-column justify-content-center align-items-center text-center p-3"
-                 style="background-color: rgba(0,0,0,0.8); z-index: 10;">
+                 style="background-color: rgba(0,0,0,0.8); z-index: 1000; pointer-events: all;">
                 <i class="fas fa-lock text-danger mb-3" style="font-size: 3rem;"></i>
                 <p class="text-white mb-3">You don't have enough credits to play this content</p>
                 <a href="javascript:void(0)" (click)="openCreditsModal()" class="btn btn-primary">
@@ -206,7 +199,8 @@
                 </a>
             </div>
             
-            <video [src]="videoUrl" controls class="w-100 h-100" style="background: #000;" (play)="onVideoPlay($event)">
+            <video #videoPlayer [src]="videoUrl" [controls]="!insufficientCredits || authService.isAdmin()" class="w-100 h-100" style="background: #000;" 
+                  (play)="onVideoPlay($event)" (playing)="onVideoPlaying($event)" (timeupdate)="onVideoTimeUpdate($event)">
                 Your browser does not support the video tag.
             </video>
         </div>
