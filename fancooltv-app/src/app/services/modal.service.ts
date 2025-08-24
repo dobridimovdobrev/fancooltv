@@ -25,7 +25,7 @@ export class ModalService {
    */
   openCreditsModal(): BsModalRef {
     return this.modalService.show(UserCreditsModalComponent, {
-      class: 'modal-lg',
+      class: 'modal-lg modal-dialog-centered',
       backdrop: 'static',
       keyboard: false
     });
