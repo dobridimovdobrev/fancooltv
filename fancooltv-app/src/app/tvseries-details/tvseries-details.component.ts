@@ -35,6 +35,8 @@ export class TvseriesDetailsComponent implements OnInit, OnDestroy {
   creditsError = false;
   creditsErrorMessage = '';
   insufficientCredits = false;
+  creditsAlreadyConsumed = false; // Flag per tracciare se i crediti sono già stati consumati per questa sessione
+  lastPlayedVideoSrc: string = ''; // Memorizza l'URL dell'ultimo video riprodotto per evitare doppio consumo
   
   // Modal delete
   @ViewChild('deleteModal') deleteModal!: TemplateRef<any>;
@@ -265,6 +267,9 @@ export class TvseriesDetailsComponent implements OnInit, OnDestroy {
     let url = trailerUrl;
     console.log('DEBUG: openTrailerModal called with URL:', trailerUrl);
     
+    // Reset del flag di consumo crediti quando si apre un nuovo trailer
+    this.creditsAlreadyConsumed = false;
+    
     // Se l'utente non è admin e non ha crediti sufficienti, blocca la riproduzione
     if (!this.authService.isAdmin() && !this.canPlayVideo) {
       // Non mostrare alert ma impostare lo stato per mostrare l'overlay
@@ -302,10 +307,7 @@ export class TvseriesDetailsComponent implements OnInit, OnDestroy {
         console.log('DEBUG: Using video element for local file');
         this.videoUrl = this.sanitizer.bypassSecurityTrustResourceUrl(url);
         
-        // Consuma i crediti solo se non è admin
-        if (!this.authService.isAdmin()) {
-          this.consumeCredits();
-        }
+        // I crediti verranno consumati nel metodo onVideoPlay quando l'utente fa play
         
         this.modalRef = this.modalService.show(template, { class: 'modal-lg modal-dialog-centered' });
       } else {
@@ -313,10 +315,7 @@ export class TvseriesDetailsComponent implements OnInit, OnDestroy {
         console.log('DEBUG: Using iframe for YouTube URL');
         this.trailerUrl = this.sanitizeTrailerUrl(url);
         
-        // Consuma i crediti solo se non è admin
-        if (!this.authService.isAdmin()) {
-          this.consumeCredits();
-        }
+        // I crediti verranno consumati nel metodo onVideoPlay quando l'utente fa play
         
         this.modalRef = this.modalService.show(template, { class: 'modal-lg modal-dialog-centered' });
       }
@@ -344,6 +343,9 @@ export class TvseriesDetailsComponent implements OnInit, OnDestroy {
   
   openEpisodeContent(template: TemplateRef<any>, episode: any): void {
     console.log('DEBUG: openEpisodeContent called for episode:', episode.title);
+    
+    // Reset del flag di consumo crediti quando si apre un nuovo episodio
+    this.creditsAlreadyConsumed = false;
     
     // Se l'utente non è admin e non ha crediti sufficienti, blocca la riproduzione
     if (!this.authService.isAdmin() && !this.canPlayVideo) {
@@ -404,10 +406,7 @@ export class TvseriesDetailsComponent implements OnInit, OnDestroy {
           this.videoUrl = this.sanitizer.bypassSecurityTrustUrl(blobUrl);
           console.log('DEBUG: Setting sanitized blob URL to:', this.videoUrl);
           
-          // Consuma i crediti solo se non è admin
-          if (!this.authService.isAdmin()) {
-            this.consumeCredits();
-          }
+          // I crediti verranno consumati nel metodo onVideoPlay quando l'utente fa play
           
           this.modalRef = this.modalService.show(template, { class: 'modal-lg modal-dialog-centered' });
         }).catch((error) => {
@@ -422,10 +421,7 @@ export class TvseriesDetailsComponent implements OnInit, OnDestroy {
         this.videoUrl = this.sanitizer.bypassSecurityTrustUrl(videoUrl);
         console.log('DEBUG: Setting sanitized public URL to:', this.videoUrl);
         
-        // Consuma i crediti solo se non è admin
-        if (!this.authService.isAdmin()) {
-          this.consumeCredits();
-        }
+        // I crediti verranno consumati nel metodo onVideoPlay quando l'utente fa play
         
         this.modalRef = this.modalService.show(template, { class: 'modal-lg modal-dialog-centered' });
       }
@@ -672,6 +668,12 @@ export class TvseriesDetailsComponent implements OnInit, OnDestroy {
       return;
     }
     
+    // Evita doppio consumo di crediti
+    if (this.creditsAlreadyConsumed) {
+      console.log('[DEBUG] Crediti già consumati per questa sessione, skip');
+      return;
+    }
+    
     console.log(`[DEBUG] Consumo crediti per serie TV ID: ${this.series.tv_series_id}, titolo: ${this.series.title}`);
     
     this.consumingCredits = true;
@@ -705,6 +707,8 @@ export class TvseriesDetailsComponent implements OnInit, OnDestroy {
           }
           
           console.log('[DEBUG] Crediti consumati con successo:', response);
+          // Imposta il flag per evitare il doppio consumo
+          this.creditsAlreadyConsumed = true;
         },
         error: (error) => {
           console.error('[ERROR] Errore durante il consumo dei crediti:', error);
@@ -739,6 +743,15 @@ export class TvseriesDetailsComponent implements OnInit, OnDestroy {
     console.log('[DEBUG] tvseries-details.onVideoPlay() chiamato');
     const videoElement = event.target as HTMLVideoElement;
     
+    // Reset del flag di consumo crediti quando si inizia una nuova riproduzione
+    // Questo è necessario solo se il video è cambiato o se è la prima riproduzione
+    const currentSrc = videoElement.src;
+    if (currentSrc && currentSrc !== this.lastPlayedVideoSrc) {
+      console.log('[DEBUG] Nuovo video rilevato, reset flag creditsAlreadyConsumed');
+      this.creditsAlreadyConsumed = false;
+      this.lastPlayedVideoSrc = currentSrc;
+    }
+    
     // Verifica se l'utente è admin
     const isAdmin = this.authService.isAdmin();
     console.log(`[DEBUG] Utente admin: ${isAdmin}, canPlayVideo: ${this.canPlayVideo}`);
@@ -752,7 +765,6 @@ export class TvseriesDetailsComponent implements OnInit, OnDestroy {
     }
     
     // Verifica se stiamo usando un URL diretto o un URL blob
-    const currentSrc = videoElement.src;
     console.log('[DEBUG] URL video corrente:', currentSrc);
     
     // Verifica se è un URL pubblico o autenticato

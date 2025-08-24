@@ -1,0 +1,119 @@
+// Modifiche al componente tvseries-details.component.ts per risolvere il problema del doppio consumo dei crediti
+
+// 1. Aggiunta della flag creditsAlreadyConsumed nelle proprietà del componente
+creditsAlreadyConsumed = false; // Flag per tracciare se i crediti sono già stati consumati per questa sessione
+lastPlayedVideoSrc: string = ''; // Memorizza l'URL dell'ultimo video riprodotto per evitare doppio consumo
+
+// 2. Modifica al metodo onVideoPlay per resettare la flag solo quando viene rilevato un nuovo video
+onVideoPlay(event: Event): void {
+  console.log('[DEBUG] tvseries-details.onVideoPlay() chiamato');
+  const videoElement = event.target as HTMLVideoElement;
+  
+  // Reset del flag di consumo crediti quando si inizia una nuova riproduzione
+  // Questo è necessario solo se il video è cambiato o se è la prima riproduzione
+  const currentSrc = videoElement.src;
+  if (currentSrc && currentSrc !== this.lastPlayedVideoSrc) {
+    console.log('[DEBUG] Nuovo video rilevato, reset flag creditsAlreadyConsumed');
+    this.creditsAlreadyConsumed = false;
+    this.lastPlayedVideoSrc = currentSrc;
+  }
+  
+  // Verifica se l'utente è admin
+  const isAdmin = this.authService.isAdmin();
+  console.log(`[DEBUG] Utente admin: ${isAdmin}, canPlayVideo: ${this.canPlayVideo}`);
+  
+  // Resto del metodo...
+}
+
+// 3. Modifica al metodo consumeCredits per controllare la flag prima di consumare crediti
+consumeCredits(videoElement?: HTMLVideoElement): void {
+  console.log('[DEBUG] tvseries-details.consumeCredits() chiamato');
+  
+  // Skip per admin
+  if (this.authService.isAdmin()) {
+    console.log('[DEBUG] Utente admin: skip consumo crediti');
+    return;
+  }
+  
+  // Verifica che la serie TV sia caricata e abbia un ID
+  if (!this.series) {
+    console.error('[ERROR] Impossibile consumare i crediti: oggetto serie TV non disponibile');
+    return;
+  }
+  
+  if (!this.series.tv_series_id) {
+    console.error('[ERROR] Impossibile consumare i crediti: ID serie TV non disponibile', this.series);
+    return;
+  }
+  
+  // Evita consumo multiplo di crediti
+  if (this.consumingCredits) {
+    console.log('[DEBUG] Consumo crediti già in corso, skip');
+    return;
+  }
+  
+  // Evita doppio consumo di crediti
+  if (this.creditsAlreadyConsumed) {
+    console.log('[DEBUG] Crediti già consumati per questa sessione, skip');
+    return;
+  }
+  
+  console.log(`[DEBUG] Consumo crediti per serie TV ID: ${this.series.tv_series_id}, titolo: ${this.series.title}`);
+  
+  this.consumingCredits = true;
+  
+  // Specifichiamo esplicitamente che stiamo consumando crediti per una serie TV e passiamo l'ID della serie
+  this.creditsService.consumeCredits('tvseries', this.series.tv_series_id)
+    .pipe(finalize(() => {
+      console.log('[DEBUG] Finalize consumeCredits - consumingCredits = false');
+      this.consumingCredits = false;
+    }))
+    .subscribe({
+      next: (response) => {
+        // Verifica se la risposta contiene un errore (gestito dal servizio)
+        if (response.error) {
+          console.warn(`[WARN] Errore gestito: ${response.message}`);
+          
+          // Se è un errore di crediti insufficienti (402)
+          if (response.status === 402) {
+            // Aggiorna lo stato dei crediti
+            this.canPlayVideo = false;
+            this.insufficientCredits = true;
+            this.creditsErrorMessage = response.message || 'You don\'t have enough credits to play this video.';
+            // Blocca la riproduzione se c'è un elemento video
+            if (videoElement) {
+              videoElement.pause();
+            }
+            // Aggiorna l'UI se necessario
+            this.checkCredits(); // Ricontrolla i crediti per aggiornare l'UI
+            return;
+          }
+        }
+        
+        console.log('[DEBUG] Crediti consumati con successo:', response);
+        // Imposta il flag per evitare il doppio consumo
+        this.creditsAlreadyConsumed = true;
+      },
+      // Resto del metodo...
+    });
+}
+
+// 4. Reset della flag creditsAlreadyConsumed nel metodo openEpisodeContent
+openEpisodeContent(template: TemplateRef<any>, episode: any): void {
+  console.log('DEBUG: openEpisodeContent called for episode:', episode.title);
+  
+  // Reset del flag di consumo crediti quando si apre un nuovo episodio
+  this.creditsAlreadyConsumed = false;
+  
+  // Resto del metodo...
+}
+
+// 5. Reset della flag creditsAlreadyConsumed nel metodo openTrailerModal
+openTrailerModal(template: TemplateRef<any>): void {
+  console.log('DEBUG: openTrailerModal called');
+  
+  // Reset del flag di consumo crediti quando si apre un nuovo trailer
+  this.creditsAlreadyConsumed = false;
+  
+  // Resto del metodo...
+}
