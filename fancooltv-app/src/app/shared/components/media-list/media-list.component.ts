@@ -142,27 +142,47 @@ export class MediaListComponent implements OnInit, OnDestroy {
    * Load items from service - using same logic as admin dashboard
    */
   private loadItems(page: number = 1): void {
+    if (!this.authService.isAuthenticated()) {
+      this.router.navigate(['/login']);
+      return;
+    }
+
     this.loading = true;
     this.error = false;
-    this.errorMessage = '';
+    this.noResults = false;
 
+    // Build params for API call
     const params: any = {
       page: page,
-      limit: this.itemsPerPage,
-      sort_by: 'created_at',
-      sort_direction: 'desc'
+      per_page: this.itemsPerPage
     };
 
-    // Add filters if selected - same as admin
-    if (this.searchQuery) params.q = this.searchQuery;
+    // Add filters if set
     if (this.selectedCategory) params.category = this.selectedCategory;
     if (this.selectedYear) params.year = this.selectedYear;
+    if (this.searchQuery) params.search = this.searchQuery;
+
+    // Log per debug
+    console.log(`MediaListComponent.loadItems - Tipo: ${this.mediaType}`);
+    console.log(`MediaListComponent.loadItems - Parametri:`, params);
+    console.log(`MediaListComponent.loadItems - Utente: ${this.authService.isAdmin() ? 'admin' : 'normale'}`);
+    console.log(`MediaListComponent.loadItems - Token: ${localStorage.getItem('auth_token') ? 'presente' : 'mancante'}`);
+
+    // Check if filter or parameter is blocking TV series for normal users
+    if (this.mediaType === 'tvseries' && !this.authService.isAdmin()) {
+      if (params.category || params.year || params.search) {
+        this.errorMessage = 'Access denied. You don\'t have permission to view these TV series with the current filters.';
+        this.error = true;
+        this.loading = false;
+        return;
+      }
+    }
 
     // Use ApiService directly like admin dashboard - call correct API based on mediaType
     const apiCall = this.mediaType === 'movie' 
       ? (this.mediaService as any).apiService.getMovies(params)
       : (this.mediaService as any).apiService.getTVSeries(params);
-    
+
     apiCall.subscribe({
       next: (response: any) => {
         if (page === 1) {
@@ -179,8 +199,20 @@ export class MediaListComponent implements OnInit, OnDestroy {
       },
       error: (error: any) => {
         console.error('Error loading items:', error);
+        console.error('Error status:', error.status);
+        console.error('Error message:', error.message);
+        console.error('Error details:', error.error);
+        console.error('User role:', this.authService.isAdmin() ? 'admin' : 'user');
+        
         this.error = true;
-        this.errorMessage = `Failed to load ${this.mediaType === 'movie' ? 'movies' : 'TV series'}. Please try again.`;
+        // Mostra un messaggio di errore più dettagliato
+        if (error.status === 403) {
+          this.errorMessage = `Access denied. You don't have permission to view these ${this.mediaType === 'movie' ? 'movies' : 'TV series'}.`;
+        } else if (error.status === 401) {
+          this.errorMessage = `Authentication required. Please log in again.`;
+        } else {
+          this.errorMessage = `Failed to load ${this.mediaType === 'movie' ? 'movies' : 'TV series'}. ${error.error?.message || error.message || 'Please try again.'}`;
+        }
         this.loading = false;
       }
     });

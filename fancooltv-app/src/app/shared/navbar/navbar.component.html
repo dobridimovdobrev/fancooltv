@@ -45,7 +45,7 @@
             <a *ngIf="!authService.isAdmin()" href="javascript:void(0)" (click)="openProfileModal()" class="dropdown-item">
               <i class="fa-solid fa-user"></i> Profile
             </a>
-            <a *ngIf="!authService.isAdmin()" class="dropdown-item" routerLink="/dashboard/user/credits">
+            <a *ngIf="!authService.isAdmin()" href="javascript:void(0)" (click)="openCreditsModal()" class="dropdown-item">
               <i class="fa-solid fa-coins"></i> Credits
             </a>
             
@@ -123,7 +123,7 @@
             </a>
           </li>
           <li class="mobile-nav-item" *ngIf="!authService.isAdmin()">
-            <a routerLink="/dashboard/user/credits" class="mobile-nav-link" (click)="closeMobileMenu()" aria-label="View your credits" title="View your credits">
+            <a href="javascript:void(0)" class="mobile-nav-link" (click)="openCreditsModal(); closeMobileMenu()" aria-label="View your credits" title="View your credits">
               <i class="fa-solid fa-coins"></i>
               <span>Credits</span>
             </a>

@@ -28,7 +28,9 @@ export class MovieFormComponent implements OnInit {
   // Modal delete
   @ViewChild('deleteModal') deleteModal!: TemplateRef<any>;
   @ViewChild('deleteVideoModal') deleteVideoModal!: TemplateRef<any>;
+  @ViewChild('uploadProgressModal') uploadProgressModal!: TemplateRef<any>;
   modalRef?: BsModalRef;
+  uploadModalRef?: BsModalRef;
   videoToDeleteIndex: number = -1;
   uploadingPoster = false;
   uploadingBackdrop = false;
@@ -251,6 +253,103 @@ export class MovieFormComponent implements OnInit {
     });
   }
 
+  // Upload progress tracking
+  uploadProgress: number = 0;
+  isUploading: boolean = false;
+  private progressInterval: any;
+  uploadSuccessMessage: string = '';
+  
+  // Get integer progress for display
+  getIntegerProgress(): number {
+    return Math.floor(this.uploadProgress);
+  }
+  
+  // Start upload progress (no simulation, just show modal)
+  startUploadProgress(): void {
+    this.uploadProgress = 0;
+    this.isUploading = true;
+    this.uploadSuccessMessage = '';
+    this.showUploadModal();
+  }
+  
+  // Complete upload progress
+  completeUploadProgress(): void {
+    if (this.progressInterval) {
+      clearInterval(this.progressInterval);
+      this.progressInterval = null;
+    }
+    
+    this.uploadProgress = 100;
+    this.isUploading = false;
+    
+    // Hide modal after showing completion
+    setTimeout(() => {
+      this.resetUploadState();
+    }, 2000);
+  }
+  
+  // Method to reset upload state
+  resetUploadState(): void {
+    if (this.progressInterval) {
+      clearInterval(this.progressInterval);
+      this.progressInterval = null;
+    }
+    this.uploadProgress = 0;
+    this.isUploading = false;
+    this.loading = false;
+    this.uploadSuccessMessage = '';
+    this.hideUploadModal();
+  }
+  
+  // Show upload progress modal
+  showUploadModal(): void {
+    console.log('showUploadModal called, uploadProgressModal:', this.uploadProgressModal);
+    if (this.uploadProgressModal) {
+      this.uploadModalRef = this.modalService.show(this.uploadProgressModal, {
+        class: 'modal-md modal-dialog-centered',
+        backdrop: 'static',
+        keyboard: false,
+        ignoreBackdropClick: true
+      });
+      console.log('Modal shown, uploadModalRef:', this.uploadModalRef);
+    } else {
+      console.error('uploadProgressModal template not found!');
+    }
+  }
+  
+  // Hide upload progress modal
+  hideUploadModal(): void {
+    if (this.uploadModalRef) {
+      this.uploadModalRef.hide();
+      this.uploadModalRef = undefined;
+    }
+  }
+
+  // Update upload progress (called from page component)
+  updateUploadProgress(progress: number): void {
+    console.log('updateUploadProgress called with:', progress);
+    
+    this.uploadProgress = progress;
+    this.isUploading = progress < 100;
+    
+    // Show modal if progress > 0 and modal not already shown
+    if (progress > 0 && !this.uploadModalRef) {
+      this.showUploadModal();
+    }
+  }
+  
+  // Set success message (called from page component)
+  setUploadSuccessMessage(message: string): void {
+    this.uploadSuccessMessage = message;
+    this.uploadProgress = 100;
+    this.isUploading = false;
+    
+    // Close modal after showing success message
+    setTimeout(() => {
+      this.resetUploadState();
+    }, 3000);
+  }
+  
   // Variabili per la gestione delle persone e del modal
   isLoadingPersons: boolean = false;
   currentPersonIndex: number = -1;
@@ -379,6 +478,15 @@ export class MovieFormComponent implements OnInit {
 
   // Prepare form data for API submission
   prepareFormData(): any {
+    // Check if we have files to upload
+    const hasFiles = this.posterFile || this.backdropFile || Object.keys(this.videoFiles).length > 0;
+    
+    if (hasFiles) {
+      // Return FormData when files are present
+      return this.prepareFormDataWithFiles();
+    }
+    
+    // Return regular object when no files
     const formValue = this.movieForm.value;
     
     // Convert persons array from objects to array of IDs only
@@ -511,11 +619,21 @@ export class MovieFormComponent implements OnInit {
 
   // Form submission - now uploads files like TV series form
   onSubmit(): void {
-    // Mark all fields as touched to show validation errors
-    this.movieForm.markAllAsTouched();
-    
-    if (this.isValid()) {
-      const formData = this.prepareFormDataWithFiles();
+    if (this.movieForm.valid) {
+      this.loading = true;
+      
+      // Check if we have files to upload
+      const hasFiles = this.posterFile || this.backdropFile || Object.keys(this.videoFiles).length > 0;
+      if (hasFiles) {
+        // Start simulated progress
+        this.startUploadProgress();
+      }
+      
+      // Prepare form data
+      const formData = this.prepareFormData();
+      console.log('Form data prepared:', formData);
+      
+      // Emit the form data to parent component
       this.formSubmit.emit(formData);
     }
   }

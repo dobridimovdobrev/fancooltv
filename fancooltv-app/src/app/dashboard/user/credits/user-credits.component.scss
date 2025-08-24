@@ -1,0 +1,55 @@
+.credits-container {
+  margin-bottom: 2rem;
+}
+
+.credits-balance {
+  text-align: center;
+  padding: 1.5rem;
+  border-radius: 0.5rem;
+  background: linear-gradient(135deg, #f5f7fa 0%, #e4e8eb 100%);
+}
+
+.credits-amount {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.credits-value {
+  font-size: 3.5rem;
+  font-weight: 700;
+  color: #007bff;
+  line-height: 1;
+}
+
+.credits-label {
+  font-size: 1.2rem;
+  color: #6c757d;
+  margin-top: 0.5rem;
+}
+
+.credits-info-list {
+  list-style: none;
+  padding-left: 0;
+  margin-bottom: 0;
+}
+
+.credits-info-list li {
+  margin-bottom: 0.75rem;
+  display: flex;
+  align-items: flex-start;
+}
+
+.credits-info-list li:last-child {
+  margin-bottom: 0;
+}
+
+.credits-info-list i {
+  margin-top: 0.25rem;
+}
+
+@media (max-width: 767.98px) {
+  .credits-info-box {
+    margin-top: 1.5rem;
+  }
+}

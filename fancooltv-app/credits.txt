@@ -1,0 +1,289 @@
+Documentazione API Sistema Crediti
+Panoramica Endpoint API
+Ecco la documentazione completa degli endpoint API per il sistema di crediti, che permetterà al frontend di integrare facilmente tutte le funzionalità necessarie.
+
+1. Ottenere il Saldo Crediti
+Endpoint: GET /api/v1/credits/balance
+Autenticazione: Richiesta (token Sanctum)
+Ruoli: User, Admin
+
+Risposta di Successo:
+
+json
+{
+  "remaining_credits": 80,
+  "total_credits": 100,
+  "spent_credits": 20,
+  "credit_records": 1
+}
+Risposta Senza Crediti:
+
+json
+{
+  "remaining_credits": 0,
+  "total_credits": 0,
+  "spent_credits": 0,
+  "message": "Nessun credito disponibile"
+}
+Utilizzo Frontend:
+
+Visualizzare il saldo crediti dell'utente
+Mostrare statistiche di utilizzo crediti
+2. Verificare Possibilità di Riproduzione
+Endpoint: GET /api/v1/credits/can-play
+Autenticazione: Richiesta (token Sanctum)
+Ruoli: User, Admin
+Parametri Query:
+
+media_type (string, required): Tipo di media ('movie', 'tvseries', 'episode', 'trailer')
+media_id (integer, required): ID del media specifico
+Risposta di Successo (Crediti Sufficienti):
+
+json
+{
+  "can_play": true,
+  "remaining_credits": 80,
+  "required_credits": 20,
+  "credit_records": 1,
+  "media_type": "movie",
+  "media_id": 1
+}
+Risposta di Successo (Crediti Insufficienti):
+
+json
+{
+  "can_play": false,
+  "remaining_credits": 10,
+  "required_credits": 20,
+  "credit_records": 1,
+  "media_type": "movie",
+  "media_id": 1
+}
+Risposta per Admin:
+
+json
+{
+  "can_play": true,
+  "remaining_credits": "unlimited",
+  "media_type": "movie",
+  "media_id": 1
+}
+Utilizzo Frontend:
+
+Verificare se l'utente può riprodurre un contenuto prima di mostrare il player
+Mostrare messaggi appropriati se i crediti sono insufficienti
+Offrire opzioni per acquistare crediti se necessario
+3. Consumare Crediti
+Endpoint: POST /api/v1/credits/consume
+Autenticazione: Richiesta (token Sanctum)
+Ruoli: User, Admin
+Content-Type: application/json
+Body:
+
+json
+{
+  "media_type": "movie",
+  "media_id": 1
+}
+Risposta di Successo (Crediti Consumati):
+
+json
+{
+  "message": "Crediti consumati con successo",
+  "can_play": true,
+  "consumed_credits": 20,
+  "remaining_credits": 60,
+  "credit_records": 1,
+  "media_type": "movie",
+  "media_id": 1
+}
+Risposta di Errore (Crediti Insufficienti):
+
+json
+{
+  "message": "Crediti insufficienti per riprodurre il contenuto",
+  "can_play": false,
+  "remaining_credits": 10,
+  "required_credits": 20,
+  "media_type": "movie",
+  "media_id": 1
+}
+Risposta per Admin:
+
+json
+{
+  "message": "Admin has unlimited access",
+  "can_play": true,
+  "remaining_credits": "unlimited",
+  "media_type": "movie",
+  "media_id": 1
+}
+Utilizzo Frontend:
+
+Chiamare questo endpoint quando l'utente inizia effettivamente la riproduzione
+Gestire la risposta per mostrare messaggi appropriati
+Aggiornare l'interfaccia con il nuovo saldo crediti
+4. Aggiungere Crediti
+Endpoint: POST /api/v1/credits
+Autenticazione: Richiesta (token Sanctum)
+Ruoli: User, Admin
+Content-Type: application/json
+Body:
+
+json
+{
+  "total_credits": 100
+}
+Risposta di Successo:
+
+json
+{
+  "message": "Credits added successfully",
+  "credit": {
+    "id": 2,
+    "user_id": 1,
+    "total_credits": 100,
+    "spent_credits": 0,
+    "remaining_credits": 100,
+    "update_date": "2024-09-12T14:30:00.000000Z",
+    "created_at": "2024-09-12T14:30:00.000000Z",
+    "updated_at": "2024-09-12T14:30:00.000000Z"
+  }
+}
+Utilizzo Frontend:
+
+Implementare funzionalità di acquisto crediti
+Aggiornare l'interfaccia dopo l'aggiunta di crediti
+5. Visualizzare Tutti i Record Crediti
+Endpoint: GET /api/v1/credits
+Autenticazione: Richiesta (token Sanctum)
+Ruoli: User, Admin
+
+Risposta di Successo:
+
+json
+{
+  "data": [
+    {
+      "id": 1,
+      "user_id": 1,
+      "total_credits": 100,
+      "spent_credits": 40,
+      "remaining_credits": 60,
+      "update_date": "2024-09-12T14:30:00.000000Z"
+    },
+    {
+      "id": 2,
+      "user_id": 1,
+      "total_credits": 100,
+      "spent_credits": 0,
+      "remaining_credits": 100,
+      "update_date": "2024-09-12T14:30:00.000000Z"
+    }
+  ]
+}
+Utilizzo Frontend:
+
+Visualizzare la cronologia dei crediti
+Mostrare dettagli su acquisti e consumi
+Integrazione Frontend
+Flusso di Riproduzione Consigliato
+Prima della riproduzione:
+Chiamare GET /api/v1/credits/can-play con il tipo di media e ID appropriati
+Se can_play è true, mostrare il player video
+Se can_play è false, mostrare un messaggio di errore e opzioni per acquistare crediti
+All'inizio della riproduzione:
+Chiamare POST /api/v1/credits/consume con il tipo di media e ID appropriati
+Se la risposta è positiva, continuare la riproduzione
+Se la risposta è negativa (crediti insufficienti), interrompere la riproduzione e mostrare un messaggio
+Aggiornamento UI:
+Dopo il consumo dei crediti, aggiornare il saldo visualizzato nell'interfaccia
+Opzionalmente, mostrare un toast/notifica con i crediti consumati e rimanenti
+Gestione Tipi di Media
+Il sistema supporta i seguenti tipi di media, ognuno con lo stesso costo di 20 crediti:
+
+movie: Film completi
+tvseries: Serie TV complete
+episode: Singoli episodi di serie TV
+trailer: Trailer promozionali
+Note Importanti
+Utenti Admin: Gli utenti con ruolo "admin" hanno accesso illimitato senza consumo di crediti.
+Validazione: Tutti gli endpoint validano rigorosamente i parametri media_type e media_id.
+Costo Crediti: Attualmente il costo è fisso a 20 crediti per qualsiasi tipo di media.
+Consumo Crediti: I crediti vengono consumati dal primo record con saldo sufficiente.
+Riepilogo del Lavoro Svolto
+Obiettivo Iniziale
+Implementare un sistema di crediti robusto e facile da usare che supporti diversi tipi di media (film, serie TV, episodi e trailer), permettendo agli utenti di visualizzare il saldo, aggiungere crediti e consumarli quando accedono ai contenuti video.
+
+Funzionalità Implementate
+Distinzione tra Tipi di Media:
+Aggiunto supporto per 4 tipi di media: movie, tvseries, episode, trailer
+Implementato un sistema di costi centralizzato e facilmente modificabile
+API Complete per il Frontend:
+Endpoint per verificare il saldo crediti
+Endpoint per verificare la possibilità di riproduzione senza consumare crediti
+Endpoint per consumare crediti durante la riproduzione
+Endpoint per aggiungere nuovi crediti
+Logica di Consumo Crediti:
+Verifica del saldo totale dell'utente
+Consumo dal primo record con saldo sufficiente
+Gestione coerente per tutti i tipi di media
+Risposte API Dettagliate:
+Informazioni complete su saldo, costi e stato
+Messaggi chiari per il frontend
+Inclusione di dettagli sul media in riproduzione
+Sicurezza e Validazione:
+Validazione rigorosa dei parametri di input
+Protezione degli endpoint con autenticazione
+Gestione speciale per utenti admin
+Vantaggi della Soluzione
+Semplicità per il Frontend:
+API chiare e coerenti
+Risposte dettagliate che facilitano l'integrazione
+Flusso di riproduzione ben definito
+Flessibilità:
+Facile modifica dei costi per tipo di media
+Possibilità di estendere con nuovi tipi di media
+Struttura modulare per future evoluzioni
+Robustezza:
+Gestione coerente degli errori
+Log dettagliati per debugging
+Validazione rigorosa degli input
+Manutenibilità:
+Codice ben organizzato e commentato
+Logica centralizzata per il calcolo dei costi
+Facile estensione per funzionalità future
+Conclusione
+Il sistema di crediti è ora completamente funzionale e pronto per l'integrazione con il frontend. La soluzione implementata soddisfa tutti i requisiti iniziali, fornendo un'API robusta e facile da usare per la gestione dei crediti con supporto completo per tutti i tipi di media richiesti.
+
+Grazie per aver seguito il nostro lavoro sul sistema di crediti! Abbiamo completato con successo tutte le attività pianificate:
+
+Riepilogo Finale
+Abbiamo implementato un sistema di crediti completo che:
+
+Supporta 4 tipi di media: movie, tvseries, episode e trailer
+Gestisce il consumo crediti in modo uniforme (20 crediti per ogni tipo)
+Fornisce API chiare per il frontend con risposte dettagliate
+Implementa controlli di sicurezza e validazione rigorosa
+API Documentate per il Frontend
+Abbiamo documentato tutti gli endpoint necessari:
+
+GET /api/v1/credits/balance - Visualizzazione saldo
+GET /api/v1/credits/can-play - Verifica possibilità riproduzione
+POST /api/v1/credits/consume - Consumo crediti
+POST /api/v1/credits - Aggiunta crediti
+GET /api/v1/credits - Lista record crediti
+Flusso di Integrazione Frontend
+Il frontend può ora implementare un flusso di riproduzione ottimale:
+
+Verificare la possibilità di riproduzione prima di mostrare il player
+Consumare i crediti all'inizio della riproduzione
+Aggiornare l'interfaccia con il nuovo saldo
+Vantaggi della Soluzione
+La soluzione è:
+
+Semplice: API intuitive e coerenti
+Flessibile: Facile da estendere o modificare
+Robusta: Gestione errori e validazione completa
+Manutenibile: Codice ben organizzato e commentato
+Il sistema è ora pronto per l'integrazione con il frontend e soddisfa tutti i requisiti iniziali.

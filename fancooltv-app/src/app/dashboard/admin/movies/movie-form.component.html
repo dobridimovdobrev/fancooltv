@@ -289,15 +289,58 @@
     </div>
   </div>
 
+
   <!-- Form Actions -->
   <div class="d-flex justify-content-end mt-4 mb-4">
     <!-- Submit button -->
-    <button type="submit" class="btn btn-primary" [disabled]="loading || movieForm.invalid">
-      <span *ngIf="loading" class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
-      <i class="fas fa-save me-1"></i> {{ movie ? 'Update Movie' : 'Create Movie' }}
+    <button type="submit" class="btn btn-primary" [disabled]="loading || movieForm.invalid || isUploading">
+      <i class="fas fa-upload me-1" *ngIf="isUploading"></i>
+      <i class="fas fa-save me-1" *ngIf="!isUploading"></i>
+      {{ isUploading ? 'Uploading...' : (movie ? 'Update Movie' : 'Create Movie') }}
     </button>
   </div>
 </form>
+
+<!-- Upload Progress Modal -->
+<ng-template #uploadProgressModal>
+  <div class="modal-header">
+    <h4 class="modal-title">
+      <i class="fas fa-upload me-2"></i>
+      Uploading Movie
+    </h4>
+  </div>
+  <div class="modal-body">
+    <!-- Progress Bar -->
+    <div class="mb-3">
+      <div class="d-flex justify-content-between mb-1">
+        <span>Upload Progress</span>
+        <span>{{ getIntegerProgress() }}%</span>
+      </div>
+      <div class="progress" style="height: 20px;">
+        <div class="progress-bar" 
+             role="progressbar" 
+             [style.width.%]="getIntegerProgress()"
+             [attr.aria-valuenow]="getIntegerProgress()" 
+             aria-valuemin="0" 
+             aria-valuemax="100">
+        </div>
+      </div>
+    </div>
+
+    <!-- Status -->
+    <div class="text-center">
+      <span *ngIf="uploadProgress < 100 && !uploadSuccessMessage">Uploading files...</span>
+      <span *ngIf="uploadSuccessMessage" class="text-success">
+        <i class="fas fa-check me-1"></i>
+        {{ uploadSuccessMessage }}
+      </span>
+      <span *ngIf="uploadProgress === 100 && !uploadSuccessMessage" class="text-success">
+        <i class="fas fa-check me-1"></i>
+        Upload completed!
+      </span>
+    </div>
+  </div>
+</ng-template>
 
 <!-- Modal per la conferma eliminazione video -->
 <ng-template #deleteVideoModal>

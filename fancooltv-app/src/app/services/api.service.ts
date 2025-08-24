@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams, HttpEventType } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { Observable, throwError } from 'rxjs';
+import { map, catchError } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 import { ApiResponse, PaginationParams } from '../models/api.models';
 import { Movie, Category, Person } from '../models/media.models';
@@ -34,8 +34,37 @@ export class ApiService {
   /**
    * Get TV series with optional pagination and filters
    */
-  public getTVSeries(params: Partial<PaginationParams> = { page: 1 }): Observable<ApiResponse<TVSeries[]>> {
-    return this.get<TVSeries[]>('/api/v1/tvseries', params);
+  public getTVSeries(params: any = {}): Observable<any> {
+    // Log per debug
+    console.log('ApiService.getTVSeries - Chiamata con parametri:', params);
+    console.log('ApiService.getTVSeries - User role:', localStorage.getItem('userRole') || 'user');
+    console.log('ApiService.getTVSeries - Auth token:', localStorage.getItem('auth_token') ? 'presente' : 'mancante');
+    
+    return this.get('/api/v1/tvseries', params).pipe(
+      map(response => {
+        // Log per debug
+        console.log('ApiService.getTVSeries - Risposta ricevuta:', response);
+        console.log('ApiService.getTVSeries - Struttura completa:', JSON.stringify(response, null, 2));
+        
+        // Log se non ci sono risultati
+        if (response && response.data && Array.isArray(response.data) && response.data.length === 0) {
+          console.log('ApiService.getTVSeries - Nessun risultato trovato');
+          console.log('ApiService.getTVSeries - Meta info:', response.meta);
+          console.log('ApiService.getTVSeries - Links:', response.links);
+        }
+        
+        return response;
+      }),
+      catchError(error => {
+        // Log dettagliato dell'errore
+        console.error('ApiService.getTVSeries - Errore:', error);
+        console.error('ApiService.getTVSeries - Status:', error.status);
+        console.error('ApiService.getTVSeries - Message:', error.message);
+        console.error('ApiService.getTVSeries - Error details:', error.error);
+        
+        return throwError(() => error);
+      })
+    );
   }
 
   /**
@@ -390,7 +419,9 @@ export class ApiService {
     });
     
     return this.http.post<any>(`${this.baseUrl}/api/v1/movies/complete`, formData, {
-      headers: headers
+      headers: headers,
+      reportProgress: true,
+      observe: 'events'
     });
   }
 
@@ -407,7 +438,9 @@ export class ApiService {
     
     // Use POST with complete-update endpoint as requested
     return this.http.post<any>(`${this.baseUrl}/api/v1/movies/${id}/complete-update`, formData, {
-      headers: headers
+      headers: headers,
+      reportProgress: true,
+      observe: 'events'
     });
   }
 

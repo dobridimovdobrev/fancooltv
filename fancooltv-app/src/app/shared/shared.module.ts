@@ -10,6 +10,7 @@ import { ErrorMessageComponent } from './error-message/error-message.component';
 import { SearchFilterComponent } from './search-filter/search-filter.component';
 import { MediaListComponent } from './components/media-list/media-list.component';
 import { ProfileEditModalComponent } from './components/profile-edit-modal/profile-edit-modal.component';
+import { UserCreditsModalComponent } from './user-credits-modal/user-credits-modal.component';
 import { AccordionModule } from 'ngx-bootstrap/accordion';
 import { BsDropdownModule } from 'ngx-bootstrap/dropdown';
 import { ModalModule } from 'ngx-bootstrap/modal';
@@ -24,7 +25,8 @@ import { CollapseModule } from 'ngx-bootstrap/collapse';
     ErrorMessageComponent,
     SearchFilterComponent,
     MediaListComponent,
-    ProfileEditModalComponent
+    ProfileEditModalComponent,
+    UserCreditsModalComponent
   ],
   imports: [
     CommonModule,
@@ -44,12 +46,14 @@ import { CollapseModule } from 'ngx-bootstrap/collapse';
     ErrorMessageComponent,
     SearchFilterComponent,
     MediaListComponent,
+    UserCreditsModalComponent,
     AccordionModule,
     BsDropdownModule,
     CollapseModule,
     CommonModule,
     FormsModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    ModalModule
   ]
 })
 export class SharedModule { }

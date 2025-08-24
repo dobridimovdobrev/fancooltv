@@ -7,6 +7,10 @@ import { ApiService } from '../services/api.service';
 import { AuthService } from '../services/auth.service';
 import { Subscription } from 'rxjs';
 import { BsModalService, BsModalRef } from 'ngx-bootstrap/modal';
+import { CreditsService } from '../services/credits.service';
+import { ModalService } from '../services/modal.service';
+import { EventService } from '../services/event.service';
+import { finalize } from 'rxjs/operators';
 
 @Component({
   selector: 'app-tvseries-details',
@@ -24,6 +28,14 @@ export class TvseriesDetailsComponent implements OnInit, OnDestroy {
   modalRef?: BsModalRef;
   private subscriptions: Subscription = new Subscription();
   
+  // Crediti
+  canPlayVideo = false;
+  checkingCredits = false;
+  consumingCredits = false;
+  creditsError = false;
+  creditsErrorMessage = '';
+  insufficientCredits = false;
+  
   // Modal delete
   @ViewChild('deleteModal') deleteModal!: TemplateRef<any>;
   
@@ -37,29 +49,64 @@ export class TvseriesDetailsComponent implements OnInit, OnDestroy {
 
   constructor(
     private route: ActivatedRoute,
+    private eventService: EventService,
     private router: Router,
     private tvSeriesService: TVSeriesService,
     private apiService: ApiService,
     public authService: AuthService,
     private sanitizer: DomSanitizer,
-    private modalService: BsModalService
+    private modalService: BsModalService,
+    private creditsService: CreditsService,
+    private userModalService: ModalService
   ) { }
 
   ngOnInit(): void {
+    this.route.paramMap.subscribe(params => {
+      const id = params.get('id');
+      if (id) {
+        this.loadSeriesDetails(+id);
+      } else {
+        this.router.navigate(['/tvseries']);
+      }
+    });
+    
+    // Verifica se l'utente può riprodurre video
+    if (!this.authService.isAdmin()) {
+      this.checkCredits();
+    }
+    
+    // Sottoscrizione agli aggiornamenti dei crediti
     this.subscriptions.add(
-      this.route.paramMap.subscribe(params => {
-        const id = params.get('id');
-        if (id) {
-          this.loadSeriesDetails(+id);
-        } else {
-          this.router.navigate(['/tvseries']);
-        }
+      this.eventService.creditsUpdated$.subscribe(newBalance => {
+        console.log('Credits updated event received in tvseries-details, new balance:', newBalance);
+        // Aggiorna lo stato dei crediti
+        this.checkCredits();
       })
     );
   }
 
   ngOnDestroy(): void {
     this.subscriptions.unsubscribe();
+    if (this.videoUrl && typeof this.videoUrl === 'object') {
+      const urlString = this.videoUrl.toString();
+      if (urlString.startsWith('blob:')) {
+        console.log('[DEBUG] Revoca URL blob:', urlString);
+        URL.revokeObjectURL(urlString);
+      }
+    }
+  }
+  
+  /**
+   * Opens the credits modal for purchasing credits
+   */
+  openCreditsModal(): void {
+    // Chiudi qualsiasi modal aperto prima di aprire il modal dei crediti
+    if (this.modalRef) {
+      this.modalRef.hide();
+    }
+    
+    // Apri il modal dei crediti utilizzando il ModalService
+    this.userModalService.openCreditsModal();
   }
 
   /**
@@ -69,12 +116,23 @@ export class TvseriesDetailsComponent implements OnInit, OnDestroy {
     console.log('TvseriesDetailsComponent.loadSeriesDetails called with ID:', seriesId);
     this.loading = true;
     this.error = false;
+    
+    // Se l'utente è admin, può sempre riprodurre i video
+    if (this.authService.isAdmin()) {
+      this.canPlayVideo = true;
+    }
+    
     this.subscriptions.add(
       this.tvSeriesService.loadTVSeriesDetails(seriesId).subscribe({
         next: (series) => {
           console.log('TvseriesDetailsComponent received series data:', series);
           this.series = series;
           this.loading = false;
+          
+          // Verifica i crediti dopo che la serie è stata caricata
+          if (!this.authService.isAdmin()) {
+            this.checkCredits();
+          }
           
           // Debug: Log series data like movie-details does
           console.log('=== TV SERIES DEBUG ===');
@@ -120,7 +178,7 @@ export class TvseriesDetailsComponent implements OnInit, OnDestroy {
         },
         error: (error) => {
           this.error = true;
-          this.errorMessage = 'Errore nel caricamento dei dettagli della serie TV';
+          this.errorMessage = 'Error loading TV series details';
           this.loading = false;
           console.error('TvseriesDetailsComponent API Error:', error);
         }
@@ -207,23 +265,32 @@ export class TvseriesDetailsComponent implements OnInit, OnDestroy {
     let url = trailerUrl;
     console.log('DEBUG: openTrailerModal called with URL:', trailerUrl);
     
+    // Se l'utente non è admin e non ha crediti sufficienti, blocca la riproduzione
+    if (!this.authService.isAdmin() && !this.canPlayVideo) {
+      // Non mostrare alert ma impostare lo stato per mostrare l'overlay
+      this.insufficientCredits = true;
+      this.creditsErrorMessage = 'You don\'t have enough credits to play this content';
+      return;
+    }
+    
     // If no URL provided, try to find one from the series data
     if (!url && this.series) {
       console.log('DEBUG: No URL provided, searching in series data');
-      // Check traditional trailers array first
-      if (this.series.trailers && this.series.trailers.length > 0) {
-        url = this.series.trailers[0].url;
-        console.log('DEBUG: Found trailer in trailers array:', url);
-      }
-      // Check video_files for trailer
-      else if ((this.series as any).video_files && (this.series as any).video_files.length > 0) {
+      
+      // Check video_files for trailer FIRST (prioritize uploaded videos)
+      if ((this.series as any).video_files && (this.series as any).video_files.length > 0) {
         const trailerVideo = (this.series as any).video_files.find((video: any) => 
           video.title && video.title.toLowerCase().includes('trailer')
         );
         if (trailerVideo) {
           url = trailerVideo.public_stream_url || trailerVideo.stream_url;
-          console.log('DEBUG: Found trailer in video_files:', url);
+          console.log('DEBUG: Found trailer in video_files (PRIORITY):', url);
         }
+      }
+      // THEN check traditional trailers array if no uploaded video found
+      if (!url && this.series.trailers && this.series.trailers.length > 0) {
+        url = this.series.trailers[0].url;
+        console.log('DEBUG: Found trailer in trailers array (FALLBACK):', url);
       }
     }
     
@@ -234,11 +301,23 @@ export class TvseriesDetailsComponent implements OnInit, OnDestroy {
         // Local video file - use video element instead of iframe
         console.log('DEBUG: Using video element for local file');
         this.videoUrl = this.sanitizer.bypassSecurityTrustResourceUrl(url);
+        
+        // Consuma i crediti solo se non è admin
+        if (!this.authService.isAdmin()) {
+          this.consumeCredits();
+        }
+        
         this.modalRef = this.modalService.show(template, { class: 'modal-lg modal-dialog-centered' });
       } else {
         // YouTube URL - use iframe
         console.log('DEBUG: Using iframe for YouTube URL');
         this.trailerUrl = this.sanitizeTrailerUrl(url);
+        
+        // Consuma i crediti solo se non è admin
+        if (!this.authService.isAdmin()) {
+          this.consumeCredits();
+        }
+        
         this.modalRef = this.modalService.show(template, { class: 'modal-lg modal-dialog-centered' });
       }
     } else {
@@ -258,17 +337,122 @@ export class TvseriesDetailsComponent implements OnInit, OnDestroy {
   }
 
   /**
+   * Open the episode content - handles both episodes with video files and those without
+   * If the episode has video files, it will play those. Otherwise, it will play the series trailer.
+   */
+  @ViewChild('trailerModal') trailerModalTemplate!: TemplateRef<any>;
+  
+  openEpisodeContent(template: TemplateRef<any>, episode: any): void {
+    console.log('DEBUG: openEpisodeContent called for episode:', episode.title);
+    
+    // Se l'utente non è admin e non ha crediti sufficienti, blocca la riproduzione
+    if (!this.authService.isAdmin() && !this.canPlayVideo) {
+      // Non mostrare alert ma impostare lo stato per mostrare l'overlay
+      this.insufficientCredits = true;
+      this.creditsErrorMessage = 'You don\'t have enough credits to play this content';
+      return;
+    }
+    
+    // Check if the episode has video files
+    if (episode.video_files && episode.video_files.length > 0) {
+      // Use the episode's video file
+      const videoUrl = episode.video_files[0].public_stream_url || episode.video_files[0].stream_url;
+      this.openVideoModal(template, videoUrl);
+    } else {
+      // No video files for this episode, use the series trailer instead
+      console.log('DEBUG: No video files for episode, using series trailer');
+      
+      // Usa il template trailerModal invece di videoModal
+      if (this.series && this.series.trailers && this.series.trailers.length > 0) {
+        // Usa il template trailerModal esplicitamente
+        this.openTrailerModal(this.trailerModalTemplate || template);
+      } else if ((this.series as any).video_files && (this.series as any).video_files.length > 0) {
+        // Se ci sono video_files nella serie, usa quelli
+        this.openTrailerModal(this.trailerModalTemplate || template);
+      } else {
+        console.log('DEBUG: No trailer available for this series');
+        alert('No video content available for this episode');
+      }
+    }
+  }
+  
+  /**
    * Open the video modal with the specified video URL for episodes
    */
   openVideoModal(template: TemplateRef<any>, videoUrl: string): void {
     console.log('DEBUG: openVideoModal called with URL:', videoUrl);
+    
+    // Se l'utente non è admin e non ha crediti sufficienti, blocca la riproduzione
+    if (!this.authService.isAdmin() && !this.canPlayVideo) {
+      // Non mostrare alert ma impostare lo stato per mostrare l'overlay
+      this.insufficientCredits = true;
+      this.creditsErrorMessage = 'You don\'t have enough credits to play this content';
+      return;
+    }
+    
     if (videoUrl) {
-      this.videoUrl = this.sanitizer.bypassSecurityTrustResourceUrl(videoUrl);
-      console.log('DEBUG: Setting sanitized videoUrl to:', this.videoUrl);
-      this.modalRef = this.modalService.show(template, { class: 'modal-lg modal-dialog-centered' });
+      // Verifica se è un URL pubblico o autenticato
+      const isPublicUrl = videoUrl.includes('public-video');
+      const isAuthenticatedUrl = videoUrl.includes('stream-video') || videoUrl.includes('authenticated') || videoUrl.includes('api/video');
+      
+      console.log(`DEBUG: URL type - Public: ${isPublicUrl}, Authenticated: ${isAuthenticatedUrl}`);
+      
+      if (isAuthenticatedUrl) {
+        // Per URL autenticati, carica come blob per una riproduzione più affidabile
+        console.log('DEBUG: Loading authenticated URL as blob');
+        this.loadVideoBlob(videoUrl).then((blobUrl) => {
+          this.videoUrl = this.sanitizer.bypassSecurityTrustUrl(blobUrl);
+          console.log('DEBUG: Setting sanitized blob URL to:', this.videoUrl);
+          
+          // Consuma i crediti solo se non è admin
+          if (!this.authService.isAdmin()) {
+            this.consumeCredits();
+          }
+          
+          this.modalRef = this.modalService.show(template, { class: 'modal-lg modal-dialog-centered' });
+        }).catch((error) => {
+          console.error('ERROR: Failed to load video as blob:', error);
+          // Fallback al metodo standard in caso di errore
+          this.videoUrl = this.sanitizer.bypassSecurityTrustUrl(videoUrl);
+          this.modalRef = this.modalService.show(template, { class: 'modal-lg modal-dialog-centered' });
+        });
+      } else {
+        // Per URL pubblici o altri tipi di URL, usa direttamente l'URL sanitizzato
+        console.log('DEBUG: Using direct sanitized URL for public video');
+        this.videoUrl = this.sanitizer.bypassSecurityTrustUrl(videoUrl);
+        console.log('DEBUG: Setting sanitized public URL to:', this.videoUrl);
+        
+        // Consuma i crediti solo se non è admin
+        if (!this.authService.isAdmin()) {
+          this.consumeCredits();
+        }
+        
+        this.modalRef = this.modalService.show(template, { class: 'modal-lg modal-dialog-centered' });
+      }
     } else {
       console.log('No video URL available for this episode');
     }
+  }
+  
+  /**
+   * Carica un video come blob per l'autenticazione e riproduzione affidabile
+   */
+  loadVideoBlob(url: string): Promise<string> {
+    console.log('[DEBUG] Caricamento video come blob da URL:', url);
+    return new Promise((resolve, reject) => {
+      this.apiService.getVideoBlob(url).subscribe({
+        next: (blob: Blob) => {
+          console.log('[DEBUG] Blob ricevuto con successo, dimensione:', blob.size, 'bytes');
+          const blobUrl = URL.createObjectURL(blob);
+          console.log('[DEBUG] Blob URL creato:', blobUrl);
+          resolve(blobUrl);
+        },
+        error: (error: any) => {
+          console.error('[ERROR] Errore durante il caricamento del video come blob:', error);
+          reject(error);
+        }
+      });
+    });
   }
 
   /**
@@ -401,5 +585,228 @@ export class TvseriesDetailsComponent implements OnInit, OnDestroy {
     }
     
     return false;
+  }
+  
+  /**
+   * Verifica se l'utente ha crediti sufficienti per riprodurre il video
+   */
+  checkCredits(): void {
+    console.log('[DEBUG] tvseries-details.checkCredits() chiamato');
+    
+    // Skip per admin
+    if (this.authService.isAdmin()) {
+      console.log('[DEBUG] Utente admin: skip verifica crediti');
+      this.canPlayVideo = true;
+      return;
+    }
+    
+    // Verifica che la serie TV sia caricata e abbia un ID
+    if (!this.series) {
+      console.error('[ERROR] Impossibile verificare i crediti: oggetto serie TV non disponibile');
+      this.creditsError = true;
+      return;
+    }
+    
+    if (!this.series.tv_series_id) {
+      console.error('[ERROR] Impossibile verificare i crediti: ID serie TV non disponibile', this.series);
+      this.creditsError = true;
+      return;
+    }
+    
+    console.log(`[DEBUG] Verifico crediti per serie TV ID: ${this.series.tv_series_id}, titolo: ${this.series.title}`);
+    
+    this.checkingCredits = true;
+    this.creditsError = false;
+    
+    // Specifichiamo esplicitamente che stiamo verificando i crediti per una serie TV e passiamo l'ID della serie
+    this.creditsService.canPlay('tvseries', this.series.tv_series_id)
+      .pipe(finalize(() => {
+        console.log('[DEBUG] Finalize checkCredits - checkingCredits = false');
+        this.checkingCredits = false;
+      }))
+      .subscribe({
+        next: (canPlay) => {
+          this.canPlayVideo = canPlay;
+          console.log('[DEBUG] Controllo crediti completato:', canPlay ? 'Crediti sufficienti' : 'Crediti insufficienti', canPlay);
+          
+          // Se l'utente ha crediti sufficienti, assicuriamoci che i pulsanti di riproduzione siano abilitati
+          if (canPlay) {
+            console.log('[DEBUG] Abilitando pulsanti di riproduzione per crediti sufficienti');
+          }
+        },
+        error: (error) => {
+          console.error('[ERROR] Errore durante il controllo dei crediti:', error);
+          this.creditsError = true;
+          // In caso di errore, permettiamo comunque la riproduzione
+          this.canPlayVideo = true;
+        }
+      });
+  }
+  
+  /**
+   * Consuma i crediti quando l'utente inizia la riproduzione del video
+   */
+  consumeCredits(videoElement?: HTMLVideoElement): void {
+    console.log('[DEBUG] tvseries-details.consumeCredits() chiamato');
+    
+    // Skip per admin
+    if (this.authService.isAdmin()) {
+      console.log('[DEBUG] Utente admin: skip consumo crediti');
+      return;
+    }
+    
+    // Verifica che la serie TV sia caricata e abbia un ID
+    if (!this.series) {
+      console.error('[ERROR] Impossibile consumare i crediti: oggetto serie TV non disponibile');
+      return;
+    }
+    
+    if (!this.series.tv_series_id) {
+      console.error('[ERROR] Impossibile consumare i crediti: ID serie TV non disponibile', this.series);
+      return;
+    }
+    
+    // Evita consumo multiplo di crediti
+    if (this.consumingCredits) {
+      console.log('[DEBUG] Consumo crediti già in corso, skip');
+      return;
+    }
+    
+    console.log(`[DEBUG] Consumo crediti per serie TV ID: ${this.series.tv_series_id}, titolo: ${this.series.title}`);
+    
+    this.consumingCredits = true;
+    
+    // Specifichiamo esplicitamente che stiamo consumando crediti per una serie TV e passiamo l'ID della serie
+    this.creditsService.consumeCredits('tvseries', this.series.tv_series_id)
+      .pipe(finalize(() => {
+        console.log('[DEBUG] Finalize consumeCredits - consumingCredits = false');
+        this.consumingCredits = false;
+      }))
+      .subscribe({
+        next: (response) => {
+          // Verifica se la risposta contiene un errore (gestito dal servizio)
+          if (response.error) {
+            console.warn(`[WARN] Errore gestito: ${response.message}`);
+            
+            // Se è un errore di crediti insufficienti (402)
+            if (response.status === 402) {
+              // Aggiorna lo stato dei crediti
+              this.canPlayVideo = false;
+              this.insufficientCredits = true;
+              this.creditsErrorMessage = response.message || 'You don\'t have enough credits to play this video.';
+              // Blocca la riproduzione se c'è un elemento video
+              if (videoElement) {
+                videoElement.pause();
+              }
+              // Aggiorna l'UI se necessario
+              this.checkCredits(); // Ricontrolla i crediti per aggiornare l'UI
+              return;
+            }
+          }
+          
+          console.log('[DEBUG] Crediti consumati con successo:', response);
+        },
+        error: (error) => {
+          console.error('[ERROR] Errore durante il consumo dei crediti:', error);
+          
+          // Verifica se è un errore 402
+          if (error.status === 402) {
+            // Aggiorna lo stato dei crediti
+            this.canPlayVideo = false;
+            this.insufficientCredits = true;
+            this.creditsErrorMessage = 'You don\'t have enough credits to play this video.';
+            // Blocca la riproduzione se c'è un elemento video
+            if (videoElement) {
+              videoElement.pause();
+            }
+            return;
+          }
+          
+          // Per altri errori, permettiamo comunque la riproduzione se c'è un elemento video
+          if (videoElement) {
+            videoElement.play().catch(playError => {
+              console.error('[ERROR] Impossibile riprodurre il video dopo errore:', playError);
+            });
+          }
+        }
+      });
+  }
+  
+  /**
+   * Gestisce l'evento di play del video
+   */
+  onVideoPlay(event: Event): void {
+    console.log('[DEBUG] tvseries-details.onVideoPlay() chiamato');
+    const videoElement = event.target as HTMLVideoElement;
+    
+    // Verifica se l'utente è admin
+    const isAdmin = this.authService.isAdmin();
+    console.log(`[DEBUG] Utente admin: ${isAdmin}, canPlayVideo: ${this.canPlayVideo}`);
+    
+    // Se l'utente non è admin e non ha crediti sufficienti, blocca la riproduzione
+    if (!isAdmin && !this.canPlayVideo) {
+      console.log('[DEBUG] Bloccando riproduzione: crediti insufficienti');
+      videoElement.pause();
+      alert('You don\'t have enough credits to play this video.');
+      return;
+    }
+    
+    // Verifica se stiamo usando un URL diretto o un URL blob
+    const currentSrc = videoElement.src;
+    console.log('[DEBUG] URL video corrente:', currentSrc);
+    
+    // Verifica se è un URL pubblico o autenticato
+    const isPublicUrl = currentSrc.includes('public-video');
+    const isAuthenticatedUrl = !currentSrc.startsWith('blob:') && 
+                              (currentSrc.includes('stream-video') || 
+                               currentSrc.includes('authenticated') || 
+                               currentSrc.includes('api/video'));
+    
+    console.log(`[DEBUG] URL type - Public: ${isPublicUrl}, Authenticated: ${isAuthenticatedUrl}`);
+    
+    // Se è un URL autenticato e non è già un blob, carica il video come blob
+    if (isAuthenticatedUrl) {
+      console.log('[DEBUG] Caricamento video come blob per URL autenticato');
+      videoElement.pause(); // Pausa il video durante il caricamento del blob
+      
+      // Carica il video come blob usando l'URL corrente
+      this.loadVideoBlob(currentSrc).then(blobUrl => {
+        console.log('[DEBUG] Blob URL creato con successo:', blobUrl);
+        // Aggiorna l'URL del video con il blob URL
+        this.videoUrl = this.sanitizer.bypassSecurityTrustUrl(blobUrl);
+        // Assegna il nuovo URL al video element
+        videoElement.src = blobUrl;
+        
+        // Consuma i crediti solo se non è admin
+        if (!isAdmin) {
+          console.log('[DEBUG] Chiamando consumeCredits() per utente non-admin');
+          this.consumeCredits(videoElement);
+        } else {
+          console.log('[DEBUG] Skip consumeCredits per utente admin');
+        }
+        
+        // Riprendi la riproduzione
+        videoElement.play().catch(error => {
+          console.error('[ERROR] Errore durante la riproduzione del video dopo il caricamento del blob:', error);
+        });
+      }).catch(error => {
+        console.error('[ERROR] Errore durante il caricamento del video come blob:', error);
+        // In caso di errore, prova a riprodurre il video con l'URL originale
+        if (!isAdmin) {
+          this.consumeCredits(videoElement);
+        }
+      });
+    } else {
+      // Per URL pubblici o blob già caricati, consuma solo i crediti
+      console.log('[DEBUG] URL pubblico o blob già caricato, skip caricamento blob');
+      
+      // Consuma i crediti solo se non è admin
+      if (!isAdmin) {
+        console.log('[DEBUG] Chiamando consumeCredits() per utente non-admin');
+        this.consumeCredits(videoElement);
+      } else {
+        console.log('[DEBUG] Skip consumeCredits per utente admin');
+      }
+    }
   }
 }

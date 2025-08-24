@@ -265,12 +265,22 @@ export class TVSeriesServiceRefactored extends BaseMediaService<TVSeriesItem> {
 
     // Build query parameters using BaseMediaService method
     const params = this.buildApiParams();
+    
+    // Log dettagliato dei parametri API
+    console.log('TVSeriesServiceRefactored.loadItems - Parametri API:', params);
+    console.log('TVSeriesServiceRefactored.loadItems - User role:', localStorage.getItem('userRole'));
+    console.log('TVSeriesServiceRefactored.loadItems - Auth token exists:', !!localStorage.getItem('auth_token'));
 
     this.loadingSubject.next(true);
     this.errorSubject.next(null);
 
     return this.apiService.getTVSeries(params).pipe(
       map((response: ApiResponse<TVSeries[]>) => {
+        // Log dettagliato della risposta API
+        console.log('TVSeriesServiceRefactored.loadItems - Risposta API:', response);
+        console.log('TVSeriesServiceRefactored.loadItems - Dati serie TV:', response.data);
+        console.log('TVSeriesServiceRefactored.loadItems - Meta:', response.meta);
+        
         // Convert TVSeries[] to TVSeriesItem[]
         const mappedItems = response.data?.map(series => ({
           ...series,

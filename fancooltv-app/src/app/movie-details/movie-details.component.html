@@ -56,7 +56,28 @@
             <!-- Trailer Section -->
             <div *ngIf="trailerUrl" class="trailer-section mb-4">
               <h3>Trailer</h3>
-              <div class="ratio ratio-16x9">
+              <div class="ratio ratio-16x9 position-relative">
+                <!-- Overlay per crediti insufficienti -->
+                <div *ngIf="insufficientCredits && !authService.isAdmin()" 
+                     class="position-absolute w-100 h-100 d-flex flex-column justify-content-center align-items-center text-center p-3"
+                     style="background-color: rgba(0,0,0,0.8); z-index: 20; pointer-events: all;">
+                  <i class="fas fa-lock text-danger mb-3" style="font-size: 3rem;"></i>
+                  <p class="text-white mb-3">You don't have enough credits to play this content</p>
+                  <a href="javascript:void(0)" (click)="openCreditsModal()" class="btn btn-primary">
+                    <i class="fas fa-coins me-2"></i>Purchase Credits
+                  </a>
+                </div>
+                <!-- Overlay trasparente che blocca l'interazione quando i crediti sono insufficienti -->
+                <div *ngIf="insufficientCredits && !authService.isAdmin()" 
+                     class="position-absolute w-100 h-100" 
+                     style="z-index: 15; cursor: not-allowed;">
+                </div>
+                <!-- Overlay per intercettare il click e consumare crediti per YouTube -->                
+                <div *ngIf="!insufficientCredits && !youtubeCreditsConsumed && !authService.isAdmin()" 
+                     class="position-absolute w-100 h-100" 
+                     style="z-index: 5; cursor: pointer;"
+                     (click)="consumeCreditsForYouTube()">
+                </div>
                 <iframe [src]="trailerUrl" title="Movie Trailer" allowfullscreen></iframe>
               </div>
             </div>
@@ -65,25 +86,70 @@
             <div *ngIf="videoFiles && videoFiles.length > 0" class="video-files-section mb-4">
               <h3>Watch Movie</h3>
               
+              <!-- Stato controllo crediti -->
+              <div *ngIf="checkingCredits" class="mb-3 d-flex align-items-center">
+                <div class="spinner-border spinner-border-sm text-primary me-2" role="status">
+                  <span class="visually-hidden">Loading...</span>
+                </div>
+                <span>Verifying credits...</span>
+              </div>
+              
+              <!-- Messaggio crediti insufficienti (verifica iniziale) -->
+              <div *ngIf="!checkingCredits && !canPlayVideo && !authService.isAdmin() && !insufficientCredits" class="alert alert-warning mb-3">
+                <i class="fas fa-coins me-2"></i>
+                <strong>Insufficient credits!</strong> You don't have enough credits to play this video.
+                <a href="javascript:void(0)" (click)="openCreditsModal()" class="alert-link">Purchase more credits</a> to continue watching.
+              </div>
+              
+              <!-- Messaggio crediti insufficienti (durante riproduzione) -->
+              <div *ngIf="insufficientCredits" class="alert alert-danger mb-3">
+                <i class="fas fa-exclamation-circle me-2"></i>
+                You don't have enough credits to play this content <a href="javascript:void(0)" (click)="openCreditsModal()" class="alert-link">Purchase more credits</a> to continue watching.
+              </div>
+              
+              <!-- Errore verifica crediti -->
+              <div *ngIf="creditsError" class="alert alert-danger mb-3">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                <strong>Error!</strong> An error occurred while verifying credits.
+              </div>
+              
               <!-- HTML5 Video Player -->
               <div *ngFor="let video of videoFiles; let i = index" class="mb-3">
                 <!-- Error state -->
                 <div *ngIf="video.error" class="ratio ratio-16x9 d-flex align-items-center justify-content-center bg-dark">
                   <div class="text-center text-white">
                     <i class="fas fa-exclamation-triangle text-warning mb-2" style="font-size: 2rem;"></i>
-                    <p>Errore nel caricamento del video</p>
-                    <small class="text-muted">Verifica la connessione o riprova più tardi</small>
+                    <p>Error loading video</p>
+                    <small class="text-muted">Check your connection or try again later</small>
                   </div>
                 </div>
                 
                 <!-- Video player -->
-                <div *ngIf="!video.error" class="ratio ratio-16x9">
+                <div *ngIf="!video.error" class="ratio ratio-16x9 position-relative">
+                  <!-- Overlay per crediti insufficienti -->
+                  <div *ngIf="insufficientCredits && !authService.isAdmin()" 
+                       class="position-absolute w-100 h-100 d-flex flex-column justify-content-center align-items-center text-center p-3"
+                       style="background-color: rgba(0,0,0,0.8); z-index: 20; pointer-events: all;">
+                    <i class="fas fa-lock text-danger mb-3" style="font-size: 3rem;"></i>
+                    <p class="text-white mb-3">You don't have enough credits to play this content</p>
+                    <a href="javascript:void(0)" (click)="openCreditsModal()" class="btn btn-primary">
+                      <i class="fas fa-coins me-2"></i>Purchase Credits
+                    </a>
+                  </div>
+                  
+                  <!-- Overlay trasparente che blocca l'interazione quando i crediti sono insufficienti -->
+                  <div *ngIf="insufficientCredits && !authService.isAdmin()" 
+                       class="position-absolute w-100 h-100" 
+                       style="z-index: 15; cursor: not-allowed;">
+                  </div>
+                  
                   <video 
                     controls 
                     preload="metadata"
                     class="w-100 h-100"
                     [poster]="getImageUrl(movie.poster)"
                     (error)="onVideoError($event, i)"
+                    (play)="onVideoPlay($event)"
                     style="object-fit: contain; background: #000;">
                     <source [src]="video.safeUrl" type="video/mp4">
                     Il tuo browser non supporta il tag video.

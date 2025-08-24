@@ -1,9 +1,11 @@
-import { Component, OnInit, ViewChild, TemplateRef } from '@angular/core';
+import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Movie } from 'src/app/models/media.models';
-import { ApiService } from 'src/app/services/api.service';
+import { Movie } from '../../../models/media.models';
+import { ApiService } from '../../../services/api.service';
 import { MovieFormComponent } from './movie-form.component';
-import { BsModalService, BsModalRef } from 'ngx-bootstrap/modal';
+import { BsModalRef, BsModalService } from 'ngx-bootstrap/modal';
+import { HttpEventType, HttpResponse } from '@angular/common/http';
+import { ApiResponse } from '../../../models/api.models';
 
 @Component({
   selector: 'app-movie-form-page',
@@ -89,99 +91,108 @@ export class MovieFormPageComponent implements OnInit {
         : this.apiService.updateMovie(this.movie.movie_id, formData);
       
       apiCall.subscribe({
-        next: (response) => {
-          console.log('Movie updated successfully:', response);
-          console.log('Response video_files:', response?.data?.video_files);
-          this.loading = false;
-          this.error = '';
-          this.success = 'Movie updated successfully!';
-          
-          // For updateCompleteMovie, always reload since response doesn't include video_files
-          // For regular updateMovie, use response data if available
-          if (formData instanceof FormData || !response?.data?.video_files) {
-            console.log('Reloading movie data (FormData update or missing video_files)');
-            if (this.movie && this.movie.movie_id) {
-              this.loadMovie(this.movie.movie_id);
+        next: (event: any) => {
+          if (event.type === HttpEventType.UploadProgress) {
+            // Calculate and update upload progress
+            const progress = Math.round(100 * event.loaded / (event.total || 1));
+            if (this.movieForm) {
+              this.movieForm.updateUploadProgress(progress);
             }
-          } else {
-            console.log('Using response data directly');
-            this.movie = response.data;
-            if (this.movie?.category && (this.movie.category as any)?.id && !this.movie.category_id) {
-              this.movie.category_id = (this.movie.category as any).id;
+          } else if (event.type === HttpEventType.Response) {
+            // Upload completed
+            if (this.movieForm) {
+              this.movieForm.updateUploadProgress(100);
+            }
+            
+            const response = event as HttpResponse<ApiResponse<Movie>>;
+            console.log('Update response:', response.body);
+            
+            if (formData instanceof FormData || !response?.body?.data?.video_files) {
+              console.log('Reloading movie data (FormData update or missing video_files)');
+              if (this.movie && this.movie.movie_id) {
+                this.loadMovie(this.movie.movie_id);
+              }
+            } else {
+              if (response && response.body && response.body.data) {
+                console.log('Using response data directly:', response.body.data);
+                this.movie = response.body.data;
+                
+                if (this.movie?.category && (this.movie.category as any)?.id && !this.movie.category_id) {
+                  this.movie.category_id = (this.movie.category as any).id;
+                }
+              }
+            }
+            
+            this.loading = false;
+            
+            // Set success message in modal instead of page alert
+            if (this.movieForm) {
+              this.movieForm.setUploadSuccessMessage('Film aggiornato con successo!');
             }
           }
-          
-          // Clear success message after 5 seconds
-          setTimeout(() => {
-            this.success = '';
-          }, 5000);
         },
-        error: (err) => {
+        error: (err: any) => {
           console.error('Error updating movie:', err);
-          console.error('Error status:', err.status);
-          console.error('Error message:', err.message);
-          console.error('Error details:', err.error);
-          console.error('FULL ERROR RESPONSE:', JSON.stringify(err.error, null, 2));
+          if (this.movieForm) {
+            this.movieForm.resetUploadState();
+          }
           
-          // Mostra messaggi di errore più dettagliati
           if (err.error && err.error.message) {
             this.error = `Errore: ${err.error.message}`;
           } else if (err.error && err.error.errors) {
-            // Raccoglie tutti gli errori di validazione in un unico messaggio
             const errorMessages = Object.values(err.error.errors).flat();
             this.error = `Errori di validazione: ${errorMessages.join(', ')}`;
-            console.error('Validation errors:', err.error.errors);
           } else {
             this.error = 'Impossibile aggiornare il film. Riprova più tardi.';
           }
           
           this.loading = false;
-          // Reset loading state in child component
-          if (this.movieForm) {
-            this.movieForm.loading = false;
-          }
         }
       });
     } else {
-      // Create new movie - check if formData is FormData or regular object
+      // Create new movie
       console.log('Creating new movie with data:', formData);
       const apiCall = formData instanceof FormData 
         ? this.apiService.createCompleteMovie(formData)
         : this.apiService.createMovie(formData);
       
       apiCall.subscribe({
-        next: (response) => {
-          console.log('Movie created successfully:', response);
-          // Only reset form after successful creation
-          if (this.movieForm && this.movieForm.movieForm) {
-            this.movieForm.movieForm.reset();
+        next: (event: any) => {
+          if (event.type === HttpEventType.UploadProgress) {
+            const progress = Math.round(100 * event.loaded / (event.total || 1));
+            if (this.movieForm) {
+              this.movieForm.updateUploadProgress(progress);
+            }
+          } else if (event.type === HttpEventType.Response) {
+            if (this.movieForm) {
+              this.movieForm.updateUploadProgress(100);
+            }
+            
+            setTimeout(() => {
+              if (this.movieForm && this.movieForm.movieForm) {
+                this.movieForm.movieForm.reset();
+              }
+              this.loading = false;
+              this.router.navigate(['/dashboard/admin/movies']);
+            }, 2000);
           }
-          this.loading = false;
-          this.router.navigate(['/dashboard/admin/movies']);
         },
-        error: (err) => {
+        error: (err: any) => {
           console.error('Error creating movie:', err);
-          console.error('Error status:', err.status);
-          console.error('Error message:', err.message);
-          console.error('Error details:', err.error);
+          if (this.movieForm) {
+            this.movieForm.resetUploadState();
+          }
           
-          // Mostra messaggi di errore più dettagliati
           if (err.error && err.error.message) {
             this.error = `Errore: ${err.error.message}`;
           } else if (err.error && err.error.errors) {
-            // Raccoglie tutti gli errori di validazione in un unico messaggio
             const errorMessages = Object.values(err.error.errors).flat();
             this.error = `Errori di validazione: ${errorMessages.join(', ')}`;
-            console.error('Validation errors:', err.error.errors);
           } else {
             this.error = 'Impossibile creare il film. Riprova più tardi.';
           }
           
           this.loading = false;
-          // Reset loading state in child component
-          if (this.movieForm) {
-            this.movieForm.loading = false;
-          }
         }
       });
     }
@@ -191,9 +202,6 @@ export class MovieFormPageComponent implements OnInit {
     this.router.navigate(['/dashboard/admin/movies']);
   }
 
-  /**
-   * View movie details in new tab
-   */
   viewMovie(): void {
     if (this.movie && this.movie.movie_id) {
       const url = this.router.serializeUrl(
@@ -205,26 +213,19 @@ export class MovieFormPageComponent implements OnInit {
     }
   }
 
-  /**
-   * Delete movie - open modal
-   */
   deleteMovie(): void {
     if (!this.movie || !this.movie.movie_id) {
       this.error = 'Impossibile eliminare il film. ID non disponibile.';
       return;
     }
-
-    // Open the delete confirmation modal
+    
     this.modalRef = this.modalService.show(this.deleteModal, {
-      class: 'modal-md modal-dialog-centered',
+      class: 'modal-sm modal-dialog-centered',
       backdrop: 'static',
       keyboard: false
     });
   }
 
-  /**
-   * Confirm movie deletion
-   */
   confirmDelete(): void {
     if (this.movie) {
       this.loading = true;
@@ -236,7 +237,7 @@ export class MovieFormPageComponent implements OnInit {
           this.router.navigate(['/dashboard/admin/movies']);
         },
         error: (err: any) => {
-          console.error('Errore durante l\'eliminazione del film:', err);
+          console.error('Error deleting movie:', err);
           this.error = 'Impossibile eliminare il film. Riprova più tardi.';
           this.loading = false;
           this.modalRef?.hide();
@@ -245,9 +246,6 @@ export class MovieFormPageComponent implements OnInit {
     }
   }
 
-  /**
-   * Cancel movie deletion
-   */
   cancelDelete(): void {
     this.modalRef?.hide();
   }

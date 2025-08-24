@@ -122,7 +122,7 @@ export class TVSeriesService {
 
     if (!videoId) return '';
     
-    // Add parameters needed for embed
-    return `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0&modestbranding=1&enablejsapi=1`;
+    // Add parameters needed for embed - autoplay=0 per disabilitare l'autoplay
+    return `https://www.youtube.com/embed/${videoId}?autoplay=0&rel=0&modestbranding=1&enablejsapi=1`;
   }
 }

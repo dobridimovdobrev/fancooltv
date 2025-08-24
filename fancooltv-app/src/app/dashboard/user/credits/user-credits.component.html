@@ -1,0 +1,57 @@
+<div class="credits-container p-4">
+  <div class="card shadow-sm">
+    <div class="card-header bg-primary text-white">
+      <h2 class="mb-0">Gestione Crediti</h2>
+    </div>
+    <div class="card-body">
+      <!-- Loading spinner -->
+      <div *ngIf="loading" class="text-center py-4">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Caricamento...</span>
+        </div>
+      </div>
+
+      <!-- Error message -->
+      <div *ngIf="error && !loading" class="alert alert-danger">
+        <p class="mb-0">Si è verificato un errore durante il caricamento dei crediti. Riprova più tardi.</p>
+        <button class="btn btn-outline-danger mt-2" (click)="loadCredits()">
+          <i class="fas fa-sync-alt me-2"></i>Riprova
+        </button>
+      </div>
+
+      <!-- Credits info -->
+      <div *ngIf="!loading && !error" class="credits-info">
+        <div class="row align-items-center">
+          <div class="col-md-6">
+            <div class="credits-balance">
+              <h3 class="mb-3">Il tuo saldo crediti</h3>
+              <div class="credits-amount">
+                <span class="credits-value">{{ credits }}</span>
+                <span class="credits-label">crediti</span>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="credits-info-box p-3 bg-light rounded">
+              <h4 class="mb-3">Informazioni sui crediti</h4>
+              <ul class="credits-info-list">
+                <li>
+                  <i class="fas fa-play-circle me-2 text-primary"></i>
+                  <span>La visione di un film o episodio costa <strong>20 crediti</strong></span>
+                </li>
+                <li>
+                  <i class="fas fa-info-circle me-2 text-primary"></i>
+                  <span>I crediti vengono consumati solo quando inizi la riproduzione</span>
+                </li>
+                <li>
+                  <i class="fas fa-user-shield me-2 text-primary"></i>
+                  <span>Gli amministratori hanno accesso illimitato ai contenuti</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

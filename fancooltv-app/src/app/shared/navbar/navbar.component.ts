@@ -4,6 +4,7 @@ import { AuthService } from '../../services/auth.service';
 import { BsModalService, BsModalRef } from 'ngx-bootstrap/modal';
 import { ProfileEditModalComponent } from '../components/profile-edit-modal/profile-edit-modal.component';
 import { User } from '../../models/auth.models';
+import { ModalService } from '../../services/modal.service';
 
 @Component({
   selector: 'app-navbar',
@@ -16,7 +17,8 @@ export class NavbarComponent implements OnInit {
   constructor(
     public authService: AuthService,
     private router: Router,
-    private modalService: BsModalService
+    private bsModalService: BsModalService,
+    private modalService: ModalService
   ) {}
 
   ngOnInit(): void {
@@ -31,7 +33,7 @@ export class NavbarComponent implements OnInit {
    * Opens the profile edit modal for regular users
    */
   openProfileModal(): void {
-    const modalRef: BsModalRef = this.modalService.show(ProfileEditModalComponent, {
+    const modalRef: BsModalRef = this.bsModalService.show(ProfileEditModalComponent, {
       class: 'modal-lg modal-dialog-centered'
     });
 
@@ -40,6 +42,13 @@ export class NavbarComponent implements OnInit {
         this.authService.updateCurrentUser(updatedUser);
       });
     }
+  }
+  
+  /**
+   * Opens the credits management modal for regular users
+   */
+  openCreditsModal(): void {
+    this.modalService.openCreditsModal();
   }
 
   /**
