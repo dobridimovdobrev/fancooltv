@@ -168,15 +168,8 @@ export class MediaListComponent implements OnInit, OnDestroy {
     console.log(`MediaListComponent.loadItems - Utente: ${this.authService.isAdmin() ? 'admin' : 'normale'}`);
     console.log(`MediaListComponent.loadItems - Token: ${localStorage.getItem('auth_token') ? 'presente' : 'mancante'}`);
 
-    // Check if filter or parameter is blocking TV series for normal users
-    if (this.mediaType === 'tvseries' && !this.authService.isAdmin()) {
-      if (params.category || params.year || params.search) {
-        this.errorMessage = 'Access denied. You don\'t have permission to view these TV series with the current filters.';
-        this.error = true;
-        this.loading = false;
-        return;
-      }
-    }
+    // Gli utenti normali possono ora usare i filtri per le serie TV
+    // Rimosso il blocco precedente che impediva l'uso dei filtri
 
     // Use ApiService directly like admin dashboard - call correct API based on mediaType
     const apiCall = this.mediaType === 'movie' 

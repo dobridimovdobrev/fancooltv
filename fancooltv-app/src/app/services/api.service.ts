@@ -468,7 +468,7 @@ export class ApiService {
       Object.entries(params).forEach(([key, value]) => {
         if (value !== undefined && value !== '') {
           // Convert parameters to the correct format
-          if (key === 'q') {
+          if (key === 'q' || key === 'search') {
             httpParams = httpParams.append('title', value.toString());
           } else if (key === 'category') {
             httpParams = httpParams.append('category_id', value.toString());
