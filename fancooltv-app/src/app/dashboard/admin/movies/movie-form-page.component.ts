@@ -93,11 +93,13 @@ export class MovieFormPageComponent implements OnInit {
     console.log('saveMovie called with:', formData);
     this.error = '';
     this.success = '';
-    this.loading = true;
     
-    // Reset upload state and show progress modal
-    this.resetUploadState();
-    this.showUploadProgressModal();
+    // Solo per FormData (upload file) impostiamo loading = true
+    const isFileUpload = formData instanceof FormData;
+    if (isFileUpload) {
+      this.loading = true;
+      this.resetUploadState();
+    }
 
     if (this.isEditMode && this.movie) {
       // Update existing movie - check if formData is FormData or regular object
@@ -106,54 +108,98 @@ export class MovieFormPageComponent implements OnInit {
         ? this.apiService.updateCompleteMovie(this.movie.movie_id, formData)
         : this.apiService.updateMovie(this.movie.movie_id, formData);
       
-      apiCall.subscribe({
-        next: (event: any) => {
-          if (event.type === HttpEventType.UploadProgress && event.total) {
-            const progress = Math.round(100 * event.loaded / event.total);
-            console.log(`Upload progress: ${progress}% (${event.loaded}/${event.total})`);
-            
-            // Aggiorna la barra di progresso direttamente nel page component
-            this.updateUploadProgress(progress);
-            
-            // Aggiornamenti più frequenti per valori critici
-            if (progress === 25 || progress === 50 || progress === 75 || progress >= 90) {
-              console.log(`Punto critico raggiunto: ${progress}%`);
-            }
-          } else if (event.type === HttpEventType.Response) {
-            // Upload completed
-            console.log('Upload completed, setting progress to 100%');
-            
-            // Aggiorna la barra al 100% e mostra messaggio di successo
-            this.updateUploadProgress(100);
-            this.setUploadSuccessMessage('Film aggiornato con successo!');
-            
-            const response = event as HttpResponse<ApiResponse<Movie>>;
-            console.log('Update response:', response.body);
-            
-            // Attendiamo che il modal si chiuda prima di aggiornare i dati
-            setTimeout(() => {
-              // Aggiorniamo i dati del film solo dopo che il modal è chiuso
-              if (response && response.body && response.body.data) {
-                console.log('Using response data after modal close:', response.body.data);
-                this.movie = response.body.data;
-                
-                if (this.movie?.category && (this.movie.category as any)?.id && !this.movie.category_id) {
-                  this.movie.category_id = (this.movie.category as any).id;
-                }
-              }
+      // Gestione diversa per upload vs update semplice
+      if (formData instanceof FormData) {
+        // Upload con file - usa eventi HTTP
+        apiCall.subscribe({
+          next: (event: any) => {
+            if (event.type === HttpEventType.UploadProgress && event.total) {
+              const progress = Math.round(100 * event.loaded / event.total);
+              console.log(`Upload progress: ${progress}% (${event.loaded}/${event.total})`);
               
-              // IMPORTANTE: Ripristina loading = false per mostrare il form aggiornato
-              this.loading = false;
-            }, 2500);
+              if (!this.uploadModalRef) {
+                this.showUploadProgressModal();
+              }
+              this.updateUploadProgress(progress);
+              
+              if (progress === 25 || progress === 50 || progress === 75 || progress >= 90) {
+                console.log(`Punto critico raggiunto: ${progress}%`);
+              }
+            } else if (event.type === HttpEventType.Response) {
+              const response = event as HttpResponse<ApiResponse<Movie>>;
+              console.log('Upload completed, setting progress to 100%');
+              this.updateUploadProgress(100);
+              this.setUploadSuccessMessage('Film aggiornato con successo!');
+              
+              setTimeout(() => {
+                if (response && response.body && response.body.data) {
+                  this.movie = response.body.data;
+                  if (this.movie?.category && (this.movie.category as any)?.id && !this.movie.category_id) {
+                    this.movie.category_id = (this.movie.category as any).id;
+                  }
+                }
+                this.loading = false;
+              }, 2500);
+            }
+          },
+          error: (error) => {
+            console.error('Error saving movie:', error);
+            this.error = 'Error saving movie: ' + (error.error?.message || error.message);
+            this.loading = false;
+            this.resetUploadState();
+            this.closeUploadProgressModal();
           }
-        },
-        error: (error) => {
-          console.error('Error saving movie:', error);
-          this.error = 'Error saving movie: ' + (error.error?.message || error.message);
-          this.loading = false;
-          this.resetUploadState();
-        }
-      });
+        });
+      } else {
+        // Update senza file - risposta diretta
+        apiCall.subscribe({
+          next: (response: ApiResponse<Movie>) => {
+            console.log('🔥 Direct update response:', response);
+            
+            // Reset loading state nel form component
+            if (this.movieForm) {
+              this.movieForm.resetLoadingState();
+            }
+            
+            // Aggiorna dati
+            if (response && response.data) {
+              this.movie = response.data;
+              
+              if (this.movie?.category && (this.movie.category as any)?.id && !this.movie.category_id) {
+                this.movie.category_id = (this.movie.category as any).id;
+              }
+            }
+            
+            // Mostra messaggio di successo
+            this.success = 'Film aggiornato con successo!';
+            console.log('🎉 SUCCESS MESSAGE SET:', this.success);
+            console.log('🎉 SUCCESS TRUTHY CHECK:', !!this.success);
+            console.log('🎉 SUCCESS LENGTH:', this.success.length);
+            
+            // Forza change detection
+            this.changeDetectorRef.detectChanges();
+            
+            // Verifica dopo change detection
+            setTimeout(() => {
+              console.log('🎉 SUCCESS AFTER CHANGE DETECTION:', this.success);
+            }, 100);
+            
+            // Auto-hide success message after 5 seconds
+            setTimeout(() => {
+              console.log('🎉 HIDING SUCCESS MESSAGE');
+              this.success = '';
+              this.changeDetectorRef.detectChanges();
+            }, 5000);
+          },
+          error: (error) => {
+            console.error('Error saving movie:', error);
+            this.error = 'Error saving movie: ' + (error.error?.message || error.message);
+            this.loading = false;
+            this.resetUploadState();
+            this.closeUploadProgressModal();
+          }
+        });
+      }
     } else {
       // Create new movie
       console.log('Creating new movie with data:', formData);
@@ -167,6 +213,11 @@ export class MovieFormPageComponent implements OnInit {
             const progress = Math.round(100 * event.loaded / event.total);
             console.log(`Create progress: ${progress}% (${event.loaded}/${event.total})`);
             
+            // Mostra il modal solo se c'è un vero upload in corso
+            if (!this.uploadModalRef) {
+              this.showUploadProgressModal();
+            }
+            
             // Aggiorna la barra di progresso direttamente nel page component
             this.updateUploadProgress(progress);
             
@@ -175,26 +226,33 @@ export class MovieFormPageComponent implements OnInit {
               console.log(`Punto critico raggiunto: ${progress}%`);
             }
           } else if (event.type === HttpEventType.Response) {
-            console.log('Create completed, setting progress to 100%');
-            
-            // Aggiorna la barra al 100% e mostra messaggio di successo
-            this.updateUploadProgress(100);
-            this.setUploadSuccessMessage('Film creato con successo!');
-            
-            setTimeout(() => {
+            // Se c'era un upload in corso, mostra completamento
+            if (this.uploadModalRef) {
+              console.log('Create completed, setting progress to 100%');
+              this.updateUploadProgress(100);
+              this.setUploadSuccessMessage('Film creato con successo!');
+              
+              setTimeout(() => {
+                if (this.movieForm && this.movieForm.movieForm) {
+                  this.movieForm.movieForm.reset();
+                }
+                this.loading = false;
+                this.router.navigate(['/dashboard/admin/movies']);
+              }, 2000);
+            } else {
+              // Creazione senza upload - redirect diretto
+              console.log('Create without upload completed');
               if (this.movieForm && this.movieForm.movieForm) {
                 this.movieForm.movieForm.reset();
               }
               this.loading = false;
               this.router.navigate(['/dashboard/admin/movies']);
-            }, 2000);
+            }
           }
         },
         error: (err: any) => {
           console.error('Error creating movie:', err);
-          if (this.movieForm) {
-            this.movieForm.resetUploadState();
-          }
+          this.resetUploadState();
           
           if (err.error && err.error.message) {
             this.error = `Errore: ${err.error.message}`;
@@ -297,16 +355,9 @@ export class MovieFormPageComponent implements OnInit {
       
       this.changeDetectorRef.detectChanges();
       
-      // Show upload progress modal
-      if (!this.uploadModalRef) {
-        this.showUploadProgressModal();
-      }
-      
-      // Auto close modal after 2 seconds and restore loading state
+      // Auto close modal after 2 seconds (modal è già aperto)
       setTimeout(() => {
         this.closeUploadProgressModal();
-        // Ripristina loading = false per mostrare il form
-        this.loading = false;
       }, 2000);
     });
   }

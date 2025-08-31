@@ -685,21 +685,14 @@ export class MovieFormComponent implements OnInit {
   onSubmit(): void {
     if (this.movieForm.valid) {
       this.loading = true;
-      
-      // Check if we have files to upload
-      const hasFiles = this.posterFile || this.backdropFile || Object.keys(this.videoFiles).length > 0;
-      if (hasFiles) {
-        // Start simulated progress
-        this.startUploadProgress();
-      }
-      
-      // Prepare form data
-      const formData = this.prepareFormData();
-      console.log('Form data prepared:', formData);
-      
-      // Emit the form data to parent component
-      this.formSubmit.emit(formData);
+      this.formSubmit.emit(this.getFormData());
     }
+  }
+
+  // Metodo per resettare il loading state
+  public resetLoadingState(): void {
+    this.loading = false;
+    this.changeDetectorRef.detectChanges();
   }
   
   /**

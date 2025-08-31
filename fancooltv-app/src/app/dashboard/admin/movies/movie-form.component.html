@@ -293,7 +293,7 @@
   <!-- Form Actions -->
   <div class="d-flex justify-content-end mt-4 mb-4">
     <!-- Submit button -->
-    <button type="submit" class="btn btn-primary" [disabled]="loading || movieForm.invalid || isUploading">
+    <button type="submit" class="btn btn-primary" [disabled]="movieForm.invalid || isUploading">
       <i class="fas fa-upload me-1" *ngIf="isUploading"></i>
       <i class="fas fa-save me-1" *ngIf="!isUploading"></i>
       {{ isUploading ? 'Uploading...' : (movie ? 'Update Movie' : 'Create Movie') }}
