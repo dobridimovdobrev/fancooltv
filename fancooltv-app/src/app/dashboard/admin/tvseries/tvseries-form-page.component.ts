@@ -247,16 +247,24 @@ export class TVSeriesFormPageComponent implements OnInit {
     
     // Check for video files in episodes
     formData.forEach((value, key) => {
-      if (key.includes('episodes[') && key.includes('[video_file]') && value instanceof File) {
+      if (key.includes('episodes[') && key.includes('[episode_video]') && value instanceof File) {
         console.log('Found episode video file:', key, value.name);
         hasFiles = true;
       }
-      if (key.includes('trailer_video_file') && value instanceof File) {
+      if (key.includes('trailer_video') && value instanceof File) {
         console.log('Found trailer video file:', key, value.name);
         hasFiles = true;
       }
       if (key.includes('poster_image') && value instanceof File) {
         console.log('Found poster image file:', key, value.name);
+        hasFiles = true;
+      }
+      if (key.includes('backdrop_image') && value instanceof File) {
+        console.log('Found backdrop image file:', key, value.name);
+        hasFiles = true;
+      }
+      if (key.includes('still_image') && value instanceof File) {
+        console.log('Found episode still image file:', key, value.name);
         hasFiles = true;
       }
     });

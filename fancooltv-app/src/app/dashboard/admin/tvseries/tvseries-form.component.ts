@@ -477,6 +477,11 @@ export class TVSeriesFormComponent implements OnInit, OnDestroy, OnChanges {
             // Add episode status (required by backend)
             const episodeStatus = episode.status || 'published';
             formData.append(`seasons[${seasonIndex}][episodes][${episodeIndex}][status]`, episodeStatus);
+            
+            // Generate unique slug to avoid duplicate entry errors
+            const timestamp = Date.now();
+            const uniqueSlug = `${episode.episode_number || episodeIndex + 1}-${season.season_id || seasonIndex}-${timestamp}`;
+            formData.append(`seasons[${seasonIndex}][episodes][${episodeIndex}][slug]`, uniqueSlug);
 
             // Add episode files with correct field names expected by backend
             const episodeKey = `${seasonIndex}-${episodeIndex}`;

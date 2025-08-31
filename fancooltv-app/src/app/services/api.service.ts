@@ -405,7 +405,9 @@ export class ApiService {
     });
     
     return this.http.post<any>(`${this.baseUrl}/api/v1/tvseries/complete`, formData, {
-      headers: headers
+      headers: headers,
+      reportProgress: true,
+      observe: 'events'
     });
   }
 
@@ -422,7 +424,9 @@ export class ApiService {
     
     // Use POST with complete-update endpoint as requested
     return this.http.post<any>(`${this.baseUrl}/api/v1/tvseries/${id}/complete-update`, formData, {
-      headers: headers
+      headers: headers,
+      reportProgress: true,
+      observe: 'events'
     });
   }
 

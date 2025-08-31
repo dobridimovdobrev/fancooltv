@@ -19,8 +19,8 @@
     </div>
   </div>
 
-  <!-- Loading State -->
-  <div *ngIf="loading" class="d-flex justify-content-center align-items-center" style="height: 300px;">
+  <!-- Loading State - Hide when upload modal is active -->
+  <div *ngIf="loading && !uploadModalRef" class="d-flex justify-content-center align-items-center" style="height: 300px;">
     <div class="spinner-border text-primary" role="status">
       <span class="visually-hidden">Loading...</span>
     </div>
