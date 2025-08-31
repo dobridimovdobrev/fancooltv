@@ -1,0 +1,475 @@
+CODICE MOVIES - UPLOAD PROGRESS CON MODAL E TRACKING BACKEND
+================================================================
+
+=== 1. MOVIE-FORM-PAGE.COMPONENT.TS - METODI UPLOAD PROGRESS ===
+
+// Upload progress tracking variables
+uploadProgress: number = 0;
+isUploading: boolean = false;
+uploadCompleted: boolean = false;
+uploadSuccessMessage: string = '';
+
+// ViewChild per il modal
+@ViewChild('uploadProgressModal') uploadProgressModal!: TemplateRef<any>;
+uploadModalRef?: BsModalRef;
+
+// Metodo principale per aggiornare il progresso
+public updateUploadProgress(progress: number): void {
+  console.log('🚀 PAGE COMPONENT - updateUploadProgress called with:', progress);
+  this.ngZone.run(() => {
+    this.uploadProgress = progress;
+    this.isUploading = progress > 0 && progress < 100;
+    
+    if (progress >= 100) {
+      this.uploadCompleted = true;
+      this.isUploading = false;
+    }
+    
+    console.log('🚀 PAGE COMPONENT - Progress updated:', {
+      uploadProgress: this.uploadProgress,
+      isUploading: this.isUploading,
+      uploadCompleted: this.uploadCompleted
+    });
+    
+    this.changeDetectorRef.detectChanges();
+    this.changeDetectorRef.markForCheck();
+  });
+}
+
+// Metodo per impostare il messaggio di successo
+public setUploadSuccessMessage(message: string): void {
+  console.log('🚀 PAGE COMPONENT - setUploadSuccessMessage called with:', message);
+  this.ngZone.run(() => {
+    this.uploadSuccessMessage = message;
+    this.uploadCompleted = true;
+    this.isUploading = false;
+    
+    console.log('🚀 PAGE COMPONENT - Success message set:', this.uploadSuccessMessage);
+    
+    this.changeDetectorRef.detectChanges();
+    
+    // Auto close modal after 2 seconds
+    setTimeout(() => {
+      this.closeUploadProgressModal();
+    }, 2000);
+  });
+}
+
+// Metodo per resettare lo stato di upload
+public resetUploadState(): void {
+  console.log('🚀 PAGE COMPONENT - resetUploadState called');
+  this.ngZone.run(() => {
+    this.uploadProgress = 0;
+    this.isUploading = false;
+    this.uploadCompleted = false;
+    this.uploadSuccessMessage = '';
+    
+    console.log('🚀 PAGE COMPONENT - Upload state reset');
+    
+    this.changeDetectorRef.detectChanges();
+  });
+}
+
+// Metodo per mostrare il modal di progresso
+public showUploadProgressModal(): void {
+  if (!this.uploadModalRef) {
+    this.uploadModalRef = this.modalService.show(this.uploadProgressModal, {
+      backdrop: 'static',
+      keyboard: false,
+      class: 'modal-dialog-centered'
+    });
+  }
+}
+
+// Metodo per chiudere il modal di progresso
+public closeUploadProgressModal(): void {
+  if (this.uploadModalRef) {
+    this.uploadModalRef.hide();
+    this.uploadModalRef = undefined;
+  }
+}
+
+=== 2. MOVIE-FORM-PAGE.COMPONENT.TS - METODO SAVE CON TRACKING ===
+
+saveMovie(formData: any): void {
+  console.log('saveMovie called with:', formData);
+  this.error = '';
+  this.success = '';
+  
+  // Solo per FormData (upload file) impostiamo loading = true
+  const isFileUpload = formData instanceof FormData;
+  if (isFileUpload) {
+    this.loading = true;
+    this.resetUploadState();
+  }
+
+  if (this.isEditMode && this.movie) {
+    // Update existing movie - check if formData is FormData or regular object
+    console.log('Updating existing movie:', this.movie.movie_id);
+    const apiCall = formData instanceof FormData 
+      ? this.apiService.updateCompleteMovie(this.movie.movie_id, formData)
+      : this.apiService.updateMovie(this.movie.movie_id, formData);
+    
+    // Gestione diversa per upload vs update semplice
+    if (formData instanceof FormData) {
+      // Upload con file - usa eventi HTTP
+      apiCall.subscribe({
+        next: (event: any) => {
+          if (event.type === HttpEventType.UploadProgress && event.total) {
+            const progress = Math.round(100 * event.loaded / event.total);
+            console.log(`Upload progress: ${progress}% (${event.loaded}/${event.total})`);
+            
+            if (!this.uploadModalRef) {
+              this.showUploadProgressModal();
+            }
+            this.updateUploadProgress(progress);
+            
+            if (progress === 25 || progress === 50 || progress === 75 || progress >= 90) {
+              console.log(`Punto critico raggiunto: ${progress}%`);
+            }
+          } else if (event.type === HttpEventType.Response) {
+            const response = event as HttpResponse<ApiResponse<Movie>>;
+            console.log('Upload completed, setting progress to 100%');
+            this.updateUploadProgress(100);
+            this.setUploadSuccessMessage('Film aggiornato con successo!');
+            
+            setTimeout(() => {
+              if (response && response.body && response.body.data) {
+                this.movie = response.body.data;
+                if (this.movie?.category && (this.movie.category as any)?.id && !this.movie.category_id) {
+                  this.movie.category_id = (this.movie.category as any).id;
+                }
+              }
+              this.loading = false;
+            }, 2500);
+          }
+        },
+        error: (error) => {
+          console.error('Error saving movie:', error);
+          this.error = 'Error saving movie: ' + (error.error?.message || error.message);
+          this.loading = false;
+          this.resetUploadState();
+          this.closeUploadProgressModal();
+        }
+      });
+    }
+  }
+}
+
+=== 3. MOVIE-FORM-PAGE.COMPONENT.HTML - MODAL UPLOAD PROGRESS ===
+
+<!-- Upload Progress Modal -->
+<ng-template #uploadProgressModal>
+  <div class="modal-header border-0 pb-0">
+    <h4 class="modal-title fw-bold text-white">
+      <i class="fas fa-cloud-upload-alt me-2 text-warning"></i>
+      Uploading Movie
+    </h4>
+  </div>
+  <div class="modal-body px-4 py-4">
+    <div class="text-center">
+      <!-- Progress Circle or Bar -->
+      <div class="mb-4">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <span class="fw-semibold text-white">Upload Progress</span>
+          <span class="badge bg-primary fs-6 px-3 py-2">{{ uploadProgress }}%</span>
+        </div>
+        <div class="progress" style="height: 12px; border-radius: 10px;">
+          <div 
+            class="progress-bar bg-gradient progress-bar-striped progress-bar-animated" 
+            role="progressbar" 
+            [style.width.%]="uploadProgress"
+            [attr.aria-valuenow]="uploadProgress" 
+            aria-valuemin="0" 
+            aria-valuemax="100"
+            style="border-radius: 10px;">
+          </div>
+        </div>
+      </div>
+      
+      <!-- Status Messages -->
+      <div class="mb-3" style="min-height: 60px;">
+        <div *ngIf="isUploading && !uploadCompleted" class="d-flex flex-column align-items-center">
+          <div class="spinner-border text-warning mb-2" role="status" style="width: 2rem; height: 2rem;">
+            <span class="visually-hidden">Loading...</span>
+          </div>
+          <p class="mb-0 text-white">Uploading files, please wait...</p>
+        </div>
+        
+        <div *ngIf="uploadCompleted" class="d-flex flex-column align-items-center text-success">
+          <div class="mb-2">
+            <i class="fas fa-check-circle" style="font-size: 2rem;"></i>
+          </div>
+          <p class="mb-0 fw-semibold text-white">{{ uploadSuccessMessage || 'Upload completed successfully!' }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</ng-template>
+
+=== 4. MOVIE-FORM-PAGE.COMPONENT.HTML - PULSANTE UPDATE SUPERIORE ===
+
+<div *ngIf="isEditMode" class="d-flex justify-content-end mb-3">
+  <button class="btn btn-success me-2" (click)="movieForm.onSubmit()">
+    <i class="fas fa-save me-2"></i>Update Movie
+  </button>
+  <button class="btn btn-info" (click)="viewMovie()">
+    <i class="fas fa-eye me-2"></i>View
+  </button>
+</div>
+
+=== 5. MOVIE-FORM.COMPONENT.TS - METODI UPLOAD PROGRESS ===
+
+// Upload progress tracking
+uploadProgress: number = 0;
+private maxUploadProgress: number = 0;
+public uploadCompleted: boolean = false;
+isUploading: boolean = false;
+private progressInterval: any;
+uploadSuccessMessage: string = '';
+private modalAlreadyOpen: boolean = false;
+
+// Start upload progress (no simulation, just show modal)
+startUploadProgress(): void {
+  this.isUploading = true;
+  this.uploadSuccessMessage = '';
+  this.showUploadModal();
+}
+
+// Complete upload progress
+completeUploadProgress(): void {
+  if (this.progressInterval) {
+    clearInterval(this.progressInterval);
+    this.progressInterval = null;
+  }
+  
+  this.uploadProgress = 100;
+  this.isUploading = false;
+  
+  // Hide modal after showing completion
+  setTimeout(() => {
+    this.resetUploadState();
+  }, 2000);
+}
+
+// Reset upload state - VERSIONE SEMPLIFICATA
+public resetUploadState(): void {
+  console.log('=== RESET UPLOAD STATE ===');
+  
+  // Reset everything to initial state
+  this.uploadProgress = 0;
+  this.maxUploadProgress = 0;
+  this.uploadCompleted = false;
+  this.isUploading = false;
+  this.loading = false;
+  this.uploadSuccessMessage = '';
+  
+  // Close modal if open
+  if (this.uploadModalRef) {
+    this.uploadModalRef.hide();
+    this.uploadModalRef = undefined;
+    this.modalAlreadyOpen = false;
+    console.log('Modal chiuso e reset completato');
+  }
+  
+  // Force UI update
+  this.changeDetectorRef.detectChanges();
+  console.log('Stato completamente resettato');
+}
+
+// Show upload progress modal - versione semplificata che non resetta la barra
+public showUploadModal(): void {
+  console.log('showUploadModal called');
+  
+  // Apriamo il modal solo se non è già aperto
+  if (!this.uploadModalRef && this.uploadProgressModal && !this.modalAlreadyOpen) {
+    console.log('Apertura modal di progresso');
+    
+    // Impostiamo il flag per evitare aperture multiple
+    this.modalAlreadyOpen = true;
+    
+    this.uploadModalRef = this.modalService.show(this.uploadProgressModal, {
+      class: 'modal-md modal-dialog-centered',
+      backdrop: 'static',
+      keyboard: false,
+      ignoreBackdropClick: true
+    });
+    
+    console.log('Modal aperto');
+  } else {
+    console.log('Modal già aperto o template non trovato');
+  }
+}
+
+// Hide upload progress modal
+hideUploadModal(): void {
+  console.log('hideUploadModal called');
+  if (this.uploadModalRef) {
+    this.uploadModalRef.hide();
+    this.uploadModalRef = undefined;
+    this.modalAlreadyOpen = false;
+    console.log('Modal nascosto, flag modalAlreadyOpen resettato');
+  }
+}
+
+// Metodo pubblico per forzare la chiusura del modal dall'esterno
+public forceCloseUploadModal(): void {
+  console.log('forceCloseUploadModal called');
+  this.ngZone.run(() => {
+    console.log('Inside ngZone.run in forceCloseUploadModal');
+    if (this.uploadModalRef) {
+      console.log('Modal reference exists, forcing close');
+      this.uploadModalRef.hide();
+      this.uploadModalRef = undefined;
+      this.modalAlreadyOpen = false;
+      
+      this.isUploading = false;
+      
+      this.changeDetectorRef.detectChanges();
+      console.log('Modal closed, flag reset, upload state preserved');
+    } else {
+      console.log('No modal reference found to close');
+    }
+  });
+}
+
+// Set upload success message - versione modificata che non resetta la barra
+public setUploadSuccessMessage(message: string): void {
+  console.log('Setting upload success message:', message);
+  
+  // Esegui tutto all'interno di NgZone per garantire che Angular rilevi le modifiche
+  this.ngZone.run(() => {
+    this.uploadSuccessMessage = message;
+    this.isUploading = false;
+    this.uploadCompleted = true;
+    this.changeDetectorRef.detectChanges();
+    
+    // Chiudiamo il modal dopo aver mostrato il messaggio di successo
+    setTimeout(() => {
+      console.log('Auto-closing modal after success message');
+      this.forceCloseUploadModal();
+    }, 2500); // Aumentato a 2.5 secondi per dare tempo di leggere il messaggio
+  });
+}
+
+=== 6. MOVIE-FORM.COMPONENT.HTML - PROGRESS BAR PER VIDEO ===
+
+<!-- Progress bar during upload -->
+<div *ngIf="uploadingVideoFile[i]" class="mt-2">
+  <div class="progress mb-2">
+    <div class="progress-bar progress-bar-striped progress-bar-animated" 
+         role="progressbar" 
+         [style.width.%]="videoFileUploadProgress[i]" 
+         [attr.aria-valuenow]="videoFileUploadProgress[i]" 
+         aria-valuemin="0" 
+         aria-valuemax="100">
+      {{videoFileUploadProgress[i]}}%
+    </div>
+  </div>
+  <small class="text-muted">Uploading video...</small>
+</div>
+
+<!-- Upload completed message -->
+<div *ngIf="!uploadingVideoFile[i] && hasVideoUrl(videoFile.get('url')?.value)" class="mt-2 w-100">
+  <div class="alert alert-success py-2 w-100">
+    <i class="fas fa-check-circle me-2"></i>
+    <strong>Video uploaded successfully!</strong>
+  </div>
+</div>
+
+=== 7. MOVIE-FORM.COMPONENT.TS - VARIABILI UPLOAD ===
+
+uploadingVideoFile: boolean[] = [];
+videoFileUploadProgress: number[] = [];
+
+// ViewChild per il modal
+@ViewChild('uploadProgressModal') uploadProgressModal!: TemplateRef<any>;
+uploadModalRef?: BsModalRef;
+
+=== 8. INTEGRAZIONE CON API SERVICE ===
+
+// Nel saveMovie quando c'è FormData:
+const apiCall = formData instanceof FormData 
+  ? this.apiService.updateCompleteMovie(this.movie.movie_id, formData)
+  : this.apiService.updateMovie(this.movie.movie_id, formData);
+
+// Gestione eventi HTTP per tracking:
+if (formData instanceof FormData) {
+  apiCall.subscribe({
+    next: (event: any) => {
+      if (event.type === HttpEventType.UploadProgress && event.total) {
+        const progress = Math.round(100 * event.loaded / event.total);
+        console.log(`Upload progress: ${progress}% (${event.loaded}/${event.total})`);
+        
+        if (!this.uploadModalRef) {
+          this.showUploadProgressModal();
+        }
+        this.updateUploadProgress(progress);
+      } else if (event.type === HttpEventType.Response) {
+        const response = event as HttpResponse<ApiResponse<Movie>>;
+        console.log('Upload completed, setting progress to 100%');
+        this.updateUploadProgress(100);
+        this.setUploadSuccessMessage('Film aggiornato con successo!');
+        
+        setTimeout(() => {
+          // Aggiorna i dati del movie
+          if (response && response.body && response.body.data) {
+            this.movie = response.body.data;
+          }
+          this.loading = false;
+        }, 2500);
+      }
+    },
+    error: (error) => {
+      console.error('Error saving movie:', error);
+      this.error = 'Error saving movie: ' + (error.error?.message || error.message);
+      this.loading = false;
+      this.resetUploadState();
+      this.closeUploadProgressModal();
+    }
+  });
+}
+
+=== 9. IMPORTS NECESSARI ===
+
+// movie-form-page.component.ts
+import { Component, OnInit, TemplateRef, ViewChild, ChangeDetectorRef, NgZone } from '@angular/core';
+import { HttpEventType, HttpResponse } from '@angular/common/http';
+import { BsModalRef, BsModalService } from 'ngx-bootstrap/modal';
+
+// movie-form.component.ts  
+import { Component, ElementRef, EventEmitter, Input, OnInit, Output, TemplateRef, ViewChild, ChangeDetectorRef, NgZone, ApplicationRef } from '@angular/core';
+import { BsModalRef, BsModalService } from 'ngx-bootstrap/modal';
+import { HttpEventType } from '@angular/common/http';
+
+=== 10. BACKEND INTEGRATION ENDPOINTS ===
+
+// Dalla documentazione backend:
+POST /api/v1/upload/image
+POST /api/v1/upload/video  
+POST /api/v1/upload/trailer
+GET /api/v1/upload/progress?upload_id=xxx
+
+// Response format:
+{
+  "success": true,
+  "data": {
+    "upload_id": "img_1630500000_abcdef123456",
+    "progress": 75.5,
+    "status": "in_progress", // pending, in_progress, completed, failed
+    "error": null
+  }
+}
+
+=== 11. PULSANTE UPDATE SUPERIORE CHE FUNZIONA ===
+
+// HTML:
+<button class="btn btn-success me-2" (click)="movieForm.onSubmit()">
+  <i class="fas fa-save me-2"></i>Update Movie
+</button>
+
+// Il pulsante chiama direttamente movieForm.onSubmit() che:
+// 1. Emette formSubmit con FormData
+// 2. Il page component riceve l'evento in saveMovie()
+// 3. Se c'è FormData, mostra il modal e traccia il progresso
+// 4. Mostra messaggio di successo al completamento
