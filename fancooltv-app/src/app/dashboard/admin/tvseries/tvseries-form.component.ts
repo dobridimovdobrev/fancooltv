@@ -28,9 +28,17 @@ export class TVSeriesFormComponent implements OnInit, OnDestroy, OnChanges {
   
   // Modal delete
   @ViewChild('deleteModal') deleteModal!: TemplateRef<any>;
+  @ViewChild('deleteSeasonModal') deleteSeasonModal!: TemplateRef<any>;
+  @ViewChild('deleteEpisodeModal') deleteEpisodeModal!: TemplateRef<any>;
   @ViewChild('personModal') personModal!: TemplateRef<any>;
   modalRef?: BsModalRef;
+  deleteSeasonModalRef?: BsModalRef;
+  deleteEpisodeModalRef?: BsModalRef;
   personModalRef?: BsModalRef;
+  
+  // Delete tracking variables
+  seasonToDelete: any = null;
+  episodeToDelete: any = null;
   uploadingPoster = false;
   uploadingBackdrop = false;
   isLoadingPersons = false;
@@ -730,6 +738,125 @@ export class TVSeriesFormComponent implements OnInit, OnDestroy, OnChanges {
         backdrop: 'static',
         keyboard: false
       });
+    }
+  }
+
+  /**
+   * Show delete season modal
+   */
+  showDeleteSeasonModal(seasonIndex: number): void {
+    const season = this.seasonsArray.at(seasonIndex).value;
+    this.seasonToDelete = { ...season, seasonIndex };
+    
+    this.deleteSeasonModalRef = this.modalService.show(this.deleteSeasonModal, {
+      class: 'modal-md modal-dialog-centered',
+      backdrop: 'static',
+      keyboard: false
+    });
+  }
+
+  /**
+   * Show delete episode modal
+   */
+  showDeleteEpisodeModal(seasonIndex: number, episodeIndex: number): void {
+    const episode = this.getEpisodesArray(seasonIndex).at(episodeIndex).value;
+    this.episodeToDelete = { ...episode, seasonIndex, episodeIndex };
+    
+    this.deleteEpisodeModalRef = this.modalService.show(this.deleteEpisodeModal, {
+      class: 'modal-md modal-dialog-centered',
+      backdrop: 'static',
+      keyboard: false
+    });
+  }
+
+  /**
+   * Cancel delete season operation
+   */
+  cancelDeleteSeason(): void {
+    this.deleteSeasonModalRef?.hide();
+    this.seasonToDelete = null;
+  }
+
+  /**
+   * Cancel delete episode operation
+   */
+  cancelDeleteEpisode(): void {
+    this.deleteEpisodeModalRef?.hide();
+    this.episodeToDelete = null;
+  }
+
+  /**
+   * Confirm delete season operation
+   */
+  confirmDeleteSeason(): void {
+    if (this.seasonToDelete && this.seasonToDelete.season_id) {
+      // If season exists in database, call API to delete it
+      this.loading = true;
+      this.apiService.deleteSeason(this.seasonToDelete.season_id).subscribe({
+        next: (response) => {
+          console.log('Season deleted successfully:', response);
+          this.loading = false;
+          this.deleteSeasonModalRef?.hide();
+          
+          // Remove season from form array
+          const seasonIndex = this.seasonToDelete.seasonIndex;
+          this.seasonsArray.removeAt(seasonIndex);
+          
+          this.seasonToDelete = null;
+          
+          // Show success message
+          this.error = '';
+          console.log('✅ Season deleted successfully!');
+        },
+        error: (error) => {
+          console.error('Error deleting season:', error);
+          this.loading = false;
+          this.error = 'Error deleting season. Please try again.';
+        }
+      });
+    } else {
+      // If season doesn't exist in database, just remove from form
+      this.seasonsArray.removeAt(this.seasonToDelete.seasonIndex);
+      this.deleteSeasonModalRef?.hide();
+      this.seasonToDelete = null;
+    }
+  }
+
+  /**
+   * Confirm delete episode operation
+   */
+  confirmDeleteEpisode(): void {
+    if (this.episodeToDelete && this.episodeToDelete.episode_id) {
+      // If episode exists in database, call API to delete it
+      this.loading = true;
+      this.apiService.deleteEpisode(this.episodeToDelete.episode_id).subscribe({
+        next: (response) => {
+          console.log('Episode deleted successfully:', response);
+          this.loading = false;
+          this.deleteEpisodeModalRef?.hide();
+          
+          // Remove episode from form array
+          const episodesArray = this.getEpisodesArray(this.episodeToDelete.seasonIndex);
+          episodesArray.removeAt(this.episodeToDelete.episodeIndex);
+          
+          this.episodeToDelete = null;
+          
+          // Show success message
+          this.error = '';
+          console.log('✅ Episode deleted successfully!');
+        },
+        error: (error) => {
+          console.error('Error deleting episode:', error);
+          this.loading = false;
+          this.error = 'Error deleting episode. Please try again.';
+        }
+      });
+    } else {
+      // If episode doesn't exist in database, just remove from form
+      const episodesArray = this.getEpisodesArray(this.episodeToDelete.seasonIndex);
+      episodesArray.removeAt(this.episodeToDelete.episodeIndex);
+      this.deleteEpisodeModalRef?.hide();
+      this.episodeToDelete = null;
     }
   }
 

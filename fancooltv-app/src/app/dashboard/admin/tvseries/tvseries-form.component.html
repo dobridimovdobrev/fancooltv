@@ -189,7 +189,7 @@
                     </div>
                   </div>
                   <div class="col-md-1 text-end d-flex align-items-end">
-                    <button type="button" class="btn btn-outline-danger btn-sm mb-3" (click)="removeSeason(seasonIndex)" title="Remove Season">
+                    <button type="button" class="btn btn-outline-danger btn-sm mb-3" (click)="showDeleteSeasonModal(seasonIndex)" title="Remove Season">
                       <i class="fas fa-trash"></i>
                     </button>
                   </div>
@@ -213,7 +213,7 @@
                     <!-- Episode Header -->
                     <div class="d-flex justify-content-between align-items-center mb-3">
                       <h6 class="mb-0">Episode {{ episodeIndex + 1 }}</h6>
-                      <button type="button" class="btn btn-outline-danger btn-sm" (click)="removeEpisode(seasonIndex, episodeIndex)" title="Remove Episode">
+                      <button type="button" class="btn btn-outline-danger btn-sm" (click)="showDeleteEpisodeModal(seasonIndex, episodeIndex)" title="Remove Episode">
                         <i class="fas fa-trash"></i>
                       </button>
                     </div>
@@ -515,6 +515,61 @@
       <i *ngIf="!loading" class="fas fa-trash me-2"></i>Delete
     </button>
     <button type="button" class="btn btn-secondary flex-fill" (click)="cancelDelete()">
+      <i class="fas fa-times me-2"></i>Cancel
+    </button>
+  </div>
+</ng-template>
+
+<!-- Delete Season Confirmation Modal -->
+<ng-template #deleteSeasonModal>
+  <div class="modal-header">
+    <h4 class="modal-title">Confirm Message</h4>
+    <button type="button" class="btn-close" aria-label="Close" (click)="cancelDeleteSeason()"></button>
+  </div>
+  <div class="modal-body">
+    <div class="text-center">
+      <h5>Are you sure?</h5>
+      <p class="mb-3">
+        Do you want to delete Season <strong>{{ seasonToDelete?.season_number }}</strong>?
+      </p>
+      <p class="text-warning mb-0">
+        <i class="fas fa-exclamation-triangle me-2"></i>
+        All episodes in this season will also be deleted!
+      </p>
+    </div>
+  </div>
+  <div class="modal-footer d-flex justify-content-between">
+    <button type="button" class="btn btn-danger flex-fill me-2" (click)="confirmDeleteSeason()" [disabled]="loading">
+      <span *ngIf="loading" class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+      <i *ngIf="!loading" class="fas fa-trash me-2"></i>Delete Season
+    </button>
+    <button type="button" class="btn btn-secondary flex-fill" (click)="cancelDeleteSeason()">
+      <i class="fas fa-times me-2"></i>Cancel
+    </button>
+  </div>
+</ng-template>
+
+<!-- Delete Episode Confirmation Modal -->
+<ng-template #deleteEpisodeModal>
+  <div class="modal-header">
+    <h4 class="modal-title">Confirm Message</h4>
+    <button type="button" class="btn-close" aria-label="Close" (click)="cancelDeleteEpisode()"></button>
+  </div>
+  <div class="modal-body">
+    <div class="text-center">
+      <h5>Are you sure?</h5>
+      <p class="mb-3">
+        Do you want to delete Episode <strong>{{ episodeToDelete?.episode_number }}</strong>: 
+        <strong>"{{ episodeToDelete?.title }}"</strong>?
+      </p>
+    </div>
+  </div>
+  <div class="modal-footer d-flex justify-content-between">
+    <button type="button" class="btn btn-danger flex-fill me-2" (click)="confirmDeleteEpisode()" [disabled]="loading">
+      <span *ngIf="loading" class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+      <i *ngIf="!loading" class="fas fa-trash me-2"></i>Delete Episode
+    </button>
+    <button type="button" class="btn btn-secondary flex-fill" (click)="cancelDeleteEpisode()">
       <i class="fas fa-times me-2"></i>Cancel
     </button>
   </div>

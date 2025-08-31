@@ -377,6 +377,24 @@ export class ApiService {
   }
 
   /**
+   * Delete a season
+   */
+  public deleteSeason(seasonId: number): Observable<ApiResponse<any>> {
+    return this.http.delete<ApiResponse<any>>(`${this.baseUrl}/api/v1/seasons/${seasonId}`, {
+      headers: this.getHeaders()
+    });
+  }
+
+  /**
+   * Delete an episode
+   */
+  public deleteEpisode(episodeId: number): Observable<ApiResponse<any>> {
+    return this.http.delete<ApiResponse<any>>(`${this.baseUrl}/api/v1/episodes/${episodeId}`, {
+      headers: this.getHeaders()
+    });
+  }
+
+  /**
    * Create a complete TV series with files (FormData) - single API call
    */
   public createCompleteTvSeries(formData: FormData): Observable<any> {
