@@ -1,4 +1,4 @@
-import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
+import { Component, OnInit, TemplateRef, ViewChild, ChangeDetectorRef, NgZone } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Movie } from '../../../models/media.models';
 import { ApiService } from '../../../services/api.service';
@@ -24,13 +24,23 @@ export class MovieFormPageComponent implements OnInit {
 
   // Modal delete
   @ViewChild('deleteModal') deleteModal!: TemplateRef<any>;
+  @ViewChild('uploadProgressModal') uploadProgressModal!: TemplateRef<any>;
   modalRef?: BsModalRef;
+  uploadModalRef?: BsModalRef;
+  
+  // Upload progress tracking
+  uploadProgress: number = 0;
+  isUploading: boolean = false;
+  uploadCompleted: boolean = false;
+  uploadSuccessMessage: string = '';
 
   constructor(
     private apiService: ApiService,
     private route: ActivatedRoute,
     private router: Router,
-    private modalService: BsModalService
+    private modalService: BsModalService,
+    private changeDetectorRef: ChangeDetectorRef,
+    private ngZone: NgZone
   ) { }
 
   ngOnInit(): void {
@@ -80,8 +90,14 @@ export class MovieFormPageComponent implements OnInit {
   }
 
   saveMovie(formData: any): void {
-    console.log('saveMovie called with data:', formData);
+    console.log('saveMovie called with:', formData);
+    this.error = '';
+    this.success = '';
     this.loading = true;
+    
+    // Reset upload state and show progress modal
+    this.resetUploadState();
+    this.showUploadProgressModal();
 
     if (this.isEditMode && this.movie) {
       // Update existing movie - check if formData is FormData or regular object
@@ -92,61 +108,50 @@ export class MovieFormPageComponent implements OnInit {
       
       apiCall.subscribe({
         next: (event: any) => {
-          if (event.type === HttpEventType.UploadProgress) {
-            // Calculate and update upload progress
-            const progress = Math.round(100 * event.loaded / (event.total || 1));
-            if (this.movieForm) {
-              this.movieForm.updateUploadProgress(progress);
+          if (event.type === HttpEventType.UploadProgress && event.total) {
+            const progress = Math.round(100 * event.loaded / event.total);
+            console.log(`Upload progress: ${progress}% (${event.loaded}/${event.total})`);
+            
+            // Aggiorna la barra di progresso direttamente nel page component
+            this.updateUploadProgress(progress);
+            
+            // Aggiornamenti più frequenti per valori critici
+            if (progress === 25 || progress === 50 || progress === 75 || progress >= 90) {
+              console.log(`Punto critico raggiunto: ${progress}%`);
             }
           } else if (event.type === HttpEventType.Response) {
             // Upload completed
-            if (this.movieForm) {
-              this.movieForm.updateUploadProgress(100);
-            }
+            console.log('Upload completed, setting progress to 100%');
+            
+            // Aggiorna la barra al 100% e mostra messaggio di successo
+            this.updateUploadProgress(100);
+            this.setUploadSuccessMessage('Film aggiornato con successo!');
             
             const response = event as HttpResponse<ApiResponse<Movie>>;
             console.log('Update response:', response.body);
             
-            if (formData instanceof FormData || !response?.body?.data?.video_files) {
-              console.log('Reloading movie data (FormData update or missing video_files)');
-              if (this.movie && this.movie.movie_id) {
-                this.loadMovie(this.movie.movie_id);
-              }
-            } else {
+            // Attendiamo che il modal si chiuda prima di aggiornare i dati
+            setTimeout(() => {
+              // Aggiorniamo i dati del film solo dopo che il modal è chiuso
               if (response && response.body && response.body.data) {
-                console.log('Using response data directly:', response.body.data);
+                console.log('Using response data after modal close:', response.body.data);
                 this.movie = response.body.data;
                 
                 if (this.movie?.category && (this.movie.category as any)?.id && !this.movie.category_id) {
                   this.movie.category_id = (this.movie.category as any).id;
                 }
               }
-            }
-            
-            this.loading = false;
-            
-            // Set success message in modal instead of page alert
-            if (this.movieForm) {
-              this.movieForm.setUploadSuccessMessage('Film aggiornato con successo!');
-            }
+              
+              // IMPORTANTE: Ripristina loading = false per mostrare il form aggiornato
+              this.loading = false;
+            }, 2500);
           }
         },
-        error: (err: any) => {
-          console.error('Error updating movie:', err);
-          if (this.movieForm) {
-            this.movieForm.resetUploadState();
-          }
-          
-          if (err.error && err.error.message) {
-            this.error = `Errore: ${err.error.message}`;
-          } else if (err.error && err.error.errors) {
-            const errorMessages = Object.values(err.error.errors).flat();
-            this.error = `Errori di validazione: ${errorMessages.join(', ')}`;
-          } else {
-            this.error = 'Impossibile aggiornare il film. Riprova più tardi.';
-          }
-          
+        error: (error) => {
+          console.error('Error saving movie:', error);
+          this.error = 'Error saving movie: ' + (error.error?.message || error.message);
           this.loading = false;
+          this.resetUploadState();
         }
       });
     } else {
@@ -158,15 +163,23 @@ export class MovieFormPageComponent implements OnInit {
       
       apiCall.subscribe({
         next: (event: any) => {
-          if (event.type === HttpEventType.UploadProgress) {
-            const progress = Math.round(100 * event.loaded / (event.total || 1));
-            if (this.movieForm) {
-              this.movieForm.updateUploadProgress(progress);
+          if (event.type === HttpEventType.UploadProgress && event.total) {
+            const progress = Math.round(100 * event.loaded / event.total);
+            console.log(`Create progress: ${progress}% (${event.loaded}/${event.total})`);
+            
+            // Aggiorna la barra di progresso direttamente nel page component
+            this.updateUploadProgress(progress);
+            
+            // Aggiornamenti più frequenti per valori critici
+            if (progress === 25 || progress === 50 || progress === 75 || progress >= 90) {
+              console.log(`Punto critico raggiunto: ${progress}%`);
             }
           } else if (event.type === HttpEventType.Response) {
-            if (this.movieForm) {
-              this.movieForm.updateUploadProgress(100);
-            }
+            console.log('Create completed, setting progress to 100%');
+            
+            // Aggiorna la barra al 100% e mostra messaggio di successo
+            this.updateUploadProgress(100);
+            this.setUploadSuccessMessage('Film creato con successo!');
             
             setTimeout(() => {
               if (this.movieForm && this.movieForm.movieForm) {
@@ -248,5 +261,84 @@ export class MovieFormPageComponent implements OnInit {
 
   cancelDelete(): void {
     this.modalRef?.hide();
+  }
+
+  // Upload progress methods
+  public updateUploadProgress(progress: number): void {
+    console.log('🚀 PAGE COMPONENT - updateUploadProgress called with:', progress);
+    this.ngZone.run(() => {
+      this.uploadProgress = progress;
+      this.isUploading = progress > 0 && progress < 100;
+      
+      if (progress >= 100) {
+        this.uploadCompleted = true;
+        this.isUploading = false;
+      }
+      
+      console.log('🚀 PAGE COMPONENT - Progress updated:', {
+        uploadProgress: this.uploadProgress,
+        isUploading: this.isUploading,
+        uploadCompleted: this.uploadCompleted
+      });
+      
+      this.changeDetectorRef.detectChanges();
+      this.changeDetectorRef.markForCheck();
+    });
+  }
+
+  public setUploadSuccessMessage(message: string): void {
+    console.log('🚀 PAGE COMPONENT - setUploadSuccessMessage called with:', message);
+    this.ngZone.run(() => {
+      this.uploadSuccessMessage = message;
+      this.uploadCompleted = true;
+      this.isUploading = false;
+      
+      console.log('🚀 PAGE COMPONENT - Success message set:', this.uploadSuccessMessage);
+      
+      this.changeDetectorRef.detectChanges();
+      
+      // Show upload progress modal
+      if (!this.uploadModalRef) {
+        this.showUploadProgressModal();
+      }
+      
+      // Auto close modal after 2 seconds and restore loading state
+      setTimeout(() => {
+        this.closeUploadProgressModal();
+        // Ripristina loading = false per mostrare il form
+        this.loading = false;
+      }, 2000);
+    });
+  }
+
+  public resetUploadState(): void {
+    console.log('🚀 PAGE COMPONENT - resetUploadState called');
+    this.ngZone.run(() => {
+      this.uploadProgress = 0;
+      this.isUploading = false;
+      this.uploadCompleted = false;
+      this.uploadSuccessMessage = '';
+      
+      console.log('🚀 PAGE COMPONENT - Upload state reset');
+      
+      this.changeDetectorRef.detectChanges();
+    });
+  }
+
+  public showUploadProgressModal(): void {
+    if (!this.uploadModalRef) {
+      this.uploadModalRef = this.modalService.show(this.uploadProgressModal, {
+        backdrop: 'static',
+        keyboard: false,
+        class: 'modal-dialog-centered'
+      });
+    }
+  }
+
+  public closeUploadProgressModal(): void {
+    if (this.uploadModalRef) {
+      this.uploadModalRef.hide();
+      this.uploadModalRef = undefined;
+    }
   }
 }

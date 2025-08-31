@@ -1,4 +1,4 @@
-import { Component, ElementRef, EventEmitter, Input, OnInit, Output, TemplateRef, ViewChild } from '@angular/core';
+import { Component, ElementRef, EventEmitter, Input, OnInit, Output, TemplateRef, ViewChild, ChangeDetectorRef, NgZone, ApplicationRef } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Category, ImageFile, Movie, Person, Trailer, VideoFile } from '../../../models/media.models';
 import { ApiService } from '../../../services/api.service';
@@ -29,8 +29,11 @@ export class MovieFormComponent implements OnInit {
   @ViewChild('deleteModal') deleteModal!: TemplateRef<any>;
   @ViewChild('deleteVideoModal') deleteVideoModal!: TemplateRef<any>;
   @ViewChild('uploadProgressModal') uploadProgressModal!: TemplateRef<any>;
+  @ViewChild('personModal') personModal!: TemplateRef<any>;
+  @ViewChild('searchPersonInput') searchPersonInput!: ElementRef;
   modalRef?: BsModalRef;
   uploadModalRef?: BsModalRef;
+  personModalRef?: BsModalRef;
   videoToDeleteIndex: number = -1;
   uploadingPoster = false;
   uploadingBackdrop = false;
@@ -38,6 +41,8 @@ export class MovieFormComponent implements OnInit {
   uploadingVideoFile: boolean[] = [];
   trailerUploadProgress: number[] = [];
   videoFileUploadProgress: number[] = [];
+  currentPersonIndex: number = -1;
+  isLoadingPersons: boolean = false;
   
   // File storage variables (like TV series form)
   posterFile: File | null = null;
@@ -61,7 +66,10 @@ export class MovieFormComponent implements OnInit {
     private fb: FormBuilder,
     public apiService: ApiService,
     private modalService: BsModalService,
-    private sanitizer: DomSanitizer
+    private sanitizer: DomSanitizer,
+    private changeDetectorRef: ChangeDetectorRef,
+    private ngZone: NgZone,
+    private appRef: ApplicationRef
   ) {
     this.movieForm = this.createForm();
   }
@@ -255,18 +263,21 @@ export class MovieFormComponent implements OnInit {
 
   // Upload progress tracking
   uploadProgress: number = 0;
+  // Variabile per memorizzare il progresso massimo raggiunto
+  private maxUploadProgress: number = 0;
+  // Flag per indicare che l'upload è stato completato con successo
+  public uploadCompleted: boolean = false;
   isUploading: boolean = false;
   private progressInterval: any;
   uploadSuccessMessage: string = '';
   
-  // Get integer progress for display
-  getIntegerProgress(): number {
-    return Math.floor(this.uploadProgress);
-  }
+  // Flag per evitare aperture multiple del modal
+  private modalAlreadyOpen: boolean = false;
   
   // Start upload progress (no simulation, just show modal)
   startUploadProgress(): void {
-    this.uploadProgress = 0;
+    // Non resettiamo più la barra di progresso qui
+    // this.uploadProgress = 0; // <-- Rimosso per evitare reset indesiderati
     this.isUploading = true;
     this.uploadSuccessMessage = '';
     this.showUploadModal();
@@ -288,76 +299,129 @@ export class MovieFormComponent implements OnInit {
     }, 2000);
   }
   
-  // Method to reset upload state
-  resetUploadState(): void {
-    if (this.progressInterval) {
-      clearInterval(this.progressInterval);
-      this.progressInterval = null;
-    }
+  // Reset upload state - VERSIONE SEMPLIFICATA
+  public resetUploadState(): void {
+    console.log('=== RESET UPLOAD STATE ===');
+    
+    // Reset everything to initial state
     this.uploadProgress = 0;
+    this.maxUploadProgress = 0;
+    this.uploadCompleted = false;
     this.isUploading = false;
     this.loading = false;
     this.uploadSuccessMessage = '';
-    this.hideUploadModal();
+    
+    // Close modal if open
+    if (this.uploadModalRef) {
+      this.uploadModalRef.hide();
+      this.uploadModalRef = undefined;
+      this.modalAlreadyOpen = false;
+      console.log('Modal chiuso e reset completato');
+    }
+    
+    // Force UI update
+    this.changeDetectorRef.detectChanges();
+    console.log('Stato completamente resettato');
   }
   
-  // Show upload progress modal
-  showUploadModal(): void {
-    console.log('showUploadModal called, uploadProgressModal:', this.uploadProgressModal);
-    if (this.uploadProgressModal) {
+  // Show upload progress modal - versione semplificata che non resetta la barra
+  public showUploadModal(): void {
+    console.log('showUploadModal called');
+    
+    // Non resettiamo più la barra di progresso qui per evitare flickering
+    // this.uploadProgress = 0; // <-- Rimosso per evitare reset indesiderati
+    
+    // Apriamo il modal solo se non è già aperto
+    if (!this.uploadModalRef && this.uploadProgressModal && !this.modalAlreadyOpen) {
+      console.log('Apertura modal di progresso');
+      
+      // Impostiamo il flag per evitare aperture multiple
+      this.modalAlreadyOpen = true;
+      
       this.uploadModalRef = this.modalService.show(this.uploadProgressModal, {
         class: 'modal-md modal-dialog-centered',
         backdrop: 'static',
         keyboard: false,
         ignoreBackdropClick: true
       });
-      console.log('Modal shown, uploadModalRef:', this.uploadModalRef);
+      
+      console.log('Modal aperto');
     } else {
-      console.error('uploadProgressModal template not found!');
+      console.log('Modal già aperto o template non trovato');
     }
   }
   
   // Hide upload progress modal
   hideUploadModal(): void {
+    console.log('hideUploadModal called');
     if (this.uploadModalRef) {
       this.uploadModalRef.hide();
       this.uploadModalRef = undefined;
-    }
-  }
-
-  // Update upload progress (called from page component)
-  updateUploadProgress(progress: number): void {
-    console.log('updateUploadProgress called with:', progress);
-    
-    this.uploadProgress = progress;
-    this.isUploading = progress < 100;
-    
-    // Show modal if progress > 0 and modal not already shown
-    if (progress > 0 && !this.uploadModalRef) {
-      this.showUploadModal();
+      // Resettiamo il flag quando nascondiamo manualmente il modal
+      this.modalAlreadyOpen = false;
+      console.log('Modal nascosto, flag modalAlreadyOpen resettato');
     }
   }
   
-  // Set success message (called from page component)
-  setUploadSuccessMessage(message: string): void {
-    this.uploadSuccessMessage = message;
-    this.uploadProgress = 100;
-    this.isUploading = false;
+  // Metodo pubblico per forzare la chiusura del modal dall'esterno
+  public forceCloseUploadModal(): void {
+    console.log('forceCloseUploadModal called');
+    this.ngZone.run(() => {
+      console.log('Inside ngZone.run in forceCloseUploadModal');
+      if (this.uploadModalRef) {
+        console.log('Modal reference exists, forcing close');
+        this.uploadModalRef.hide();
+        this.uploadModalRef = undefined;
+        // Resettiamo il flag quando forziamo la chiusura del modal
+        this.modalAlreadyOpen = false;
+        
+        // Non resettiamo più la barra di progresso
+        // this.uploadProgress = 0; // <-- Rimosso per evitare reset indesiderati
+        
+        this.isUploading = false;
+        // Manteniamo il messaggio di successo se presente
+        // this.uploadSuccessMessage = ''; // <-- Rimosso per mantenere il messaggio
+        
+        this.changeDetectorRef.detectChanges();
+        console.log('Modal closed, flag reset, upload state preserved');
+      } else {
+        console.log('No modal reference found to close');
+      }
+    });
+  }
+
+  // Metodo rimosso - upload progress è ora gestito dal page component
+  
+  // Set upload success message - versione modificata che non resetta la barra
+  public setUploadSuccessMessage(message: string): void {
+    console.log('Setting upload success message:', message);
     
-    // Close modal after showing success message
-    setTimeout(() => {
-      this.resetUploadState();
-    }, 3000);
+    // Esegui tutto all'interno di NgZone per garantire che Angular rilevi le modifiche
+    this.ngZone.run(() => {
+      this.uploadSuccessMessage = message;
+      this.isUploading = false;
+      this.uploadCompleted = true;
+      this.changeDetectorRef.detectChanges();
+      
+      // Chiudiamo il modal dopo aver mostrato il messaggio di successo
+      setTimeout(() => {
+        console.log('Auto-closing modal after success message');
+        this.forceCloseUploadModal();
+      }, 2500); // Aumentato a 2.5 secondi per dare tempo di leggere il messaggio
+    });
   }
   
-  // Variabili per la gestione delle persone e del modal
-  isLoadingPersons: boolean = false;
-  currentPersonIndex: number = -1;
-  personModalRef?: BsModalRef;
-
-  // Riferimenti agli elementi del DOM
-  @ViewChild('personModal') personModal!: TemplateRef<any>;
-  @ViewChild('searchPersonInput') searchPersonInput!: ElementRef;
+  // Metodo per forzare l'aggiornamento dell'interfaccia utente
+  private forceUIUpdate(): void {
+    console.log('Forzando aggiornamento UI completo');
+    
+    // Usa requestAnimationFrame per sincronizzarsi con il ciclo di rendering del browser
+    requestAnimationFrame(() => {
+      // Forza il rilevamento delle modifiche
+      this.changeDetectorRef.markForCheck();
+      this.changeDetectorRef.detectChanges();
+    });
+  }
 
   
   // Ottieni il nome di una persona dal suo ID
