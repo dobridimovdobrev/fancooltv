@@ -196,11 +196,21 @@ export class TVSeriesFormPageComponent implements OnInit {
   }
 
   /**
-   * Navigate to TV series details view
+   * View TV series details
    */
   viewTVSeries(): void {
     if (this.tvSeries) {
       this.router.navigate(['/tvseries-details', this.tvSeries.tv_series_id]);
+    }
+  }
+
+  /**
+   * Trigger form submit from top button - identical to bottom button
+   */
+  triggerFormSubmit(): void {
+    if (this.tvSeriesForm) {
+      // Chiama il metodo onSubmit del componente figlio - stesso comportamento del pulsante inferiore
+      this.tvSeriesForm.onSubmit();
     }
   }
 

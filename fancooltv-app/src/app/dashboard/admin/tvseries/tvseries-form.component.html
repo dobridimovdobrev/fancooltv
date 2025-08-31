@@ -290,20 +290,7 @@
                                (change)="onEpisodeVideoUpload($event, seasonIndex, episodeIndex)" 
                                accept="video/*">
                         
-                        <!-- Progress bar during upload -->
-                        <div *ngIf="uploadingEpisodeVideo[seasonIndex + '-' + episodeIndex]" class="mt-2">
-                          <div class="progress mb-2">
-                            <div class="progress-bar progress-bar-striped progress-bar-animated" 
-                                 role="progressbar" 
-                                 [style.width.%]="episodeVideoUploadProgress[seasonIndex + '-' + episodeIndex]" 
-                                 [attr.aria-valuenow]="episodeVideoUploadProgress[seasonIndex + '-' + episodeIndex]" 
-                                 aria-valuemin="0" 
-                                 aria-valuemax="100">
-                              {{episodeVideoUploadProgress[seasonIndex + '-' + episodeIndex] | number:'1.0-0'}}%
-                            </div>
-                          </div>
-                          <small class="text-muted">Uploading episode video...</small>
-                        </div>
+                        <!-- Progress bar rimossa - il caricamento avviene solo al submit -->
                         
                         <div *ngIf="episodeVideoFiles[seasonIndex + '-' + episodeIndex] && !uploadingEpisodeVideo[seasonIndex + '-' + episodeIndex]" class="mt-2">
                           <div class="alert alert-success py-2">
@@ -430,19 +417,7 @@
             
             <input type="file" class="form-control" id="trailerVideoUpload" (change)="onTrailerVideoUpload($event)" accept="video/*">
             
-            <!-- Progress bar during upload -->
-            <div *ngIf="uploadingTrailerVideo" class="mt-2">
-              <div class="progress mb-2">
-                <div class="progress-bar progress-bar-striped progress-bar-animated" 
-                     role="progressbar" 
-                     [style.width.%]="trailerVideoUploadProgress" 
-                     [attr.aria-valuenow]="trailerVideoUploadProgress" 
-                     aria-valuemin="0" 
-                     aria-valuemax="100">
-                  {{trailerVideoUploadProgress}}%
-                </div>
-              </div>
-            </div>
+            <!-- Progress bar rimossa - il caricamento avviene solo al submit -->
             
             <small class="form-text text-muted">Supported formats: MP4, AVI, MOV, WMV</small>
           </div>

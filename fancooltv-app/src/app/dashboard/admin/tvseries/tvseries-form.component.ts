@@ -830,18 +830,9 @@ export class TVSeriesFormComponent implements OnInit, OnDestroy, OnChanges {
     if (file) {
       const episodeKey = `${seasonIndex}-${episodeIndex}`;
       this.episodeVideoFiles[episodeKey] = file;
-      this.uploadingEpisodeVideo[episodeKey] = true;
-      this.episodeVideoUploadProgress[episodeKey] = 0;
-      
-      // Simulate upload progress
-      const interval = setInterval(() => {
-        this.episodeVideoUploadProgress[episodeKey] += 10;
-        if (this.episodeVideoUploadProgress[episodeKey] >= 100) {
-          this.uploadingEpisodeVideo[episodeKey] = false;
-          clearInterval(interval);
-          // Episode video uploaded successfully
-        }
-      }, 200);
+      // Imposta direttamente come non in caricamento per mostrare il messaggio di successo
+      this.uploadingEpisodeVideo[episodeKey] = false;
+      // Il file verrà effettivamente caricato quando il form viene inviato
     }
   }
 
@@ -852,18 +843,9 @@ export class TVSeriesFormComponent implements OnInit, OnDestroy, OnChanges {
     const file = event.target.files[0];
     if (file) {
       this.trailerVideoFile = file;
-      this.uploadingTrailerVideo = true;
-      this.trailerVideoUploadProgress = 0;
-      
-      // Simulate upload progress with percentage display
-      const interval = setInterval(() => {
-        this.trailerVideoUploadProgress += 10;
-        if (this.trailerVideoUploadProgress >= 100) {
-          this.uploadingTrailerVideo = false;
-          clearInterval(interval);
-          // Trailer video uploaded successfully
-        }
-      }, 200);
+      // Imposta direttamente come non in caricamento per mostrare il messaggio di successo
+      this.uploadingTrailerVideo = false;
+      // Il file verrà effettivamente caricato quando il form viene inviato
     }
   }
 

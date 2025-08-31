@@ -8,7 +8,8 @@
       
       <!-- View and Update buttons for edit mode -->
       <div *ngIf="isEditMode && tvSeries" class="page-actions">
-        <button type="button" class="btn btn-success me-2" (click)="tvSeriesForm.onSubmit()">
+        <button type="button" class="btn btn-primary me-2" [disabled]="loading" (click)="triggerFormSubmit()">
+          <span *ngIf="loading" class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
           <i class="fas fa-save me-2"></i>Update TV Series
         </button>
         <button type="button" class="btn btn-info me-2" (click)="viewTVSeries()">
@@ -46,6 +47,7 @@
   <!-- TV Series Form -->
   <div *ngIf="!loading">
     <app-tvseries-form
+      #tvSeriesForm
       [tvSeries]="tvSeries"
       [isEditMode]="isEditMode"
       (formSubmit)="onFormSubmit($event)"

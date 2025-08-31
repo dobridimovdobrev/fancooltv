@@ -1,0 +1,406 @@
+Documentazione per l'Integrazione Frontend del Progress Tracking
+1. Panoramica del Sistema
+Il sistema di tracking del progresso degli upload permette al frontend Angular di:
+
+Monitorare lo stato degli upload di file (immagini, video, trailer)
+Visualizzare una barra di progresso in tempo reale
+Ricevere notifiche di completamento o errori
+2. Flusso di Funzionamento
+Frontend                                Backend
+   |                                      |
+   |--- Invia file -------------------->  |
+   |                                      | Genera upload_id
+   |                                      | Inizia tracking
+   |                                      | Processa upload
+   |  <-- Risposta con upload_id -------- |
+   |                                      |
+   |--- Richiesta progresso (upload_id)-> |
+   |                                      | Recupera stato
+   |  <-- Risposta con % progresso ------ |
+   |                                      |
+   | [Ripeti polling fino a completamento]|
+3. Endpoint API
+3.1 Upload File
+POST /api/v1/upload/image
+POST /api/v1/upload/video
+POST /api/v1/upload/trailer
+Parametri (FormData):
+
+image o video: File da caricare
+type: Per immagini, uno tra 'poster', 'backdrop', 'still', 'persons'
+title: (opzionale) Titolo del file
+Risposta di successo:
+
+json
+{
+  "success": true,
+  "data": {
+    "message": "Image uploaded successfully",
+    "image": { /* dettagli immagine */ },
+    "full_url": "https://api.example.com/storage/images/poster/file.jpg",
+    "available_sizes": ["w92", "w154", "w185", "w342", "w500", "w780", "original"],
+    "upload_id": "img_1630500000_abcdef123456"
+  }
+}
+3.2 Verifica Progresso
+GET /api/v1/upload/progress?upload_id=img_1630500000_abcdef123456
+Parametri:
+
+upload_id: ID univoco dell'upload ricevuto nella risposta di upload
+Risposta di successo:
+
+json
+{
+  "success": true,
+  "data": {
+    "upload_id": "img_1630500000_abcdef123456",
+    "progress": 75.5,
+    "status": "in_progress",
+    "error": null
+  }
+}
+Possibili stati:
+
+pending: Upload in attesa di iniziare
+in_progress: Upload in corso
+completed: Upload completato con successo
+failed: Upload fallito (campo error conterrà dettagli)
+4. Implementazione Angular
+4.1 Servizio Upload
+typescript
+// upload.service.ts
+import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable, interval } from 'rxjs';
+import { takeWhile, switchMap } from 'rxjs/operators';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class UploadService {
+  private apiUrl = 'https://api.example.com/api/v1';
+
+  constructor(private http: HttpClient) {}
+
+  uploadImage(file: File, type: string): Observable<any> {
+    const formData = new FormData();
+    formData.append('image', file);
+    formData.append('type', type);
+    
+    return this.http.post(`${this.apiUrl}/upload/image`, formData);
+  }
+
+  uploadVideo(file: File): Observable<any> {
+    const formData = new FormData();
+    formData.append('video', file);
+    
+    return this.http.post(`${this.apiUrl}/upload/video`, formData);
+  }
+
+  uploadTrailer(file: File, title?: string): Observable<any> {
+    const formData = new FormData();
+    formData.append('video', file);
+    if (title) {
+      formData.append('title', title);
+    }
+    
+    return this.http.post(`${this.apiUrl}/upload/trailer`, formData);
+  }
+
+  getUploadProgress(uploadId: string): Observable<any> {
+    return this.http.get(`${this.apiUrl}/upload/progress?upload_id=${uploadId}`);
+  }
+
+  // Polling del progresso ogni 2 secondi fino al completamento
+  pollUploadProgress(uploadId: string): Observable<any> {
+    return interval(2000).pipe(
+      switchMap(() => this.getUploadProgress(uploadId)),
+      takeWhile(response => {
+        // Continua il polling finché lo stato non è 'completed' o 'failed'
+        return response.data.status !== 'completed' && response.data.status !== 'failed';
+      }, true) // 'true' per includere l'ultimo valore che ha causato la fine del polling
+    );
+  }
+}
+4.2 Componente Upload con Progress Bar
+typescript
+// upload.component.ts
+import { Component } from '@angular/core';
+import { UploadService } from './upload.service';
+
+@Component({
+  selector: 'app-upload',
+  template: `
+    <div class="upload-container">
+      <input type="file" (change)="onFileSelected($event)" [accept]="acceptedTypes">
+      
+      <button [disabled]="!selectedFile || uploading" (click)="uploadFile()">
+        Upload {{ uploadType }}
+      </button>
+      
+      <div *ngIf="uploading" class="progress-container">
+        <div class="progress-bar" [style.width.%]="progress"></div>
+        <div class="progress-text">{{ progress }}%</div>
+        <div class="status">Status: {{ status }}</div>
+      </div>
+      
+      <div *ngIf="errorMessage" class="error">
+        {{ errorMessage }}
+      </div>
+    </div>
+  `,
+  styles: [`
+    .progress-container {
+      width: 100%;
+      height: 20px;
+      background-color: #f0f0f0;
+      border-radius: 4px;
+      margin: 10px 0;
+      position: relative;
+    }
+    .progress-bar {
+      height: 100%;
+      background-color: #4CAF50;
+      border-radius: 4px;
+      transition: width 0.3s ease;
+    }
+    .progress-text {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      text-align: center;
+      line-height: 20px;
+      color: #000;
+    }
+    .error {
+      color: red;
+      margin-top: 10px;
+    }
+  `]
+})
+export class UploadComponent {
+  uploadType = 'image'; // 'image', 'video', o 'trailer'
+  acceptedTypes = 'image/*'; // Modificare in base al tipo di upload
+  selectedFile: File | null = null;
+  uploading = false;
+  progress = 0;
+  status = '';
+  errorMessage = '';
+  uploadId = '';
+
+  constructor(private uploadService: UploadService) {}
+
+  onFileSelected(event: any): void {
+    this.selectedFile = event.target.files[0] || null;
+    this.errorMessage = '';
+  }
+
+  uploadFile(): void {
+    if (!this.selectedFile) return;
+    
+    this.uploading = true;
+    this.progress = 0;
+    this.status = 'pending';
+    
+    let uploadObservable;
+    
+    switch (this.uploadType) {
+      case 'image':
+        uploadObservable = this.uploadService.uploadImage(this.selectedFile, 'poster');
+        break;
+      case 'video':
+        uploadObservable = this.uploadService.uploadVideo(this.selectedFile);
+        break;
+      case 'trailer':
+        uploadObservable = this.uploadService.uploadTrailer(this.selectedFile);
+        break;
+      default:
+        this.errorMessage = 'Tipo di upload non valido';
+        this.uploading = false;
+        return;
+    }
+    
+    uploadObservable.subscribe({
+      next: (response) => {
+        if (response.success && response.data.upload_id) {
+          this.uploadId = response.data.upload_id;
+          this.startProgressPolling();
+        } else {
+          this.handleError('Upload iniziato ma ID non ricevuto');
+        }
+      },
+      error: (error) => this.handleError('Errore durante l\'upload: ' + error.message)
+    });
+  }
+
+  startProgressPolling(): void {
+    this.uploadService.pollUploadProgress(this.uploadId).subscribe({
+      next: (response) => {
+        if (response.success) {
+          this.progress = response.data.progress;
+          this.status = response.data.status;
+          
+          if (response.data.status === 'completed') {
+            this.uploading = false;
+          } else if (response.data.status === 'failed') {
+            this.handleError('Upload fallito: ' + (response.data.error || 'Errore sconosciuto'));
+          }
+        } else {
+          this.handleError('Errore nel recupero del progresso');
+        }
+      },
+      error: (error) => this.handleError('Errore nel polling del progresso: ' + error.message),
+      complete: () => {
+        // Il polling è terminato (lo stato è 'completed' o 'failed')
+        if (this.status !== 'completed') {
+          this.uploading = false;
+        }
+      }
+    });
+  }
+
+  handleError(message: string): void {
+    this.errorMessage = message;
+    this.uploading = false;
+  }
+}
+5. Integrazione con Form Complessi
+Per integrare il tracking del progresso in form più complessi (come quelli per Movies o TV Series):
+
+typescript
+// movie-form.component.ts (esempio)
+import { Component } from '@angular/core';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { UploadService } from './upload.service';
+import { MovieService } from './movie.service';
+
+@Component({
+  selector: 'app-movie-form',
+  template: `
+    <form [formGroup]="movieForm" (ngSubmit)="onSubmit()">
+      <!-- Campi base -->
+      <input formControlName="title" placeholder="Titolo">
+      <textarea formControlName="description" placeholder="Descrizione"></textarea>
+      
+      <!-- Upload poster con progress bar -->
+      <div class="upload-section">
+        <h3>Poster</h3>
+        <input type="file" (change)="onPosterSelected($event)" accept="image/*">
+        
+        <div *ngIf="posterUploading" class="progress-container">
+          <div class="progress-bar" [style.width.%]="posterProgress"></div>
+          <div class="progress-text">{{ posterProgress }}%</div>
+        </div>
+        
+        <img *ngIf="posterUrl" [src]="posterUrl" class="preview">
+      </div>
+      
+      <!-- Altri campi e uploads... -->
+      
+      <button type="submit" [disabled]="movieForm.invalid || isUploading">
+        Salva Film
+      </button>
+    </form>
+  `
+})
+export class MovieFormComponent {
+  movieForm: FormGroup;
+  posterUploading = false;
+  posterProgress = 0;
+  posterUrl = '';
+  posterUploadId = '';
+  
+  get isUploading(): boolean {
+    return this.posterUploading; // || altri upload in corso
+  }
+  
+  constructor(
+    private fb: FormBuilder,
+    private uploadService: UploadService,
+    private movieService: MovieService
+  ) {
+    this.movieForm = this.fb.group({
+      title: ['', Validators.required],
+      description: [''],
+      poster: ['', Validators.required], // Questo sarà l'URL dell'immagine
+      // altri campi...
+    });
+  }
+  
+  onPosterSelected(event: any): void {
+    const file = event.target.files[0];
+    if (!file) return;
+    
+    this.posterUploading = true;
+    this.posterProgress = 0;
+    
+    this.uploadService.uploadImage(file, 'poster').subscribe({
+      next: (response) => {
+        if (response.success) {
+          this.posterUploadId = response.data.upload_id;
+          this.startPosterProgressPolling();
+          
+          // Salva l'URL nel form
+          this.movieForm.patchValue({
+            poster: response.data.full_url
+          });
+          
+          this.posterUrl = response.data.full_url;
+        }
+      },
+      error: (error) => {
+        console.error('Errore upload poster:', error);
+        this.posterUploading = false;
+      }
+    });
+  }
+  
+  startPosterProgressPolling(): void {
+    this.uploadService.pollUploadProgress(this.posterUploadId).subscribe({
+      next: (response) => {
+        if (response.success) {
+          this.posterProgress = response.data.progress;
+          
+          if (response.data.status === 'completed') {
+            this.posterUploading = false;
+          }
+        }
+      },
+      error: (error) => {
+        console.error('Errore polling:', error);
+        this.posterUploading = false;
+      },
+      complete: () => {
+        this.posterUploading = false;
+      }
+    });
+  }
+  
+  onSubmit(): void {
+    if (this.movieForm.valid && !this.isUploading) {
+      this.movieService.createMovie(this.movieForm.value).subscribe({
+        next: (response) => {
+          console.log('Film creato con successo:', response);
+          // Navigazione o altre azioni...
+        },
+        error: (error) => {
+          console.error('Errore creazione film:', error);
+        }
+      });
+    }
+  }
+}
+6. Note Importanti e Limitazioni
+Limitazioni tecniche:
+Il tracking del progresso in tempo reale durante l'upload potrebbe non essere perfetto a causa delle limitazioni di PHP/Laravel
+Per file di grandi dimensioni, il progresso potrebbe aggiornare principalmente all'inizio e alla fine dell'upload
+Miglioramenti futuri:
+Upload chunked per un tracking più preciso
+WebSockets o Server-Sent Events per aggiornamenti in tempo reale
+Gestione errori:
+Implementare retry automatico per upload falliti
+Salvare lo stato degli upload in localStorage per ripristino dopo refresh
+Performance:
+Limitare la frequenza di polling a 2-3 secondi per non sovraccaricare il server
+Considerare l'uso di un backoff esponenziale per polling più frequente all'inizio e meno frequente dopo
