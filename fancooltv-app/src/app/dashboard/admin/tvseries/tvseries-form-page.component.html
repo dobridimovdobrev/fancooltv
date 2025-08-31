@@ -6,13 +6,13 @@
         <h2 class="page-title">{{ pageTitle }}</h2>
       </div>
       
-      <!-- View and Delete buttons for edit mode -->
+      <!-- View and Update buttons for edit mode -->
       <div *ngIf="isEditMode && tvSeries" class="page-actions">
+        <button type="button" class="btn btn-success me-2" (click)="tvSeriesForm.onSubmit()">
+          <i class="fas fa-save me-2"></i>Update TV Series
+        </button>
         <button type="button" class="btn btn-info me-2" (click)="viewTVSeries()">
           <i class="fas fa-eye me-2"></i>View
-        </button>
-        <button type="button" class="btn btn-danger" (click)="showDeleteModal()">
-          <i class="fas fa-trash me-2"></i>Delete
         </button>
       </div>
     </div>
