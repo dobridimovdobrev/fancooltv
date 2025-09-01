@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, TemplateRef, ViewChild } from '@angular/core';
+import { Component, OnInit, OnDestroy, TemplateRef, ViewChild, HostListener } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { TVSeries } from '../models/tvseries.models';
@@ -50,6 +50,9 @@ export class TvseriesDetailsComponent implements OnInit, OnDestroy {
   // Seasons pagination
   seasonsPerPage = 10;
   visibleSeasonsCount = 10;
+  
+  // Responsive design
+  screenWidth: number = window.innerWidth;
 
   constructor(
     private route: ActivatedRoute,
@@ -1027,5 +1030,29 @@ export class TvseriesDetailsComponent implements OnInit, OnDestroy {
         videoElement.currentTime = 0;
       }
     }
+  }
+
+  /**
+   * Monitora il ridimensionamento della finestra per aggiornare la larghezza dello schermo
+   */
+  @HostListener('window:resize', ['$event'])
+  onResize(event: any) {
+    this.screenWidth = window.innerWidth;
+  }
+  
+  /**
+   * Tronca il titolo dell'episodio a una lunghezza specifica quando lo schermo è sotto i 990px
+   * @param title Il titolo completo dell'episodio
+   * @returns Il titolo troncato se necessario
+   */
+  truncateEpisodeTitle(title: string): string {
+    if (!title) return '';
+    
+    // Se siamo in modalità mobile, tronca il titolo a "The Architect of Social" (23 caratteri)
+    if (this.screenWidth < 990 && title.length > 23) {
+      return title.substring(0, 23) + '...';
+    }
+    
+    return title;
   }
 }
