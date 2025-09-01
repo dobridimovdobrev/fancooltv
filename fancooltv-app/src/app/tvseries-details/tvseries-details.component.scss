@@ -72,6 +72,19 @@ $breakpoint-xl: 1200px;
     height: 100%;
     object-fit: cover;
   }
+  
+  // Limitare la dimensione del poster su dispositivi mobili
+  @media (max-width: $breakpoint-md) { // 768px
+    height: 400px;
+    max-width: 300px;
+    margin: 0 auto 2rem;
+  }
+  
+  // Ancora più piccolo su dispositivi molto piccoli
+  @media (max-width: $breakpoint-sm) { // 576px
+    height: 330px;
+    max-width: 220px;
+  }
 }
 
 // Stili per i metadata (icone)

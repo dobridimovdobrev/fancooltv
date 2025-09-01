@@ -68,6 +68,26 @@ $breakpoint-xl: 1200px;
       box-shadow: 0 5px 15px rgba($dark, 0.5);
     }
     
+    // Limitare la dimensione del poster su dispositivi mobili
+    @media (max-width: $breakpoint-md) { // 768px
+      max-width: 300px;
+      margin: 0 auto 2rem;
+      
+      .poster-img {
+        max-height: 450px;
+        object-fit: contain;
+      }
+    }
+    
+    // Ancora più piccolo su dispositivi molto piccoli
+    @media (max-width: $breakpoint-sm) { // 576px
+      max-width: 220px;
+      
+      .poster-img {
+        max-height: 330px;
+      }
+    }
+    
     .play-trailer {
       position: absolute;
       top: 50%;
