@@ -1,8 +1,13 @@
 /* You can add global styles to this file, and also import other style files */
 
 // Force Dashboard icon to be yellow when active in mobile navbar
-.mobile-nav-link.active .fa-tachometer-alt {
-  color: #ffd700 !important;
+.mobile-nav-item .mobile-nav-link.active .fa-gauge-high {
+  color: #f8b547 !important;
+}
+
+// Backup selettore per assicurarsi che funzioni
+.mobile-nav-link.active i.fa-gauge-high {
+  color: #f8b547 !important;
 }
 
 // Import Bootstrap (viene gestito da Angular.json)

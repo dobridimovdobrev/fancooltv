@@ -10,16 +10,16 @@
       <ul class="navbar-nav">
         <li class="nav-item">
           <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="nav-link" aria-label="Navigate to homepage" title="Navigate to homepage">
-            <i class="fa-solid fa-home"></i> Home
+            <i class="fa-solid fa-home" style="color: #f8b547 !important;"></i> Home
           </a>
         </li>
         <li class="nav-item">
-          <a routerLink="/movies" routerLinkActive="active" class="nav-link" aria-label="Browse movies collection" title="Browse movies collection">
+          <a routerLink="/movies" routerLinkActive="active" [routerLinkActiveOptions]="{exact: false}" class="nav-link" aria-label="Browse movies collection" title="Browse movies collection">
             <i class="fa-solid fa-film"></i> Movies
           </a>
         </li>
         <li class="nav-item">
-          <a routerLink="/tvseries" routerLinkActive="active" class="nav-link" aria-label="Browse TV series collection" title="Browse TV series collection">
+          <a routerLink="/tvseries" routerLinkActive="active" [routerLinkActiveOptions]="{exact: false}" class="nav-link" aria-label="Browse TV series collection" title="Browse TV series collection">
             <i class="fa-solid fa-tv"></i> TV Series
           </a>
         </li>
@@ -38,7 +38,7 @@
           <div *dropdownMenu class="dropdown-menu dropdown-menu-end glass-effect">
             <!-- Admin-only menu item -->
             <a *ngIf="authService.isAdmin()" class="dropdown-item" routerLink="/dashboard/admin" routerLinkActive="active">
-              <i class="fa-solid fa-tachometer-alt"></i> Dashboard
+              <i class="fa-solid fa-gauge-high" style="color: #f8b547 !important;"></i> Dashboard
             </a>
             
             <!-- Regular user menu items -->
@@ -80,18 +80,18 @@
       <ul class="mobile-nav-list">
         <li class="mobile-nav-item">
           <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="mobile-nav-link" (click)="closeMobileMenu()" aria-label="Navigate to homepage" title="Navigate to homepage">
-            <i class="fa-solid fa-home"></i>
+            <i class="fa-solid fa-home" style="color: #f8b547 !important;"></i>
             <span>Home</span>
           </a>
         </li>
         <li class="mobile-nav-item">
-          <a routerLink="/movies" routerLinkActive="active" class="mobile-nav-link" (click)="closeMobileMenu()" aria-label="Browse movies collection" title="Browse movies collection">
+          <a routerLink="/movies" routerLinkActive="active" [routerLinkActiveOptions]="{exact: false}" class="mobile-nav-link" (click)="closeMobileMenu()" aria-label="Browse movies collection" title="Browse movies collection">
             <i class="fa-solid fa-film"></i>
             <span>Movies</span>
           </a>
         </li>
         <li class="mobile-nav-item">
-          <a routerLink="/tvseries" routerLinkActive="active" class="mobile-nav-link" (click)="closeMobileMenu()" aria-label="Browse TV series collection" title="Browse TV series collection">
+          <a routerLink="/tvseries" routerLinkActive="active" [routerLinkActiveOptions]="{exact: false}" class="mobile-nav-link" (click)="closeMobileMenu()" aria-label="Browse TV series collection" title="Browse TV series collection">
             <i class="fa-solid fa-tv"></i>
             <span>TV Series</span>
           </a>
@@ -109,8 +109,8 @@
         <ng-container *ngIf="authService.isAuthenticated()">
           <!-- Admin-only menu item -->
           <li class="mobile-nav-item" *ngIf="authService.isAdmin()">
-            <a routerLink="/dashboard/admin" routerLinkActive="active" class="mobile-nav-link" (click)="closeMobileMenu()" aria-label="Go to dashboard" title="Go to dashboard">
-              <i class="fa-solid fa-tachometer-alt"></i>
+            <a routerLink="/dashboard/admin" routerLinkActive="active" [routerLinkActiveOptions]="{exact: false}" class="mobile-nav-link dashboard-link" (click)="closeMobileMenu()" aria-label="Go to dashboard" title="Go to dashboard">
+              <i class="fa-solid fa-gauge-high" style="color: #f8b547 !important;"></i>
               <span>Dashboard</span>
             </a>
           </li>
