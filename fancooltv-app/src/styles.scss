@@ -1,5 +1,9 @@
-/* Stili globali per l'applicazione Angular */
-@use "sass:color";
+/* You can add global styles to this file, and also import other style files */
+
+// Force Dashboard icon to be yellow when active in mobile navbar
+.mobile-nav-link.active .fa-tachometer-alt {
+  color: #ffd700 !important;
+}
 
 // Import Bootstrap (viene gestito da Angular.json)
 

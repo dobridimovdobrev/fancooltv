@@ -51,7 +51,12 @@
                   "maximumError": "40kb"
                 }
               ],
-              "outputHashing": "all"
+              "outputHashing": "all",
+              "assets": [
+                "src/favicon.ico",
+                "src/assets",
+                "src/.htaccess"
+              ]
             },
             "development": {
               "buildOptimizer": false,

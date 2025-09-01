@@ -102,14 +102,14 @@
                                 <div class="episodes-list" [ngClass]="{'show': isSeasonExpanded(season.season_number)}" *ngIf="season.episodes && season.episodes.length > 0">
                                     <div class="episode-item p-2 mt-2 bg-secondary bg-opacity-10 rounded" *ngFor="let episode of getVisibleEpisodes(season)">
                                         <div style="display: flex; justify-content: space-between; align-items: center;">
-                                            <div style="display: flex; align-items: center; gap: 12px;">
-                                                <span class="episode-number text-white fs-5" style="min-width: 35px">{{ episode.episode_number }}</span>
+                                            <div style="display: flex; align-items: center; gap: 12px; flex: 1;">
+                                                <span class="episode-number text-white fs-5" style="min-width: 35px;">{{ episode.episode_number }}</span>
                                                 <div class="episode-still rounded" 
                                                      [style.background-image]="episode['still'] ? 'url(' + getImageUrl(episode['still'], 'still') + ')' : ''" 
-                                                     style="width: 160px; height: 90px; background-size: cover; background-position: center; background-color: #2a2a2a;">
+                                                     style="width: 160px; height: 90px; background-size: cover; background-position: center; background-color: #2a2a2a; flex-shrink: 0;">
                                                 </div>
-                                                <div>
-                                                    <h5 class="episode-title mb-2">{{ episode.title }}</h5>
+                                                <div style="flex: 1; min-width: 0; max-height: 90px; display: flex; align-items: center;">
+                                                    <h5 class="episode-title mb-0" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%;">{{ episode.title }}</h5>
                                                 </div>
                                             </div>
                                             <button class="btn btn-primary watch-button" 

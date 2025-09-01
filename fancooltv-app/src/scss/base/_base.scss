@@ -49,7 +49,7 @@ a {
   transition: $transition-base;
 
   &:hover {
-    color: color.adjust($primary, $lightness: -10%);
+    color: darken($primary, 10%);
   }
 }
 

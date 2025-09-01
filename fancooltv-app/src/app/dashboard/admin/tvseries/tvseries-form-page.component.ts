@@ -137,17 +137,13 @@ export class TVSeriesFormPageComponent implements OnInit {
               // Clear backup on success
               this.formDataBackup = null;
               
-              // For edit mode, reload data to show changes
-              if (this.isEditMode && this.tvSeries) {
-                setTimeout(() => {
-                  this.loadTVSeries(this.tvSeries!.tv_series_id);
-                }, 1000);
-              } else {
-                // For create mode, redirect to list
+              // For create mode, redirect to list
+              if (!this.isEditMode) {
                 setTimeout(() => {
                   this.router.navigate(['/dashboard/admin/tvseries']);
                 }, 2000);
               }
+              // For edit mode, don't reload data to avoid page flashing - the response already contains updated data
             }, 2500);
           }
         },

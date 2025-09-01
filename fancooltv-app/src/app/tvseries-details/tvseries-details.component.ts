@@ -386,10 +386,10 @@ export class TvseriesDetailsComponent implements OnInit, OnDestroy {
       // Usa il template trailerModal invece di videoModal
       if (this.series && this.series.trailers && this.series.trailers.length > 0) {
         // Usa il template trailerModal esplicitamente
-        this.openTrailerModal(this.trailerModalTemplate || template);
+        this.openTrailerModal(this.trailerModalTemplate);
       } else if ((this.series as any).video_files && (this.series as any).video_files.length > 0) {
         // Se ci sono video_files nella serie, usa quelli
-        this.openTrailerModal(this.trailerModalTemplate || template);
+        this.openTrailerModal(this.trailerModalTemplate);
       } else {
         console.log('DEBUG: No trailer available for this series');
         alert('No video content available for this episode');

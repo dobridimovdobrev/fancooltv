@@ -290,6 +290,13 @@ $breakpoint-xl: 1200px;
         
         .episode-still {
           transition: $transition-base;
+          
+          @media (max-width: 1200px) {
+            display: none !important;
+            width: 120px !important;
+            height: 68px !important;
+          }
+    
         }
         
         .episode-title {

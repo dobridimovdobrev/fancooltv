@@ -37,7 +37,7 @@
           </a>
           <div *dropdownMenu class="dropdown-menu dropdown-menu-end glass-effect">
             <!-- Admin-only menu item -->
-            <a *ngIf="authService.isAdmin()" class="dropdown-item" routerLink="/dashboard/admin">
+            <a *ngIf="authService.isAdmin()" class="dropdown-item" routerLink="/dashboard/admin" routerLinkActive="active">
               <i class="fa-solid fa-tachometer-alt"></i> Dashboard
             </a>
             
@@ -109,7 +109,7 @@
         <ng-container *ngIf="authService.isAuthenticated()">
           <!-- Admin-only menu item -->
           <li class="mobile-nav-item" *ngIf="authService.isAdmin()">
-            <a routerLink="/dashboard/admin" class="mobile-nav-link" (click)="closeMobileMenu()" aria-label="Go to dashboard" title="Go to dashboard">
+            <a routerLink="/dashboard/admin" routerLinkActive="active" class="mobile-nav-link" (click)="closeMobileMenu()" aria-label="Go to dashboard" title="Go to dashboard">
               <i class="fa-solid fa-tachometer-alt"></i>
               <span>Dashboard</span>
             </a>

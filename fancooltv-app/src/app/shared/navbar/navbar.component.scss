@@ -173,6 +173,15 @@
       background: rgba(255, 255, 255, 0.1);
     }
     
+    &.active {
+      background: linear-gradient(90deg, rgba(255, 215, 0, 0.2) 0%, rgba(255, 215, 0, 0.1) 100%);
+      color: #ffd700 !important;
+      
+      i {
+        color: #ffd700 !important;
+      }
+    }
+    
     i {
       margin-right: 10px;
       width: 20px;
@@ -304,6 +313,11 @@
             opacity: 0.8;
           }
           
+          &.active i {
+            color: #ffd700 !important;
+            opacity: 1 !important;
+          }
+          
           span {
             flex: 1;
           }
@@ -321,13 +335,14 @@
           }
           
           &.active {
-            background: linear-gradient(90deg, rgba(255, 215, 0, 0.2) 0%, rgba(255, 215, 0, 0.1) 100%);
-            color: #ffd700;
-            border-left-color: #ffd700;
-            font-weight: 600;
+            background: linear-gradient(90deg, rgba(255, 215, 0, 0.2) 0%, rgba(255, 215, 0, 0.1) 100%) !important;
+            color: #ffd700 !important;
+            border-left-color: #ffd700 !important;
+            font-weight: 600 !important;
             
             i {
-              opacity: 1;
+              opacity: 1 !important;
+              color: #ffd700 !important;
             }
           }
           
