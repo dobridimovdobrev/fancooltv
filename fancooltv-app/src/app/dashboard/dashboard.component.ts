@@ -1,21 +1,25 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { AuthService } from '../services/auth.service';
 import { UserService } from '../services/user.service';
-import { Router } from '@angular/router';
+import { Router, NavigationEnd } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
+import { Subscription } from 'rxjs';
+import { filter } from 'rxjs/operators';
 
 @Component({
   selector: 'app-dashboard',
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.scss']
 })
-export class DashboardComponent implements OnInit {
+export class DashboardComponent implements OnInit, OnDestroy {
   // Flag to toggle sidebar on mobile
   sidebarVisible = false;
   // User properties
   isAdminUser = false;
   capitalizedName = '';
   userIp = '';
+  // Subscription per il router
+  private routerSubscription: Subscription | null = null;
 
   constructor(
     public authService: AuthService,
@@ -33,6 +37,17 @@ export class DashboardComponent implements OnInit {
       this.loadUserData();
       // Get user IP from backend
       this.getUserIpFromBackend();
+      
+      // Sottoscrizione agli eventi di navigazione per chiudere il menu
+      this.routerSubscription = this.router.events
+        .pipe(filter(event => event instanceof NavigationEnd))
+        .subscribe(() => {
+          // Chiudi il menu quando si naviga a una nuova pagina
+          if (this.sidebarVisible) {
+            this.sidebarVisible = false;
+            console.log('Menu chiuso automaticamente dopo navigazione');
+          }
+        });
     }
   }
   
@@ -94,6 +109,12 @@ export class DashboardComponent implements OnInit {
       const sidebarElement = document.querySelector('.admin-sidebar');
       console.log('Elemento sidebar trovato:', sidebarElement);
       console.log('Elemento ha classe .show:', sidebarElement?.classList.contains('show'));
+      
+      // Gestisci lo scrolling del body quando il menu è aperto
+      if (this.sidebarVisible) {
+        // Mantieni lo scrolling attivo
+        document.body.style.overflow = 'auto';
+      }
     }, 100);
   }
 
@@ -101,5 +122,13 @@ export class DashboardComponent implements OnInit {
   logout(): void {
     this.authService.logout();
     this.router.navigate(['/login']);
+  }
+  
+  // Cleanup delle sottoscrizioni quando il componente viene distrutto
+  ngOnDestroy(): void {
+    if (this.routerSubscription) {
+      this.routerSubscription.unsubscribe();
+      this.routerSubscription = null;
+    }
   }
 }

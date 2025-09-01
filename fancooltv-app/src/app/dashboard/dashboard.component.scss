@@ -4,14 +4,16 @@
 .dashboard-container {
   display: flex;
   height: 100vh;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto; // Permette lo scrolling verticale
   position: relative; // Importante per il posizionamento assoluto dei figli
   
   .dashboard-content {
     flex: 1;
     display: flex;
     flex-direction: column;
-    overflow: hidden;
+    overflow-x: hidden;
+    overflow-y: auto; // Permette lo scrolling verticale
     padding-left: 240px; // Space for sidebar
     transition: padding-left 0.3s ease;
     width: 100%; // Assicura che occupi tutta la larghezza
@@ -127,6 +129,7 @@
   background-color: rgba($dark, 0.5);
   z-index: 1040; // Sotto la sidebar ma sopra il contenuto
   display: none;
+  pointer-events: auto; // Assicura che l'overlay catturi i click
   
   &.active {
     display: block;
