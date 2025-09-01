@@ -2,27 +2,29 @@
 @import '../../../src/scss/abstracts/mixins';
 
 .dashboard-container {
-  position: relative;
-  min-height: 100vh;
-  background-color: var(--custom-bg); // Usa la variabile custom-bg come la home page
-  color: $white;
-  overflow-x: hidden;
-}
-
-.dashboard-content {
-  padding-left: 240px; // Spazio per la sidebar ridotta a 240px
-  transition: $transition-base;
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+  position: relative; // Importante per il posizionamento assoluto dei figli
   
-  .dashboard-header {
-    padding: 1.5rem 2rem;
+  .dashboard-content {
+    flex: 1;
     display: flex;
-    align-items: center;
-    border-bottom: 1px solid rgba($white, 0.1);
+    flex-direction: column;
+    overflow: hidden;
+    padding-left: 240px; // Space for sidebar
+    transition: padding-left 0.3s ease;
+    width: 100%; // Assicura che occupi tutta la larghezza
     
-    .welcome-message {
+    @media (max-width: $breakpoint-md) {
+      padding-left: 0; // No padding on mobile
+    }
+    
+    .dashboard-header {
+      padding: 1.5rem 2rem;
       display: flex;
-      justify-content: space-between;
       align-items: center;
+      justify-content: space-between;
       width: 100%;
       
       h2 {
@@ -38,9 +40,17 @@
         font-size: 1rem;
       }
       
-      .welcome-text {
+      .welcome-message {
         color: $white;
         font-size: 1rem;
+        display: flex;
+        align-items: center;
+      }
+      
+      .logout-container {
+        margin-left: auto;
+        display: flex;
+        align-items: center;
       }
       
       .logout-btn {
@@ -64,17 +74,33 @@
     }
     
     .sidebar-toggle {
-      display: none; // Hidden on desktop
-      background: transparent;
-      border: none;
-      color: $white;
-      font-size: 1.25rem;
-      margin-right: 1rem;
+      background: rgba($primary, 0.3);
+      border: 2px solid rgba($primary, 0.5);
+      border-radius: 6px;
+      color: $primary;
+      font-size: 1rem;
       cursor: pointer;
-      transition: $transition-base;
+      margin-right: 1.5rem;
+      display: none;
+      padding: 6px 10px;
+      transition: all 0.2s ease;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+      position: relative;
+      z-index: 1060; // Assicura che sia sopra altri elementi
       
-      &:hover {
-        color: $primary;
+      &:hover, &:active, &:focus {
+        background: rgba($primary, 0.5);
+        color: lighten($primary, 15%);
+        transform: scale(1.05);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+      }
+      
+      &:active {
+        transform: scale(0.95);
+      }
+      
+      @media (max-width: $breakpoint-md) {
+        display: block;
       }
     }
   }
@@ -91,12 +117,29 @@
   }
 }
 
+// Overlay per la sidebar su mobile
+.admin-sidebar-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba($dark, 0.5);
+  z-index: 1040; // Sotto la sidebar ma sopra il contenuto
+  display: none;
+  
+  &.active {
+    display: block;
+  }
+}
+
 @media (max-width: $breakpoint-md) {
   .dashboard-content {
     padding-left: 0; // Cambiato da right a left
+    transition: transform 0.3s ease;
     
     &.sidebar-active {
-      transform: translateX(100px); // Cambiato da -100px a 100px per la direzione
+      transform: translateX(0); // Non spostiamo più il contenuto
     }
     
     .dashboard-header {

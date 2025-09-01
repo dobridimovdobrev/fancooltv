@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Input } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 
@@ -8,6 +8,8 @@ import { AuthService } from '../../services/auth.service';
   styleUrls: ['./admin-sidebar.component.scss']
 })
 export class AdminSidebarComponent implements OnInit {
+  // Input per controllare la visibilità della sidebar
+  @Input() isVisible: boolean = false;
   // Menu items for the sidebar
   menuItems = [
     {

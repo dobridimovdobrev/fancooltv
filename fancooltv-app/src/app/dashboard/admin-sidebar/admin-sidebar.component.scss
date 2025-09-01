@@ -156,11 +156,39 @@
 
 @media (max-width: $breakpoint-md) {
   .admin-sidebar {
-    width: 100%;
-    transform: translateX(-100%); // Changed from 100% to -100% for direction
+    width: 240px; // Mantenere la larghezza fissa anche su mobile
+    transform: translateX(-100%); // Nasconde la sidebar fuori dallo schermo
+    transition: transform 0.3s ease; // Aggiunge transizione fluida
+    z-index: 1050; // Aumenta z-index per sovrapporsi al contenuto
+    position: fixed !important; // Assicura che sia fixed
+    top: 0 !important; // Posiziona in alto
+    left: 0 !important; // Posiziona a sinistra
+    height: 100vh !important; // Altezza completa
+    overflow-y: auto !important; // Permette lo scroll
     
     &.show {
-      transform: translateX(0);
+      transform: translateX(0) !important; // Mostra la sidebar con !important per forzare
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.5); // Aggiunge ombra per evidenziare la sidebar
+      display: flex !important; // Assicura che sia visibile
+      opacity: 1 !important; // Assicura che sia completamente visibile
+      visibility: visible !important; // Assicura che sia visibile
+      pointer-events: auto !important; // Permette interazioni
+    }
+  }
+  
+  // Migliora l'overlay
+  .admin-sidebar-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1040;
+    
+    &.active {
+      display: block;
     }
   }
 }

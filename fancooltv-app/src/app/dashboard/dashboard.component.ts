@@ -11,7 +11,7 @@ import { HttpClient } from '@angular/common/http';
 })
 export class DashboardComponent implements OnInit {
   // Flag to toggle sidebar on mobile
-  sidebarVisible = true;
+  sidebarVisible = false;
   // User properties
   isAdminUser = false;
   capitalizedName = '';
@@ -82,7 +82,19 @@ export class DashboardComponent implements OnInit {
 
   // Toggle sidebar visibility on mobile
   toggleSidebar(): void {
+    console.log('%c toggleSidebar CHIAMATO', 'background: red; color: white; font-size: 16px');
+    console.log('Stato precedente della sidebar:', this.sidebarVisible);
     this.sidebarVisible = !this.sidebarVisible;
+    console.log('NUOVO stato della sidebar:', this.sidebarVisible);
+    
+    // Forza il rilevamento delle modifiche
+    setTimeout(() => {
+      console.log('Verifica dopo timeout se la sidebar è visibile:', this.sidebarVisible);
+      // Verifica se l'elemento .admin-sidebar ha la classe .show
+      const sidebarElement = document.querySelector('.admin-sidebar');
+      console.log('Elemento sidebar trovato:', sidebarElement);
+      console.log('Elemento ha classe .show:', sidebarElement?.classList.contains('show'));
+    }, 100);
   }
 
   // Logout user and redirect to login page

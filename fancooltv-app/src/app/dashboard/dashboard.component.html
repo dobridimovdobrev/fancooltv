@@ -3,11 +3,13 @@
   <div class="dashboard-content" [class.sidebar-active]="sidebarVisible">
     <!-- Top header with toggle button for mobile -->
     <div class="dashboard-header">
-      <button class="sidebar-toggle" (click)="toggleSidebar()">
+      <button class="sidebar-toggle" (click)="toggleSidebar()" type="button" aria-label="Toggle sidebar">
         <i class="fa-solid fa-bars"></i>
       </button>
       <div class="welcome-message">
         <span class="welcome-text">Your IP: {{ userIp || 'Loading...' }}</span>
+      </div>
+      <div class="logout-container">
         <button class="logout-btn" (click)="logout()">Logout</button>
       </div>
     </div>
@@ -18,6 +20,9 @@
     </div>
   </div>
   
+  <!-- Mobile Overlay -->
+  <div class="admin-sidebar-overlay" [class.active]="sidebarVisible" (click)="toggleSidebar()"></div>
+  
   <!-- Admin sidebar -->
-  <app-admin-sidebar [class.show]="sidebarVisible"></app-admin-sidebar>
+  <app-admin-sidebar [isVisible]="sidebarVisible"></app-admin-sidebar>
 </div>

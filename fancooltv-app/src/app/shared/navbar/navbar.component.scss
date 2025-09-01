@@ -223,10 +223,12 @@
   visibility: hidden;
   transition: all 0.3s ease;
   backdrop-filter: blur(4px);
+  pointer-events: none; // Permette di cliccare attraverso quando non è attivo
   
   &.active {
     opacity: 1;
     visibility: visible;
+    pointer-events: auto; // Cattura i click quando è attivo
   }
 }
 
@@ -234,18 +236,31 @@
 .mobile-sidebar {
   position: fixed;
   top: 0;
-  right: -320px;
+  right: 0;
   width: 320px;
   height: 100vh;
   background: #00050D;
   z-index: 1050;
-  transition: right 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
   box-shadow: -5px 0 25px rgba(0, 0, 0, 0.3);
   display: flex;
   flex-direction: column;
+  transform: translateX(100%); // Nasconde la sidebar fuori dallo schermo
   
-  &.active {
-    right: 0;
+  // Stili per ngx-bootstrap collapse
+  &:not(.collapse) {
+    display: flex !important;
+  }
+  
+  &.collapse {
+    transform: translateX(100%);
+  }
+  
+  &.collapsing {
+    transition: transform 0.3s ease;
+  }
+  
+  &.collapse.show {
+    transform: translateX(0);
   }
   
   .mobile-sidebar-header {

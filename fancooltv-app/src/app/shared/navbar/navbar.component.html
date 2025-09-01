@@ -65,10 +65,10 @@
   </div>
 
   <!-- Mobile Menu Overlay -->
-  <div class="mobile-menu-overlay d-lg-none" [class.active]="isMobileMenuOpen" (click)="closeMobileMenu()"></div>
+  <div class="mobile-menu-overlay d-lg-none" [class.active]="isMobileMenuOpen" [style.display]="isMobileMenuOpen ? 'block' : 'none'" (click)="closeMobileMenu()"></div>
   
   <!-- Mobile Sidebar Menu -->
-  <div class="mobile-sidebar d-lg-none" [class.active]="isMobileMenuOpen">
+  <div class="mobile-sidebar d-lg-none" [collapse]="!isMobileMenuOpen" [isAnimated]="true">
     <div class="mobile-sidebar-header">
       <h5 class="mobile-sidebar-title">Menu</h5>
       <button type="button" class="mobile-sidebar-close" (click)="closeMobileMenu()" aria-label="Close menu">

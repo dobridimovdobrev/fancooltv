@@ -55,14 +55,19 @@ export class NavbarComponent implements OnInit {
    * Toggle mobile menu visibility
    */
   toggleMobileMenu(): void {
+    console.log('toggleMobileMenu chiamato');
+    console.log('Stato precedente:', this.isMobileMenuOpen);
     this.isMobileMenuOpen = !this.isMobileMenuOpen;
+    console.log('Nuovo stato:', this.isMobileMenuOpen);
   }
 
   /**
    * Close mobile menu
    */
   closeMobileMenu(): void {
+    console.log('closeMobileMenu chiamato');
     this.isMobileMenuOpen = false;
+    console.log('Menu mobile chiuso, stato:', this.isMobileMenuOpen);
   }
 
   /**
