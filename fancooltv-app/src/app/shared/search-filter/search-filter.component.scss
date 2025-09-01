@@ -70,7 +70,8 @@
     }
 
     .year-select {
-      flex: 0 0 120px;
+      // Rimosso flex: 0 0 120px che causava problemi su mobile
+      max-width: 120px;
     }
   }
 }
@@ -79,6 +80,7 @@
 @media (max-width: 768px) {
   .search-filter-container {
     .filter-controls {
+      // Ripristiniamo il layout verticale su mobile
       flex-direction: column;
       gap: 12px !important;
 

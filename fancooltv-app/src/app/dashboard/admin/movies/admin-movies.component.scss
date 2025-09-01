@@ -41,6 +41,20 @@ $input-bg: #050a18; // Input leggermente più chiari del body
     option {
       background-color: $input-bg;
     }
+    
+    // Stili responsive per dispositivi mobili
+    @media (max-width: 767px) {
+      font-size: 0.85rem;
+      padding: 0.375rem 0.5rem;
+      max-width: 120px; // Limita la larghezza su mobile
+    }
+    
+    // Stili per dispositivi molto piccoli
+    @media (max-width: 400px) {
+      font-size: 0.75rem;
+      padding: 0.25rem 0.4rem;
+      max-width: 100px; // Ancora più piccolo su dispositivi molto piccoli
+    }
   }
 
   // Clear button (X) like Google
